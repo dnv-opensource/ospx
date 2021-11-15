@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fmiModelDescription fmiVersion="2.0" modelName="demoSource" guid="{40B643C6-0A3A-4917-ABC1-BEFCB90C4428}" description="demoSource" version="0.1" generationTool="SimulationX 4.2.1.68070 (02/01/21)" generationDateAndTime="2021-02-09T17:22:46" variableNamingConvention="structured" numberOfEventIndicators="0" author="Lumpitzsch, Frank">
+	<CoSimulation modelIdentifier="demoSource" canHandleVariableCommunicationStepSize="true" canGetAndSetFMUstate="true" canSerializeFMUstate="true" canInterpolateInputs="true" canNotUseMemoryManagementFunctions="true"/>
+	<UnitDefinitions>
+		<Unit name="-">
+			<DisplayUnit name="-" factor="1." offset="0."/>
+		</Unit>
+	</UnitDefinitions>
+	<LogCategories>
+		<Category name="logStatusOKInfo" description="Info Messages"/>
+		<Category name="logStatusWarning" description="Warning Messages"/>
+		<Category name="logStatusOKDebug" description="Debug Messages"/>
+		<Category name="logStatusError" description="Error Messages"/>
+		<Category name="logAll" description="All Messages"/>
+	</LogCategories>
+	<DefaultExperiment startTime="0" stopTime="1" tolerance="1e-05" stepSize="0.001"/>
+	<ModelVariables>
+		<ScalarVariable name="source.y" valueReference="1073741824" description="Signal Output" variability="continuous" causality="output">
+			<Real quantity="Unitless" unit="-" displayUnit="-"/>
+		</ScalarVariable>
+		<ScalarVariable name="settings.dtMin" description="Min. calculation step size" valueReference="2684354560" causality="parameter" variability="fixed">
+			<Real start="1e-08"/>
+		</ScalarVariable>
+		<ScalarVariable name="settings.dtMax" description="Max. calculation step size" valueReference="2684354561" causality="parameter" variability="fixed">
+			<Real start="0.01"/>
+		</ScalarVariable>
+		<ScalarVariable name="settings.absTol" description="Absolute tolerance" valueReference="2684354562" causality="parameter" variability="fixed">
+			<Real start="1e-05"/>
+		</ScalarVariable>
+		<ScalarVariable name="settings.relTol" description="Relative tolerance" valueReference="2684354563" causality="parameter" variability="fixed">
+			<Real start="1e-05"/>
+		</ScalarVariable>
+		<ScalarVariable name="settings.iMode" description="Integration Method (0: Adams Moulton, 1: BDF)" valueReference="2684354560" causality="parameter" variability="fixed">
+			<Integer start="1"/>
+		</ScalarVariable>
+		<ScalarVariable name="settings.maxOrder" description="Max. solver order" valueReference="2684354561" causality="parameter" variability="fixed">
+			<Integer start="5"/>
+		</ScalarVariable>
+	</ModelVariables>
+	<ModelStructure>
+		<Outputs>
+			<Unknown index="1"/>
+		</Outputs>
+		<InitialUnknowns>
+			<Unknown index="1"/>
+		</InitialUnknowns>
+	</ModelStructure>
+</fmiModelDescription>

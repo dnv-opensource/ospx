@@ -1,0 +1,88 @@
+/*---------------------------------*- C++ -*----------------------------------*\
+filetype dictionary; coding utf-8; version 0.1; local --; purpose --;
+\*----------------------------------------------------------------------------*/
+connections
+{
+    senderReadsSignal
+    {
+        source                signalOUT;
+        target                signalIN;
+    }
+}
+connectors
+{
+    signalOUT
+    {
+        inModel               demoSource;
+        reference             source.y;
+        type                  output;
+    }
+    signalIN
+    {
+        inModel               scalarSender;
+        reference             inputScalar.x;
+        type                  input;
+    }
+    signalTEST
+    {
+        inModel               scalarSender;
+        reference             sendScalar.y;
+        type                  output;
+    }
+}
+global
+{
+    libSource                 'C:\Users\fralum\Documents\SystemSimulation\ModelVerification\tools\CyberSea\test\fmu';
+    root                      .;
+}
+models
+{
+    demoSource
+    {
+        prototype             demoSource\demoSource.fmu;
+        stepSize              0.1;
+    }
+    scalarSender
+    {   
+        modify
+        {
+            sender.port
+            {
+                causality        parameter;
+                start            32002;
+                variability      tunable;
+            }
+        }
+        prototype             scalarSender\scalarSender.fmu;
+        stepSize              0.1;
+    }    
+}
+simulation
+{
+    name                      tx-test;
+}
+postproc
+{
+    plots
+    {
+        signalOverTime
+        {
+            title             'Sender test signal';
+            xSignals
+            (
+                Time
+            );
+            ySignals
+            (
+                signalTEST
+            );
+        }
+    }
+    signals
+    {
+        signalTEST
+        {
+            source            signalTEST;
+        }
+    }
+}

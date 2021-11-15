@@ -1,0 +1,72 @@
+/*---------------------------------*- C++ -*----------------------------------*\
+filetype                      dictionary;
+coding                        utf-8;
+version                       0.1;
+local                         --;
+purpose                       "This is a minimal template dict to be used with ospCaseBuilder.
+Follow the structure and substitute all capital placeholders with your own annotations.
+Fill in path names and
+internal references from your fmu files.
+Use the --inspect option to get an overview of possible choices.";
+\*----------------------------------------------------------------------------*/
+
+#include "paramDict"
+
+connections
+{
+    SPEAKING_CONNECTION_NAME_1
+    {
+        source                SPEAKING_SOURCE_CONNECTOR_NAME_1;
+        target                SPEAKING_TARGET_CONNECTOR_NAME_1;
+    }
+}
+connectors
+{
+    SPEAKING_SOURCE_CONNECTOR_NAME_1
+    {
+        inModel               SPEAKING_COMPONENT_MODEL_NAME_1;
+        reference             INTERNAL_VARIABLE_NAME;
+        type                  output;
+    }
+    SPEAKING_TARGET_CONNECTOR_NAME_1
+    {
+        inModel               SPEAKING_MODIFIED_COMPONENT_MODEL_NAME_1;
+        reference             INTERNAL_VARIABLE_NAME;
+        type                  input;
+    }
+}
+global
+{
+    libSource                 ABSOLUTE_PATH_TO_YOUR_FMU_LIBRARY;
+    root                      .;
+}
+models
+{
+    SPEAKING_COMPONENT_MODEL_NAME_1
+    {
+        prototype             RELATIVE_PATH_TO_FMU;
+        stepSize              0.1;
+    }
+    SPEAKING_COMPONENT_MODEL_NAME_2
+    {
+        generateProxy         True;
+        prototype             RELATIVE_PATH_TO_FMU;
+        stepSize              0.1;
+        modify
+        {
+            INTERNAL_VARIABLE_NAME
+            {
+                causality     parameter;
+                start         "$VALUE_FROM_PARAMDICT";
+                variability   fixed;
+            }
+        }
+    }
+}
+simulation
+{
+    name                      SPEAKING_SIMULATION_NAME;
+}
+postproc
+{
+}
