@@ -13,7 +13,7 @@ from ospx.utils.logging import configure_logging
 logger = logging.getLogger(__name__)
 
 
-def cli():
+def _argparser() -> argparse.ArgumentParser:
 
     parser = argparse.ArgumentParser(
         prog='ospCaseBuilder',
@@ -89,6 +89,12 @@ def cli():
         required=False,
     )
 
+    return parser
+
+
+def cli():
+
+    parser = _argparser()
     args = parser.parse_args()
 
     # Configure Logging

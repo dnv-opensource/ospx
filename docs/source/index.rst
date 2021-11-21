@@ -12,7 +12,8 @@ Welcome to ospx's documentation!
 
    readme_link
    license_link
-   modules
+   api
+   cli
 
 
 

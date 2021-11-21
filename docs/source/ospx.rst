@@ -1,31 +1,23 @@
 ospx package
 ============
 
+.. automodule:: ospx
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Subpackages
 -----------
 
 .. toctree::
    :maxdepth: 4
 
-   ospx.cli
-   ospx.utils
    ospx.watch
 
 Submodules
 ----------
 
-ospx.ospCaseBuilder module
---------------------------
+.. toctree::
+   :maxdepth: 4
 
-.. automodule:: ospx.ospCaseBuilder
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: ospx
-   :members:
-   :undoc-members:
-   :show-inheritance:
+   ospx.ospCaseBuilder

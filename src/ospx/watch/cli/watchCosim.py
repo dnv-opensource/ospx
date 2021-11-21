@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+import argparse
 import logging
 import os
 import re
@@ -12,10 +13,11 @@ from typing import Union
 from ospx.utils.logging import configure_logging
 from ospx.watch.watchCosim import CosimWatcher
 
+
 logger = logging.getLogger(__name__)
 
 
-def cli():
+def _argparser() -> argparse.ArgumentParser:
 
     parser = ArgumentParser(
         prog='watchCosim',
@@ -89,6 +91,12 @@ def cli():
         required=False,
     )
 
+    return parser
+
+
+def cli():
+
+    parser = _argparser()
     args = parser.parse_args()
 
     # Configure Logging
