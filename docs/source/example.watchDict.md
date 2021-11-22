@@ -16,7 +16,7 @@ The user can opt to reduce and / or adjust the default watchDict's content after
 
 | Keyword/Example | Type          | Argument           | Description |
 | :-------------- | :------------ | :----------------- | :---------- |
-| datasources     | fixed keyword | dictionary         | (all\|any\|none) names of the involved fmu's |
+| datasources     | fixed keyword | dictionary         | {all, any, none} names of the involved fmu's |
 | FMUNAME         | free choice   | dictionary         | matching the name of any fmu (without file extension) |
 | columns         | fixed keyword | list of integers   | columns as they are written in FMUNAME_DATETIME.csv (sub-setting and ordering is free-of-choice)  |
 | delimiter       | fixed keyword | string             | the type of delimiter in FMUNAME_DATETIME.csv |

@@ -24,7 +24,7 @@ A caseDict file contains
 |   root                | fixed keyword     | relativ path string          | build directory |
 | systemStructure       | fixed keyword     | dictionary                   | complete system structure |
 |   components          | fixed keyword     | dictionary                   | complete set of components (building blocks) |
-|     COMPONENTNAME     | free choice       | dictionary                   | matching the name of any fmu (without file extension) |
+|     COMPONENTNAME     | free choice       | dictionary                   | naming any component in the simulation setup |
 |       connectors      | fixed keyword     | dictionary                   | itemization of connectors from fmu's modelDescription.xml |
 |         CONNECTORNAME | free choice       | dictionary                   | speaking name of the connector, i.e. what it does and where it is mounted |
 |           component   | fixed keyword     | string                       | obsolete (herited from former structure) |
@@ -32,9 +32,9 @@ A caseDict file contains
 |           type        | fixed keyword     | string, choice               | input\|output |
 |       initialize      | fixec keyword     | dictionary                   | optional initialization, updating fmu's default settings |
 |         VARIABLENAME  | defined choice    | dictionary                   | the variable/parameter to be set, name is defined in the fmu file |
-|           causality   | defined choice    | string                       | choice wether input\|output\|parameter |
+|           causality   | defined choice    | string                       | choice wether {input, output, parameter} |
 |           start       | free choice       | double                       | value or reference/formula to be included |
-|           variabliity | fixed keyword     | string                       | choice wether fixed\|calculated\|tunable |
+|           variabliity | fixed keyword     | string                       | choice wether {fixed, calculated, tunable} |
 |       prototype       | fixed value       | relative path string         | pointing to the location of the source fmu on the file system |
 | connections           | fixed keyword     | dictionary                   | itemization of connections from the simulation setup |
 |   CONNECTIONNAME      | fixed keyword     | dictionary                   | speaking name of the connection |
