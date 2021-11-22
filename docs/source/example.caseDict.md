@@ -12,7 +12,7 @@ A caseDict file contains
 * generic information about the simulation case and the physical ocation of the fmu' to be sources
 * information about the components and the names to be used within the simulation
 * for each component, a dictionary of settings (e.g. start values and connector names)
-* a connection routing between connectors mentioned above
+* a connection routing between connectors defined in component sub-dictionary
 
 ## Terms & Definition
 
@@ -31,7 +31,7 @@ A caseDict file contains
 |           reference   | fixed keyword     | string                       | internal representation (name) of the connector in the regarding fmu |
 |           type        | fixed keyword     | string, choice               | input\|output |
 |       initialize      | fixec keyword     | dictionary                   | optional initialization deviant form fmu's default settings |
-|         VARIABLENAME  | free choice       | dictionary                   | the variable/parameter to be set |
+|         VARIABLENAME  | defined choice    | dictionary                   | the variable/parameter to be set, name from fmu file |
 |           causality   | defined choice    | string                       | choice wether input\|output\|parameter |
 |           start       | free choice       | double                       | value or reference/formula to be included |
 |           variabliity | fixed keyword     | string                       | choice wether fixed\|calculated\|tunable |
