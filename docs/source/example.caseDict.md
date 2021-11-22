@@ -5,11 +5,11 @@
 A caseDict is a file in C++ dictionary format used with ospCaseBuilder
 
 A caseDict acts as input for ospCaseBuilder to
-* generate an osp-compatible simulation case, consisting of fmu'
-* trigger subsequent actions, like writing a statisticsDict and a template watchDict
+* generate an osp-compatible simulation case, consisting of one or multiple fmu's
+* trigger subsequent actions, such as writing a statisticsDict and a default watchDict
 
 A caseDict file contains
-* generic information about the simulation case and the physical ocation of the fmu' to be sources
+* generic information about the simulation case and the physical location of the fmu's to be sourced
 * information about the components and the names to be used within the simulation
 * for each component, a dictionary of settings (e.g. start values and connector names)
 * a connection routing between connectors mentioned above
@@ -18,7 +18,7 @@ A caseDict file contains
 
 | Keyword/Example       | Type              | Argument                     | Description |
 | :---------------------| :---------------- | :--------------------------- | :---------- |
-| #include              | include directive | string                       | pointing to another dictionary to be sourced |
+| #include              | include directive | string                       | the included dict file will be read and merged into the parent dict|
 | _environment          | fixed keyword     | dictionary                   | definitions about the environment |
 |   libSource           | fixed keyword     | relativ/absolute path string | entry point for fmu search |
 |   root                | fixed keyword     | relativ path string          | build directory |
@@ -26,18 +26,18 @@ A caseDict file contains
 |   components          | fixed keyword     | dictionary                   | complete set of components (building blocks) |
 |     COMPONENTNAME     | free choice       | dictionary                   | matching the name of any fmu (without file extension) |
 |       connectors      | fixed keyword     | dictionary                   | itemization of connectors from fmu's modelDescription.xml |
-|         CONNECTORNAME | free choice       | dictionary                   | speaking transolation of what the connector does and where it is mounted |
+|         CONNECTORNAME | free choice       | dictionary                   | speaking name of the connector, i.e. what it does and where it is mounted |
 |           component   | fixed keyword     | string                       | obsolete (herited from former structure) |
 |           reference   | fixed keyword     | string                       | internal representation (name) of the connector in the regarding fmu |
 |           type        | fixed keyword     | string, choice               | input\|output |
-|       initialize      | fixec keyword     | dictionary                   | optional initialization deviant form fmu's default settings |
+|       initialize      | fixec keyword     | dictionary                   | optional initialization, derived from fmu's default settings |
 |         VARIABLENAME  | free choice       | dictionary                   | the variable/parameter to be set |
 |           causality   | defined choice    | string                       | choice wether input\|output\|parameter |
 |           start       | free choice       | double                       | value or reference/formula to be included |
 |           variabliity | fixed keyword     | string                       | choice wether fixed\|calculated\|tunable |
 |       prototype       | fixed value       | relative path string         | pointing to the location of the source fmu on the file system |
 | connections           | fixed keyword     | dictionary                   | itemization of connections from the simulation setup |
-|   CONNECTIONNAME      | fixed keyword     | dictionary                   | speaking transolation of what the connection does |
+|   CONNECTIONNAME      | fixed keyword     | dictionary                   | speaking name of the connection |
 |     source            | fixed keyword     | string                       | COMPONENTNAME of the incoming connection |
 |     target            | fixed keyword     | string                       | COMPONENTNAME of the outgoing connection |
 | run                   | fixed keyword     | dictionary                   | div. global settings |
@@ -58,7 +58,7 @@ filetype dictionary; coding utf-8; version 0.1; local --; purpose --;
 
 _environment
 {
-    libSource                 'C:\Users\fralum\Documents\SystemSimulation\repo\NEW-centralizedModelBase\fmu\SxExS';
+    libSource                 'C:\Path\to\a\model\library\on\your\machine';
     root                     .;
 }
 systemStructure
@@ -111,7 +111,7 @@ systemStructure
                     type                  input;
                 }
             }
-            prototype             Logics\difference\difference.fmu;
+            prototype             subfolder\in\your\library\difference.fmu;
         }
         div_0
         {
@@ -137,7 +137,7 @@ systemStructure
                 }
 
             }
-            prototype             Logics\quotient\quotient.fmu;
+            prototype             subfolder\in\your\library\quotient.fmu;
         }
         in_0
             {
@@ -159,7 +159,7 @@ systemStructure
                     variability   fixed;
                 }
             }
-            prototype             Logics\constantVal\constantVal.fmu;
+            prototype             subfolder\in\your\library\constantVal.fmu;
         }
         in_1
         {
@@ -181,7 +181,7 @@ systemStructure
                     variability   fixed;
                 }
             }
-            prototype             Logics\constantVal\constantVal.fmu;
+            prototype             subfolder\in\your\library\constantVal.fmu;
         }
         in_2
         {
@@ -203,7 +203,7 @@ systemStructure
                     variability   fixed;
                 }
             }
-            prototype             Logics\constantVal\constantVal.fmu;
+            prototype             subfolder\in\your\library\constantVal.fmu;
         }
     }
 }
