@@ -260,10 +260,11 @@ class OspSimulationCase():
 
             if 'connectors' in self.case_dict['systemStructure']['components'][model_name].keys():
                 for connector_name, item in self.case_dict['systemStructure']['components'][model_name]['connectors'].items():
+                    item.update({'component':model_name})
                     self.connectors.update({connector_name: item})
 
         # correct "proxy"-reference, if NTNU-IHB fmu-proxy code is used
-        for key, item in self.connectors.items():
+        for index, (key, item) in enumerate(self.connectors.items()):
             # source component name
             in_component = item['component']
             if in_component in self.case_dict['systemStructure']['components'].keys():

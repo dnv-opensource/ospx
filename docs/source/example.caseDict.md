@@ -27,7 +27,6 @@ A caseDict file contains
 |     COMPONENTNAME     | free choice       | dictionary                   | naming any component in the simulation setup |
 |       connectors      | fixed keyword     | dictionary                   | itemization of connectors from fmu's modelDescription.xml |
 |         CONNECTORNAME | free choice       | dictionary                   | speaking name of the connector, i.e. what it does and where it is mounted |
-|           component   | fixed keyword     | string                       | obsolete (herited from former structure) |
 |           reference   | fixed keyword     | string                       | internal representation (name) of the connector in the regarding fmu |
 |           type        | fixed keyword     | string, choice               | input\|output |
 |       initialize      | fixec keyword     | dictionary                   | optional initialization, updating fmu's default settings |
@@ -94,19 +93,16 @@ systemStructure
             {
                 diff_0_rx_0
                 {
-                    component             diff_0;
                     reference             difference.IN1;
                     type                  input;
                 }
                 diff_0_rx_1
                 {
-                    component             diff_0;
                     reference             difference.IN2;
                     type                  input;
                 }
                 diff_0_tx
                 {
-                    component             diff_0;
                     reference             difference.OUT;
                     type                  input;
                 }
@@ -119,19 +115,16 @@ systemStructure
             {
                 div_0_rx_0
                 {
-                    component     div_0;
                     reference     quotient.IN1;
                     type          input;
                 }
                 div_0_rx_1
                 {
-                    component     div_0;
                     reference     quotient.IN2;
                     type          input;
                 }
                 div_0_tx
                 {
-                    component     div_0;
                     reference     quotient.OUT;
                     type          input;
                 }
@@ -145,7 +138,6 @@ systemStructure
             {
                 in_0_tx
                 {
-                    component     in_0;
                     reference     constVal.OUT;
                     type          output;
                 }
@@ -167,7 +159,6 @@ systemStructure
             {
                 in_1_tx
                 {
-                    component     in_1;
                     reference     constVal.OUT;
                     type          output;
                 }
@@ -189,7 +180,6 @@ systemStructure
             {
                 in_2_tx
                 {
-                    component     in_2;
                     reference     constVal.OUT;
                     type          output;
                 }
@@ -217,4 +207,43 @@ run
     }
 }
 
+~~~
+For a first overview on the simulation, it is sufficient to have all involved fmu in place and to inspect the simulation case with
+```
+ospCaceBuilder.py --inspect --verbose DICTNAME
+```
+using a reduced dictionary as follows:
+~~~
+/*---------------------------------*- C++ -*----------------------------------*\
+filetype dictionary; coding utf-8; version 0.1; local --; purpose --;
+\*----------------------------------------------------------------------------*/
+_environment
+{
+    libSource                 'C:\Path\to\a\model\library\on\your\machine';
+    root                      .;
+}
+systemStructure
+{
+    components
+    {
+        demoSource
+        {
+            prototype             subfolder\in\your\library\demoSource.fmu;
+        }
+        scalarReceiver
+        {
+            prototype             subfolder\in\your\library\scalarReceiver.fmu;
+        }
+        scalarSender
+        {
+            prototype             subfolder\in\your\library\scalarSender.fmu;
+        }
+    }
+}
+
+
+simulation
+{
+    name                      tx-rx-test;
+}
 ~~~
