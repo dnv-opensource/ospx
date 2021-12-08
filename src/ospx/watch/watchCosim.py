@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 class CosimWatcher:
 
-    def __init__(self, csv_file_names: MutableSequence):
+    def __init__(self, csv_file_names: MutableSequence, latestValues: int):
         '''
         '''
         self.csv_file_names = csv_file_names
@@ -29,6 +29,7 @@ class CosimWatcher:
         self.results_dir = 'results'
         self.number_of_columns = 3
         self.number_of_subplots = 0
+        self.latestValues = latestValues
 
     def read_config_dict(self, config_dict_file: Path):
         '''
@@ -163,7 +164,11 @@ class CosimWatcher:
                 [df_all_data_sources, df_single_data_source], axis=1
             )                                                           # concatenate column-wise
 
-        return df_all_data_sources
+        if isinstance(self.latestValues, int):
+            return df_all_data_sources.iloc[-self.latestValues:,:]
+        else:
+            return df_all_data_sources
+
 
     def initialize_plot(self):
         '''
@@ -182,6 +187,7 @@ class CosimWatcher:
         self.number_of_columns = 3
         self.number_of_subplots = len(list(df)) - 1
         self.maxRow = int(self.number_of_subplots / self.number_of_columns - 0.1) + 1
+
 
     def plot(self):
         '''

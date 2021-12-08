@@ -73,6 +73,15 @@ def _argparser() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
+        '--latest',
+        action='store',
+        type=int,
+        help='specify the interval of latest values to be taken into account',
+        default=None,
+        required=False,
+    )
+
+    parser.add_argument(
         '--log',
         action='store',
         type=str,
@@ -113,11 +122,13 @@ def cli():
     watch_dict_file: Path = Path(args.watchDict)
     plot: bool = args.plot
     dump: bool = args.dump
+    latest: int = args.latest
 
     main(
         watch_dict_file=watch_dict_file,
         plot=plot,
         dump=dump,
+        latestValues = latest,
     )
 
 
@@ -125,6 +136,7 @@ def main(
     watch_dict_file: Path,
     plot: bool = False,
     dump: bool = False,
+    latestValues: int = None,
 ):
 
     if not watch_dict_file.is_file():
@@ -156,7 +168,7 @@ def main(
         )[-1] for data_source_name in data_source_names
     ]
 
-    watcher = CosimWatcher(latest_csv_file_names)
+    watcher = CosimWatcher(latest_csv_file_names, latestValues)
 
     watcher.read_config_dict(watch_dict_file)
 
