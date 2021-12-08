@@ -8,6 +8,7 @@ import matplotlib.axes
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from math import sqrt as sqrt
 from matplotlib import cm
 from dictIO.dictReader import DictReader
 from dictIO.dictWriter import DictWriter
@@ -134,14 +135,15 @@ class CosimWatcher:
 
         df_all_data_sources = pd.DataFrame()    # initialize empty df
 
-        for index, (data_source_name,
-                    data_source_properties) in enumerate(self.data_sources.items()):
-            map = dict(
-                zip(data_source_properties['colNames'], data_source_properties['displayColNames'])
-            )                                                                                       # create the mapping dict
-            for remove_item in [
-                'Time', 'StepCount'
-            ]:                                                                                      # remove Time and Stepcount because they are global and thus not to be duplicated
+        for index, (data_source_name, data_source_properties) in enumerate(self.data_sources.items()):
+            # create the mapping dict
+            map = dict(zip(data_source_properties['colNames'], data_source_properties['displayColNames']))
+            '''it could be so easy
+            but we have to remove Time and StepCount because they are in each csv file and need to be filtered
+            could be also required here to specify an abscissa differing from column 1 or 2
+            but, anyways this is only applicable to cosim
+            '''
+            for remove_item in ['Time', 'StepCount']:
                 map.pop(remove_item, None)
 
             if index == 0:                                                              # first call, also include Time (and StepCount)
@@ -152,17 +154,12 @@ class CosimWatcher:
             else:
                 df_single_data_source = pd.read_csv(
                     Path(data_source_properties['csvFile']),
-                    usecols=[
-                        col_name for col_name in data_source_properties['colNames']
-                        if col_name not in ['Time', 'StepCount']
-                    ],
+                    usecols = [col_name for col_name in data_source_properties['colNames'] if col_name not in ['Time', 'StepCount']],
                 )
 
             df_single_data_source = df_single_data_source.rename(columns=map)   # rename
 
-            df_all_data_sources = pd.concat(
-                [df_all_data_sources, df_single_data_source], axis=1
-            )                                                           # concatenate column-wise
+            df_all_data_sources = pd.concat([df_all_data_sources, df_single_data_source], axis=1)  # concatenate column-wise
 
         if isinstance(self.latestValues, int):
             return df_all_data_sources.iloc[-self.latestValues:,:]
@@ -171,27 +168,25 @@ class CosimWatcher:
 
 
     def initialize_plot(self):
-        '''
-        collect data
+        '''collect data
         namely header line
         '''
-        self.figure = plt.figure()
+        self.figure = plt.figure(figsize=(16,9), dpi=150)
         # self.fig.tight_layout() #constraint_layout()
         self.figure.subplots_adjust(
-            left=0.1, bottom=0.05, right=0.98, top=0.95, wspace=0.2, hspace=0.3
+            left=0.1, bottom=0.05, right=0.95, top=0.9, wspace=0.2, hspace=0.2,
         )
         self.terminate = False
 
         df = self.read_csv_files_into_dataframe(
         )                                           # do it once to find the number of respective columns
-        self.number_of_columns = 3
-        self.number_of_subplots = len(list(df)) - 1
+
+        self.number_of_subplots = len(list(df)) - 1 # one of the columns is the abscissa
+        self.number_of_columns = int(sqrt(self.number_of_subplots - 1)) + 1
         self.maxRow = int(self.number_of_subplots / self.number_of_columns - 0.1) + 1
 
 
     def plot(self):
-        '''
-        '''
         df_row_size = 0
         terminate_loops = 0
         max_no_change_loops = 4
@@ -224,7 +219,7 @@ class CosimWatcher:
                     current_key,
                     linewidth=2,
                     color=cm.get_cmap('gist_rainbow')(index / self.number_of_subplots),
-                    data=df[['Time', current_key]]
+                    data=df[['Time', current_key]],
                 )
                 # subplot.set_title(currentKey,  fontsize=10)
                 subplot.grid(color='#66aa88', linestyle='--')
