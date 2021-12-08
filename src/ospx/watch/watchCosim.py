@@ -70,9 +70,7 @@ class CosimWatcher:
                 if re.match(data_source_name, csv_file_name):                                       # find the regarding csv file
                     data_source_properties.update({'csvFile': csv_file_name})
                     with open(csv_file_name, 'r') as f:
-                        data_header = f.readline().split(
-                            self.delimiter
-                        )                                                                           # extract the header line to find the variable names
+                        data_header = f.readline().strip().split(self.delimiter)                                                                           # extract the header line to find the variable names
                         if 'columns' in data_source_properties:                                     # if key columns was given
                             data_source_properties.update(
                                 {
