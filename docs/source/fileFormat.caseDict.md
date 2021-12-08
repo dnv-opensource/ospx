@@ -1,4 +1,4 @@
-# caseDict file
+# caseDict
 
 ## Description
 
@@ -14,40 +14,40 @@ A caseDict file contains
 * for each component, a dictionary of settings (e.g. start values and connector names)
 * a connection routing between connectors defined in component sub-dictionary
 
-## Terms & Definition
+## Elements
 
-| Keyword/Example       | Type              | Argument                     | Description |
-| :---------------------| :---------------- | :--------------------------- | :---------- |
-| #include              | include directive | string                       | the included dict file will be read and merged into the parent dict|
-| _environment          | fixed keyword     | dictionary                   | definitions about the environment |
-|   libSource           | fixed keyword     | relativ/absolute path string | entry point for fmu search |
-|   root                | fixed keyword     | relativ path string          | build directory |
-| systemStructure       | fixed keyword     | dictionary                   | complete system structure |
-|   components          | fixed keyword     | dictionary                   | complete set of components (building blocks) |
-|     COMPONENTNAME     | free choice       | dictionary                   | naming any component in the simulation setup |
-|       connectors      | fixed keyword     | dictionary                   | itemization of connectors from fmu's modelDescription.xml |
-|         CONNECTORNAME | free choice       | dictionary                   | speaking name of the connector, i.e. what it does and where it is mounted |
-|           reference   | fixed keyword     | string                       | internal representation (name) of the connector in the regarding fmu |
-|           type        | fixed keyword     | string, choice               | input\|output |
-|       initialize      | fixec keyword     | dictionary                   | optional initialization, updating fmu's default settings |
-|         VARIABLENAME  | defined choice    | dictionary                   | the variable/parameter to be set, name is defined in the fmu file |
-|           causality   | defined choice    | string                       | choice wether {input, output, parameter} |
-|           start       | free choice       | double                       | value or reference/formula to be included |
-|           variabliity | fixed keyword     | string                       | choice wether {fixed, calculated, tunable} |
-|       prototype       | fixed value       | relative path string         | pointing to the location of the source fmu on the file system |
-| connections           | fixed keyword     | dictionary                   | itemization of connections from the simulation setup |
-|   CONNECTIONNAME      | fixed keyword     | dictionary                   | speaking name of the connection |
-|     source            | fixed keyword     | string                       | COMPONENTNAME of the incoming connection |
-|     target            | fixed keyword     | string                       | COMPONENTNAME of the outgoing connection |
-| run                   | fixed keyword     | dictionary                   | div. global settings |
-|   simulation          | fixed keyword     | dictionary                   | some settings of the current simulaton for window decoration |
-|     name              | fixed keyword     | string                       | simulation name |
-|     startTime         | fixed keyword     | double                       | start time |
-|     baseStepSize      | fixed keyword     | double                       | basic step size of simulators communication steps |
+| element / key                                     | type      | Description |
+| :------------------------------------------------ | :-------- | :---------- |
+| #include                                          | string    | include directive. The specified dict file (e.g. a paramDict) will be read and merged into the caseDict |
+| _environment                                      | dict      | environment variables needed by ospCaseBuilder at runtime |
+| &numsp;libSource                                  | string    | relative or absolute path to the directory where the FMUs are located, i.e. the base folder of an FMU library. It acts as entry point for the FMU search. |
+| &numsp;root                                       | string    | relative path to the build directory. Use '.' for cwd. |
+| systemStructure                                   | dict      | complete system structure |
+| &numsp;components                                 | dict      | defines all component models used in the simulation |
+| &numsp;&numsp;\<COMPONENT>                        | dict      | unique name identifying a component in the simulation |
+| &numsp;&numsp;&numsp;connectors                   | dict      | itemization of connectors as defined in the FMU's modelDescription.xml |
+| &numsp;&numsp;&numsp;&numsp;\<CONNECTOR>          | dict      | speaking name of a connector, i.e. what it does and where it is mounted |
+| &numsp;&numsp;&numsp;&numsp;&numsp;reference      | string    | internal name of the connector as defined in the FMU file |
+| &numsp;&numsp;&numsp;&numsp;&numsp;type           | string    | type of the connector. Choices: {input, output} |
+| &numsp;&numsp;&numsp;initialize                   | dict      | optional initialization, updating the FMU's default settings |
+| &numsp;&numsp;&numsp;&numsp;\<VARIABLE>           | dict      | the variable / parameter to be set. Needs to match the name as defined in the FMU file. |
+| &numsp;&numsp;&numsp;&numsp;&numsp;causality      | string    | causality of the variable. Choices: {input, output, parameter} |
+| &numsp;&numsp;&numsp;&numsp;&numsp;start          | float     | initial value the variable shall be set to. |
+| &numsp;&numsp;&numsp;&numsp;&numsp;variabliity    | string    | variability of the variable. Choices: {fixed, calculated, tunable} |
+| &numsp;&numsp;&numsp;prototype                    | string    | relative path to the location of the source FMU (relative to libSource) |
+| &numsp;connections                                | dict      | itemization of connections |
+| &numsp;&numsp;\<CONNECTION>                       | dict      | speaking name of the connection |
+| &numsp;&numsp;&numsp;source                       | string    | name of source \<COMPONENT> |
+| &numsp;&numsp;&numsp;target                       | string    | name of target \<COMPONENT> |
+| run                                               | dict      | settings for simulation run |
+| &numsp;simulation                                 | dict      | additional information about the simulaton. Used for window decoration. |
+| &numsp;&numsp;name                                | string    | name of the simulation |
+| &numsp;&numsp;startTime                           | float     | start time |
+| &numsp;&numsp;baseStepSize                        | float     | master algorithm step size |
 
 ## Example
 
-Below example shows the typical structure of a caseDict file.
+Below example shows a typical caseDict file.
 
 ~~~
 /*---------------------------------*- C++ -*----------------------------------*\
@@ -208,11 +208,12 @@ run
 }
 
 ~~~
-For a first overview on the simulation, it is sufficient to have all involved fmu in place and to inspect the simulation case with
+If you aim for just a first inspection of a simulation case, all you need to do is drop all referenced FMUs
+into the case's build directory and call ospCaseBuilder with the --inspect option:
 ```
-ospCaceBuilder.py --inspect --verbose DICTNAME
+ospCaseBuilder --inspect --verbose CASEDICT
 ```
-using a reduced dictionary as follows:
+Inspection works already with a fairly rudimentary caseDict, such as:
 ~~~
 /*---------------------------------*- C++ -*----------------------------------*\
 filetype dictionary; coding utf-8; version 0.1; local --; purpose --;
@@ -220,30 +221,39 @@ filetype dictionary; coding utf-8; version 0.1; local --; purpose --;
 _environment
 {
     libSource                 'C:\Path\to\a\model\library\on\your\machine';
-    root                      .;
+    root                     .;
 }
 systemStructure
 {
     components
     {
-        demoSource
+        diff_0
         {
-            prototype             subfolder\in\your\library\demoSource.fmu;
+            prototype             subfolder\in\your\library\difference.fmu;
         }
-        scalarReceiver
+        div_0
         {
-            prototype             subfolder\in\your\library\scalarReceiver.fmu;
+            prototype             subfolder\in\your\library\quotient.fmu;
         }
-        scalarSender
+        in_0
         {
-            prototype             subfolder\in\your\library\scalarSender.fmu;
+            prototype             subfolder\in\your\library\constantVal.fmu;
+        }
+        in_1
+        {
+            prototype             subfolder\in\your\library\constantVal.fmu;
+        }
+        in_2
+        {
+            prototype             subfolder\in\your\library\constantVal.fmu;
         }
     }
 }
-
-
-simulation
+run
 {
-    name                      tx-rx-test;
+    simulation
+    {
+        name                  demoCase;
+    }
 }
 ~~~

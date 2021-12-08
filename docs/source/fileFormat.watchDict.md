@@ -1,4 +1,4 @@
-# watchDict file
+# watchDict
 
 ## Description
 
@@ -12,17 +12,16 @@ A watchDict is suitable for
 A default watchDict is written during opsCaseBuilder's build process covering all information from the involved fmu's.
 The user can opt to reduce and / or adjust the default watchDict's content afterwards manually (or by a user defined tool / process).
 
-## Terms & Definition
+## Elements
 
-| Keyword/Example | Type          | Argument           | Description |
-| :-------------- | :------------ | :----------------- | :---------- |
-| datasources     | fixed keyword | dictionary         | {all, any, none} names of the involved fmu's |
-| FMUNAME         | free choice   | dictionary         | matching the name of any fmu (without file extension) |
-| columns         | fixed keyword | list of integers   | columns as they are written in FMUNAME_DATETIME.csv (sub-setting and ordering is free-of-choice)  |
-| delimiter       | fixed keyword | string             | the type of delimiter in FMUNAME_DATETIME.csv |
-| simulation      | fixed keyword | dictionary         | selected settings of the current simulaton for window decoration |
-| name            | fixed keyword | string             | simulation name |
-| SIMULATIONNAME  | free choice   | string             | name of the current simulation |
+| element / key         | type      | Description |
+| :-------------------- | :-------- | :---------- |
+| datasources           | dict      | {all, any, none} names of the involved fmu's |
+| &numsp;\<FMU>         | dict      | key matching the name of an FMU to be monitored (without file extension) |
+| &numsp;&numsp;columns | list[int] | columns as they are written in \<FMU>_DATETIME.csv (sub-setting and ordering is free-of-choice)  |
+| delimiter             | string    | the type of delimiter in \<FMU>_DATETIME.csv |
+| simulation            | dict      | additional information about the monitored simulaton. Used for window decoration. |
+| &numsp;name           | string    | name of the monitored simulation |
 
 ## Related files
 * ./watchDict
@@ -34,7 +33,7 @@ The user can opt to reduce and / or adjust the default watchDict's content after
 
 ![convergence plot example](demoCase.png)
 
-Below example shows the typical structure of a caseDict file.
+Below example shows a typical watchDict file.
 
 ~~~
 /*---------------------------------*- C++ -*----------------------------------*\
@@ -42,7 +41,7 @@ filetype dictionary; coding utf-8; version 0.1; local --; purpose --;
 \*----------------------------------------------------------------------------*/
 datasources
 {
-    FMUNAME
+    myfmu
     {
         columns
         (
@@ -53,6 +52,6 @@ datasources
 delimiter                     ,;
 simulation
 {
-    name                      SIMULATIONNAME;
+    name                      demoCase;
 }
 ~~~
