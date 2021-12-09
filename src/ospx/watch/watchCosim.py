@@ -164,9 +164,19 @@ class CosimWatcher:
 
         # find latest common start point for skip and latest
         # consider skipping negative values due to wrong inputs
+        if df_all_data_sources.shape[0] - self.skipValues < 0:                  # safety
+            logger.error(f"there will be no data, consider adjusting --skip: {self.skipValues}")
+        # cases
+        if self.skipValues > 0 and self.latestValues > 0:
+            start = max(self.skipValues, df_all_data_sources.shape[0] - self.latestValues)
+        elif self.skipValues > 0 and self.latestValues == 0:
+            start = self.skipValues
+        elif self.latestValues > 0 and self.skipValues == 0:
+            start = df_all_data_sources.shape[0] - self.latestValues
+        else:
+            start = 0
+
         # if skip latest n steps is to be implemented, no changes to start, but an additional command option is required
-        start = max(min(self.skipValues, df_all_data_sources.shape[0]), min(max(self.skipValues, df_all_data_sources.shape[0] - self.latestValues), df_all_data_sources.shape[0]))
-        
         return df_all_data_sources.iloc[start:df_all_data_sources.shape[0],:]
 
 

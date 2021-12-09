@@ -87,7 +87,7 @@ class OspCaseBuilder():
 
         case.write_osp_system_structure_xml()
 
-        # S.write_system_structure_ssd()
+        case.write_system_structure_ssd()
 
         if 'postProcessing' in case_dict.keys():
             case.write_plot_config()
@@ -462,7 +462,8 @@ class OspSimulationCase():
 
             for key1, item1 in self.connectors.items():
                 i = self.counter()
-                if self.connectors[key1]['inModel'] == self.models[key]['_attributes']['name']:
+
+                if self.connectors[key1]['component'] == self.models[key]['_attributes']['name']:
                     connectors.update(
                         {
                             '%06i_Connector' % i: {
@@ -485,12 +486,12 @@ class OspSimulationCase():
                             'name': self.models[key]['_attributes']['name'],
                             'source': self.models[key]['_attributes']['source']
                         },
-                        'Components': connectors,
-                        'ParameterBindings': parameter_bindings,
+                        'Connectors': connectors,
+                        #'ParameterBindings': parameter_bindings,
                     }
                 }
             )
-        ssd.update({'Elements': models})
+        ssd['System'].update({'Elements': models})
 
         # connections
         connections = {}
@@ -513,7 +514,32 @@ class OspSimulationCase():
                     }
                 }
             )
-        ssd.update({'Connections': connections})
+        ssd['System'].update({'Connections': connections})
+
+        #global settings
+        settings = {
+            'Annotations':
+            {
+                'Annotation':
+                {
+                    '_attributes':
+                    {
+                        'type':"com.opensimulationplatform"
+                    },
+                    'Algorithm':{
+                        'FixedStepAlgorithm':
+                        {
+                            '_attributes':
+                            {
+                                'baseStepSize':str(self.simulation['baseStepSize'])
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        ssd.update({'DefaultExperiment': settings})
 
         # _xmlOpts
         ssd.update(
@@ -534,6 +560,7 @@ class OspSimulationCase():
         formatter = XmlFormatter(omit_prefix=False)
         DictWriter.write(ssd, target_file_path, formatter=formatter)
 
+        exit(0)
         return
 
     def write_plot_config(self):
