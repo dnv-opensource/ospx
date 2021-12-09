@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 class CosimWatcher:
 
-    def __init__(self, csv_file_names: MutableSequence, latestValues: int):
+    def __init__(self, csv_file_names: MutableSequence, skipValues: int, latestValues: int):
         '''
         '''
         self.csv_file_names = csv_file_names
@@ -30,6 +30,7 @@ class CosimWatcher:
         self.results_dir = 'results'
         self.number_of_columns = 3
         self.number_of_subplots = 0
+        self.skipValues = skipValues
         self.latestValues = latestValues
 
     def read_config_dict(self, config_dict_file: Path):
@@ -161,10 +162,12 @@ class CosimWatcher:
 
             df_all_data_sources = pd.concat([df_all_data_sources, df_single_data_source], axis=1)  # concatenate column-wise
 
-        if isinstance(self.latestValues, int):
-            return df_all_data_sources.iloc[-self.latestValues:,:]
-        else:
-            return df_all_data_sources
+        # find latest common start point for skip and latest
+        # consider skipping negative values due to wrong inputs
+        # if skip latest n steps is to be implemented, no changes to start, but an additional command option is required
+        start = max(min(self.skipValues, df_all_data_sources.shape[0]), min(max(self.skipValues, df_all_data_sources.shape[0] - self.latestValues), df_all_data_sources.shape[0]))
+        
+        return df_all_data_sources.iloc[start:df_all_data_sources.shape[0],:]
 
 
     def initialize_plot(self):

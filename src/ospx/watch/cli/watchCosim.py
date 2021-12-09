@@ -76,8 +76,8 @@ def _argparser() -> argparse.ArgumentParser:
         '--latest',
         action='store',
         type=int,
-        help='specify the interval of latest values to be taken into account',
-        default=None,
+        help='specify the interval of latest n timesteps to be taken into account',
+        default=0,
         required=False,
     )
 
@@ -97,6 +97,15 @@ def _argparser() -> argparse.ArgumentParser:
         help='log level applied to logging to file.',
         choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
         default='WARNING',
+        required=False,
+    )
+
+    parser.add_argument(
+        '--skip',
+        action='store',
+        type=int,
+        help='skip the first n timesteps',
+        default=0,
         required=False,
     )
 
@@ -122,12 +131,18 @@ def cli():
     watch_dict_file: Path = Path(args.watchDict)
     plot: bool = args.plot
     dump: bool = args.dump
+    skip: int = args.skip
     latest: int = args.latest
+    if plot is False and dump is False:
+        logger.error('give at least one option what to do: --plot or --dump')
+        parser.print_help()
+        exit(0)
 
     main(
         watch_dict_file=watch_dict_file,
         plot=plot,
         dump=dump,
+        skipValues = skip,
         latestValues = latest,
     )
 
@@ -136,7 +151,9 @@ def main(
     watch_dict_file: Path,
     plot: bool = False,
     dump: bool = False,
-    latestValues: int = None,
+    skipValues: int = 0,
+    latestValues: int = 0,
+
 ):
 
     if not watch_dict_file.is_file():
@@ -168,7 +185,7 @@ def main(
         )[-1] for data_source_name in data_source_names
     ]
 
-    watcher = CosimWatcher(latest_csv_file_names, latestValues)
+    watcher = CosimWatcher(latest_csv_file_names, skipValues, latestValues)
 
     watcher.read_config_dict(watch_dict_file)
 
