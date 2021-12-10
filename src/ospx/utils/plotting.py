@@ -25,7 +25,7 @@ def create_meta_dict(title):
     return meta_dict
 
 
-def save_figure(plt, fig, extension, path: Union[str, os.PathLike[str]], title, meta_dict):
+def save_figure(plt, fig, extension, path: Union[str, os.PathLike[str]], title: str, meta_dict):
 
     # Make sure path argument is of type Path. If not, cast it to Path type.
     path = path if isinstance(path, Path) else Path(path)

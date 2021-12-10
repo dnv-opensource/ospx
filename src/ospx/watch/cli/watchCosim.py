@@ -33,14 +33,23 @@ def _argparser() -> argparse.ArgumentParser:
         'watchDict',
         metavar='WATCHDICT',
         type=str,
-        help='name of the dict file containing the watch configuration.',
+        help='name of the dict file containing the watch configuration (will also be part of the result file names).',
+    )
+
+    parser.add_argument(
+        '-c',
+        '--converge',
+        action='store_true',
+        help='watch convergence progress, finally --dump (reading WATCHDICT and *.csv, plotting convergence until no changes happen for 5s to any *.csv)',
+        default=False,
+        required=False
     )
 
     parser.add_argument(
         '-p',
         '--plot',
         action='store_true',
-        help='execute plot during runtime and afterwards',
+        help='plot data including --dump (reading WATCHDICT and *.csv, throwing results\SIMULATIONNAME.png)',
         default=False,
         required=False
     )
@@ -49,7 +58,7 @@ def _argparser() -> argparse.ArgumentParser:
         '-d',
         '--dump',
         action='store_true',
-        help='dump a pickle file afterwards',
+        help='dump data (reading WATCHDICT and *.csv, throwing results\{dataFrameDump, resultsDict})',
         default=False,
         required=False
     )
@@ -128,18 +137,20 @@ def cli():
     log_level_file: str = args.log_level
     configure_logging(log_level_console, log_file, log_level_file)
 
-    watch_dict_file: Path = Path(args.watchDict)
+    watch_dict_file_name: str = args.watchDict
+    converge: bool = args.converge
     plot: bool = args.plot
     dump: bool = args.dump
     skip: int = args.skip
     latest: int = args.latest
-    if plot is False and dump is False:
-        logger.error('give at least one option what to do: --plot or --dump')
+    if converge is False and plot is False and dump is False:
+        logger.error('give at least one option what to do: --converge, --plot or --dump')
         parser.print_help()
         exit(0)
 
     main(
-        watch_dict_file=watch_dict_file,
+        watch_dict_file_name = watch_dict_file_name,
+        converge=converge,
         plot=plot,
         dump=dump,
         skipValues = skip,
@@ -148,13 +159,16 @@ def cli():
 
 
 def main(
-    watch_dict_file: Path,
+    watch_dict_file_name: str,
+    converge: bool = False,
     plot: bool = False,
     dump: bool = False,
     skipValues: int = 0,
     latestValues: int = 0,
 
 ):
+
+    watch_dict_file = Path(watch_dict_file_name)
 
     if not watch_dict_file.is_file():
         logger.error(f"file {watch_dict_file} not found.")
@@ -187,23 +201,23 @@ def main(
 
     watcher = CosimWatcher(latest_csv_file_names, skipValues, latestValues)
 
-    watcher.read_config_dict(watch_dict_file)
+    watcher.read_config_dict(watch_dict_file_name)
 
     Path(watcher.results_dir).mkdir(parents=True, exist_ok=True)
 
-    if plot:
-        # watcher.determine_optimum_screen_size()
+    watcher.define_data_source_properties_for_plotting()
 
-        watcher.define_data_source_properties_for_plotting()
-
+    if converge:
         watcher.initialize_plot()
+        watcher.plot(converge=True)
+        watcher.dump()
 
+    elif plot:
+        watcher.initialize_plot()
         watcher.plot()
+        watcher.dump()
 
-    if dump:
-
-        watcher.define_data_source_properties_for_plotting()
-
+    else: #dump
         watcher.dump()
 
 

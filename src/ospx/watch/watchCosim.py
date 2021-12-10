@@ -33,14 +33,16 @@ class CosimWatcher:
         self.skipValues = skipValues
         self.latestValues = latestValues
 
-    def read_config_dict(self, config_dict_file: Path):
+
+    def read_config_dict(self, config_dict_file_name: str):
         '''
         default watchDict
         contains the parameters to be plotted
         not containing the file name
         '''
+        self.config_dict_file_name = config_dict_file_name
 
-        self.config_dict = DictReader.read(config_dict_file, comments=False)
+        self.config_dict = DictReader.read(Path(self.config_dict_file_name), comments=False)
 
         # read datasources, if available.
         # normally this part should be written by ospCaseBulder entirely
@@ -50,7 +52,8 @@ class CosimWatcher:
             self.delimiter = self.config_dict['delimiter']
 
         if 'simulation' in self.config_dict:
-            self.title = self.config_dict['simulation']['name']
+            self.title = '-'.join([self.config_dict_file_name, self.config_dict['simulation']['name']])
+
 
     def determine_optimum_screen_size(self):
         '''
@@ -199,10 +202,19 @@ class CosimWatcher:
         self.maxRow = int(self.number_of_subplots / self.number_of_columns - 0.1) + 1
 
 
-    def plot(self):
+    def plot(self, converge: bool = False):
+        '''used for plotting + convergence checker (future task)
+        '''
+
+        if converge is True:
+            terminate_loops = 0
+            max_no_change_loops = 4
+        else:
+            terminate_loops = 10
+            max_no_change_loops = 0
+
         df_row_size = 0
-        terminate_loops = 0
-        max_no_change_loops = 4
+
         while True:     # do as long as not interrupted
 
             df = self.read_csv_files_into_dataframe()
@@ -243,8 +255,11 @@ class CosimWatcher:
                 axs.append(subplot)
 
             self.figure.suptitle(self.title)
-            plt.show(block=False)
-            plt.pause(3)
+
+            if converge is True:
+                plt.show(block=False)
+                plt.pause(3)
+
             if terminate_loops >= max_no_change_loops:
                 save_figure(
                     plt,
@@ -256,12 +271,14 @@ class CosimWatcher:
                 )
                 break
             plt.clf()
+
             # implement keypress for termination
 
     def dump(self):
         '''
         write df to dump
         '''
+        
         df = self.read_csv_files_into_dataframe()
 
         result_dict = {}
@@ -282,9 +299,11 @@ class CosimWatcher:
 
         # debug
         # result_dict.update({'_datasources':self.data_sources})
+        resultDictName = '-'.join([self.title, 'resultDict'])
 
-        target_file_path = Path.cwd() / self.results_dir / 'resultDict'
+        target_file_path = Path.cwd() / self.results_dir / resultDictName
         DictWriter.write(result_dict, target_file_path, mode='a')
 
-        target_file_path = Path.cwd() / self.results_dir / 'dataFrame.dump'
+        dumpDictName = '-'.join([self.title, 'dataFrame.dump'])
+        target_file_path = Path.cwd() / self.results_dir / dumpDictName
         df.to_pickle(str(target_file_path.absolute()), compression='gzip')
