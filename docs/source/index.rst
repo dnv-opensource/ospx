@@ -14,7 +14,7 @@ Welcome to ospx's documentation!
    license_link
    api
    cli
-   fileFormats
+   fileFormat
 
 
 
