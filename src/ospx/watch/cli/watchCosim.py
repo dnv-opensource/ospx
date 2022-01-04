@@ -33,14 +33,16 @@ def _argparser() -> argparse.ArgumentParser:
         'watchDict',
         metavar='WATCHDICT',
         type=str,
-        help='name of the dict file containing the watch configuration (will also be part of the result file names).',
+        help=
+        'name of the dict file containing the watch configuration (will also be part of the result file names).',
     )
 
     parser.add_argument(
         '-c',
         '--converge',
         action='store_true',
-        help='watch convergence progress, finally --dump (reading WATCHDICT and *.csv, plotting convergence until no changes happen for 5s to any *.csv)',
+        help=
+        'watch convergence progress, finally --dump (reading WATCHDICT and *.csv, plotting convergence until no changes happen for 5s to any *.csv)',
         default=False,
         required=False
     )
@@ -49,7 +51,8 @@ def _argparser() -> argparse.ArgumentParser:
         '-p',
         '--plot',
         action='store_true',
-        help='plot data including --dump (reading WATCHDICT and *.csv, throwing results\SIMULATIONNAME.png)',
+        help=
+        'plot data including --dump (reading WATCHDICT and *.csv, throwing results/SIMULATIONNAME.png)',
         default=False,
         required=False
     )
@@ -58,7 +61,8 @@ def _argparser() -> argparse.ArgumentParser:
         '-d',
         '--dump',
         action='store_true',
-        help='dump data (reading WATCHDICT and *.csv, throwing results\{dataFrameDump, resultsDict})',
+        help=
+        'dump data (reading WATCHDICT and *.csv, throwing results/{dataFrameDump, resultsDict})',
         default=False,
         required=False
     )
@@ -149,12 +153,12 @@ def cli():
         exit(0)
 
     main(
-        watch_dict_file_name = watch_dict_file_name,
+        watch_dict_file_name=watch_dict_file_name,
         converge=converge,
         plot=plot,
         dump=dump,
-        skipValues = skip,
-        latestValues = latest,
+        skipValues=skip,
+        latestValues=latest,
     )
 
 
@@ -165,7 +169,6 @@ def main(
     dump: bool = False,
     skipValues: int = 0,
     latestValues: int = 0,
-
 ):
 
     watch_dict_file = Path(watch_dict_file_name)
@@ -217,7 +220,7 @@ def main(
         watcher.plot()
         watcher.dump()
 
-    else: #dump
+    else:   # dump
         watcher.dump()
 
 

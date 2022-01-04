@@ -33,7 +33,6 @@ class CosimWatcher:
         self.skipValues = skipValues
         self.latestValues = latestValues
 
-
     def read_config_dict(self, config_dict_file_name: str):
         '''
         default watchDict
@@ -52,8 +51,9 @@ class CosimWatcher:
             self.delimiter = self.config_dict['delimiter']
 
         if 'simulation' in self.config_dict:
-            self.title = '-'.join([self.config_dict_file_name, self.config_dict['simulation']['name']])
-
+            self.title = '-'.join(
+                [self.config_dict_file_name, self.config_dict['simulation']['name']]
+            )
 
     def determine_optimum_screen_size(self):
         '''
@@ -76,7 +76,9 @@ class CosimWatcher:
                 if re.match(data_source_name, csv_file_name):                                       # find the regarding csv file
                     data_source_properties.update({'csvFile': csv_file_name})
                     with open(csv_file_name, 'r') as f:
-                        data_header = f.readline().strip().split(self.delimiter)                                                                           # extract the header line to find the variable names
+                        data_header = f.readline().strip().split(
+                            self.delimiter
+                        )                                                                           # extract the header line to find the variable names
                         if 'columns' in data_source_properties:                                     # if key columns was given
                             data_source_properties.update(
                                 {
@@ -139,9 +141,12 @@ class CosimWatcher:
 
         df_all_data_sources = pd.DataFrame()    # initialize empty df
 
-        for index, (data_source_name, data_source_properties) in enumerate(self.data_sources.items()):
+        for index, (data_source_name,
+                    data_source_properties) in enumerate(self.data_sources.items()):
             # create the mapping dict
-            map = dict(zip(data_source_properties['colNames'], data_source_properties['displayColNames']))
+            map = dict(
+                zip(data_source_properties['colNames'], data_source_properties['displayColNames'])
+            )
             '''it could be so easy
             but we have to remove Time and StepCount because they are in each csv file and need to be filtered
             could be also required here to specify an abscissa differing from column 1 or 2
@@ -158,18 +163,23 @@ class CosimWatcher:
             else:
                 df_single_data_source = pd.read_csv(
                     Path(data_source_properties['csvFile']),
-                    usecols = [col_name for col_name in data_source_properties['colNames'] if col_name not in ['Time', 'StepCount']],
+                    usecols=[
+                        col_name for col_name in data_source_properties['colNames']
+                        if col_name not in ['Time', 'StepCount']
+                    ],
                 )
 
             df_single_data_source = df_single_data_source.rename(columns=map)   # rename
 
-            df_all_data_sources = pd.concat([df_all_data_sources, df_single_data_source], axis=1)  # concatenate column-wise
+            df_all_data_sources = pd.concat(
+                [df_all_data_sources, df_single_data_source], axis=1
+            )                                                           # concatenate column-wise
 
         # find latest common start point for skip and latest
         # consider skipping negative values due to wrong inputs
-        if df_all_data_sources.shape[0] - self.skipValues < 0:                  # safety
+        if df_all_data_sources.shape[0] - self.skipValues < 0:  # safety
             logger.error(f"there will be no data, consider adjusting --skip: {self.skipValues}")
-        # cases
+                                                                # cases
         if self.skipValues > 0 and self.latestValues > 0:
             start = max(self.skipValues, df_all_data_sources.shape[0] - self.latestValues)
         elif self.skipValues > 0 and self.latestValues == 0:
@@ -180,27 +190,30 @@ class CosimWatcher:
             start = 0
 
         # if skip latest n steps is to be implemented, no changes to start, but an additional command option is required
-        return df_all_data_sources.iloc[start:df_all_data_sources.shape[0],:]
-
+        return df_all_data_sources.iloc[start:df_all_data_sources.shape[0], :]
 
     def initialize_plot(self):
         '''collect data
         namely header line
         '''
-        self.figure = plt.figure(figsize=(16,9), dpi=150)
+        self.figure = plt.figure(figsize=(16, 9), dpi=150)
         # self.fig.tight_layout() #constraint_layout()
         self.figure.subplots_adjust(
-            left=0.1, bottom=0.05, right=0.95, top=0.9, wspace=0.2, hspace=0.2,
+            left=0.1,
+            bottom=0.05,
+            right=0.95,
+            top=0.9,
+            wspace=0.2,
+            hspace=0.2,
         )
         self.terminate = False
 
         df = self.read_csv_files_into_dataframe(
         )                                           # do it once to find the number of respective columns
 
-        self.number_of_subplots = len(list(df)) - 1 # one of the columns is the abscissa
+        self.number_of_subplots = len(list(df)) - 1     # one of the columns is the abscissa
         self.number_of_columns = int(sqrt(self.number_of_subplots - 1)) + 1
         self.maxRow = int(self.number_of_subplots / self.number_of_columns - 0.1) + 1
-
 
     def plot(self, converge: bool = False):
         '''used for plotting + convergence checker (future task)
@@ -278,7 +291,7 @@ class CosimWatcher:
         '''
         write df to dump
         '''
-        
+
         df = self.read_csv_files_into_dataframe()
 
         result_dict = {}

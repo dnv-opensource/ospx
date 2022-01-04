@@ -15,7 +15,7 @@ from collections import OrderedDict
 from datetime import date
 from pathlib import Path
 from shutil import copyfile
-from typing import MutableMapping
+from typing import MutableMapping, Union
 from zipfile import ZipFile
 
 import graphviz as gv
@@ -37,29 +37,29 @@ logger = logging.getLogger(__name__)
 
 class OspCaseBuilder():
 
-    def __init__(
-        self,
-        case_dict_file: Path,
+    def __init__(self):
+        return
+
+    @staticmethod
+    def build(
+        case_dict_file: Union[str, os.PathLike[str]],
         inspect: bool = False,
-        generate_graph: bool = True,
+        graph: bool = True,
     ):
-        self.case_dict_file: Path = case_dict_file
-        self.inspect: bool = inspect
-        self.generate_graph: bool = generate_graph
 
-    def build(self):
+        # Make sure source_file argument is of type Path. If not, cast it to Path type.
+        case_dict_file = case_dict_file if isinstance(case_dict_file,
+                                                      Path) else Path(case_dict_file)
+        if not case_dict_file.exists():
+            logger.error(f"OspCaseBuilder: File {case_dict_file} not found.")
+            raise FileNotFoundError(case_dict_file)
 
-        # Check whether case dict file exists
-        if not self.case_dict_file.is_file():
-            logger.error(f"caseBuilder: file {self.case_dict_file} not found.")
-            return
+        logger.info(f'reading {case_dict_file}')    # 0
 
-        logger.info(f'reading {self.case_dict_file}')   # 0
-
-        case_dict = DictReader.read(self.case_dict_file, comments=False)
+        case_dict = DictReader.read(case_dict_file, comments=False)
 
         # first leave empty, may read defaults later
-        case = OspSimulationCase(case_dict, self.inspect)
+        case = OspSimulationCase(case_dict, inspect)
 
         case.clean()
 
@@ -69,7 +69,7 @@ class OspCaseBuilder():
         # get models, get simulators
         case.get_components()
 
-        if self.inspect:
+        if inspect:
             # inspect and stop
             case.inspect()
             return
@@ -94,7 +94,7 @@ class OspCaseBuilder():
 
         case.write_statistics()
 
-        if self.generate_graph:
+        if graph:
             case.generate_dependency_graph()
 
         # comment out in favour of manual writing
@@ -260,7 +260,7 @@ class OspSimulationCase():
 
             if 'connectors' in self.case_dict['systemStructure']['components'][model_name].keys():
                 for connector_name, item in self.case_dict['systemStructure']['components'][model_name]['connectors'].items():
-                    item.update({'component':model_name})
+                    item.update({'component': model_name})
                     self.connectors.update({connector_name: item})
 
         # correct "proxy"-reference, if NTNU-IHB fmu-proxy code is used
@@ -476,7 +476,7 @@ class OspSimulationCase():
                         }
                     )
 
-            parameter_bindings = dict({})
+            parameter_bindings = {}
 
             j = self.counter()
             models.update(
@@ -486,8 +486,7 @@ class OspSimulationCase():
                             'name': self.models[key]['_attributes']['name'],
                             'source': self.models[key]['_attributes']['source']
                         },
-                        'Connectors': connectors,
-                        #'ParameterBindings': parameter_bindings,
+                        'Connectors': connectors,                                   # 'ParameterBindings': parameter_bindings,
                     }
                 }
             )
@@ -516,22 +515,17 @@ class OspSimulationCase():
             )
         ssd['System'].update({'Connections': connections})
 
-        #global settings
+        # global settings
         settings = {
-            'Annotations':
-            {
-                'Annotation':
-                {
-                    '_attributes':
-                    {
-                        'type':"com.opensimulationplatform"
+            'Annotations': {
+                'Annotation': {
+                    '_attributes': {
+                        'type': "com.opensimulationplatform"
                     },
-                    'Algorithm':{
-                        'FixedStepAlgorithm':
-                        {
-                            '_attributes':
-                            {
-                                'baseStepSize':str(self.simulation['baseStepSize'])
+                    'Algorithm': {
+                        'FixedStepAlgorithm': {
+                            '_attributes': {
+                                'baseStepSize': str(self.simulation['baseStepSize'])
                             }
                         }
                     }
@@ -1177,11 +1171,11 @@ class OspSimulationCase():
         else:
             return 'String'
 
-    def _apply_styles(self, graph, styles):
-        graph.graph_attr.update(('graph' in styles and styles['graph']) or {})
-        graph.node_attr.update(('nodes' in styles and styles['nodes']) or {})
-        graph.edge_attr.update(('edges' in styles and styles['edges']) or {})
-        return graph
+    def _apply_styles(self, digraph, styles):
+        digraph.graph_attr.update(('graph' in styles and styles['graph']) or {})
+        digraph.node_attr.update(('nodes' in styles and styles['nodes']) or {})
+        digraph.edge_attr.update(('edges' in styles and styles['edges']) or {})
+        return digraph
 
     def _set_node_label(self, key, sub_dict):
         label = f"{sub_dict['_attributes']['name']}\n___________\n\nprototype\n"

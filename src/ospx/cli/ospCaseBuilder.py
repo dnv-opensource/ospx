@@ -110,32 +110,38 @@ def cli():
 
     case_dict_file: Path = Path(args.caseDict)
     inspect: bool = args.inspect
-    generate_graph: bool = args.graph
+    graph: bool = args.graph
 
     main(
         case_dict_file=case_dict_file,
         inspect=inspect,
-        generate_graph=generate_graph,
+        graph=graph,
     )
 
 
 def main(
     case_dict_file: Path,
     inspect: bool = False,
-    generate_graph: bool = True,
+    graph: bool = True,
 ):
 
     # Check whether case dict file exists
-    if not case_dict_file.is_file():
-        logger.error(f"BuildOspCase.py: File {case_dict_file} not found.")
+    if not case_dict_file.exists():
+        logger.error(f"ospCaseBuilder.py: File {case_dict_file} not found.")
         return
 
-    case_builder: OspCaseBuilder = OspCaseBuilder(
+    logger.info(
+        f"Start ospCaseBuilder.py with following arguments:\n"
+        f"\t case_dict_file: \t\t{case_dict_file}\n"
+        f"\t inspect: \t\t\t\t{inspect}\n"
+        f"\t graph: \t\t\t{graph}\n"
+    )
+
+    OspCaseBuilder.build(
         case_dict_file=case_dict_file,
         inspect=inspect,
-        generate_graph=generate_graph,
+        graph=graph,
     )
-    case_builder.build()
 
     return
 
