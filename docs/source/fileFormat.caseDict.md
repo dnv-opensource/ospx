@@ -49,15 +49,15 @@ A caseDict file contains
 
 Below example shows a typical caseDict file.
 
-~~~
+~~~cpp
 /*---------------------------------*- C++ -*----------------------------------*\
 filetype dictionary; coding utf-8; version 0.1; local --; purpose --;
 \*----------------------------------------------------------------------------*/
-#include '.\paramDict'
+#include 'paramDict'
 
 _environment
 {
-    libSource                 'C:\Path\to\a\model\library\on\your\machine';
+    libSource                 'path/to/a/model/library/on/your/machine';
     root                     .;
 }
 systemStructure
