@@ -49,7 +49,7 @@ A caseDict file contains
 
 Below example shows a typical caseDict file.
 
-~~~cpp
+~~~guess
 /*---------------------------------*- C++ -*----------------------------------*\
 filetype dictionary; coding utf-8; version 0.1; local --; purpose --;
 \*----------------------------------------------------------------------------*/
@@ -107,7 +107,7 @@ systemStructure
                     type                  input;
                 }
             }
-            prototype             subfolder\in\your\library\difference.fmu;
+            prototype             'subfolder/in/your/library/difference.fmu';
         }
         div_0
         {
@@ -130,10 +130,10 @@ systemStructure
                 }
 
             }
-            prototype             subfolder\in\your\library\quotient.fmu;
+            prototype             'subfolder/in/your/library/quotient.fmu';
         }
         in_0
-            {
+        {
             connectors
             {
                 in_0_tx
@@ -151,7 +151,7 @@ systemStructure
                     variability   fixed;
                 }
             }
-            prototype             subfolder\in\your\library\constantVal.fmu;
+            prototype             'subfolder/in/your/library/constantVal.fmu';
         }
         in_1
         {
@@ -172,7 +172,7 @@ systemStructure
                     variability   fixed;
                 }
             }
-            prototype             subfolder\in\your\library\constantVal.fmu;
+            prototype             'subfolder/in/your/library/constantVal.fmu';
         }
         in_2
         {
@@ -193,7 +193,7 @@ systemStructure
                     variability   fixed;
                 }
             }
-            prototype             subfolder\in\your\library\constantVal.fmu;
+            prototype             'subfolder/in/your/library/constantVal.fmu';
         }
     }
 }
@@ -211,16 +211,16 @@ run
 If you aim for just a first inspection of a simulation case, all you need to do is drop all referenced FMUs
 into the case's build directory and call ospCaseBuilder with the --inspect option:
 ```
-ospCaseBuilder --inspect --verbose CASEDICT
+ospCaseBuilder caseDict --inspect --verbose
 ```
 Inspection works already with a fairly rudimentary caseDict, such as:
-~~~
+~~~guess
 /*---------------------------------*- C++ -*----------------------------------*\
 filetype dictionary; coding utf-8; version 0.1; local --; purpose --;
 \*----------------------------------------------------------------------------*/
 _environment
 {
-    libSource                 'C:\Path\to\a\model\library\on\your\machine';
+    libSource                 'path/to/a/model/library/on/your/machine';
     root                     .;
 }
 systemStructure
@@ -229,23 +229,23 @@ systemStructure
     {
         diff_0
         {
-            prototype             subfolder\in\your\library\difference.fmu;
+            prototype             'subfolder/in/your/library/difference.fmu';
         }
         div_0
         {
-            prototype             subfolder\in\your\library\quotient.fmu;
+            prototype             'subfolder/in/your/library/quotient.fmu';
         }
         in_0
         {
-            prototype             subfolder\in\your\library\constantVal.fmu;
+            prototype             'subfolder/in/your/library/constantVal.fmu';
         }
         in_1
         {
-            prototype             subfolder\in\your\library\constantVal.fmu;
+            prototype             'subfolder/in/your/library/constantVal.fmu';
         }
         in_2
         {
-            prototype             subfolder\in\your\library\constantVal.fmu;
+            prototype             'subfolder/in/your/library/constantVal.fmu';
         }
     }
 }

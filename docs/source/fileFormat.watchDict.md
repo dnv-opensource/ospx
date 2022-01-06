@@ -35,7 +35,7 @@ The user can opt to reduce and / or adjust the default watchDict's content after
 
 Below example shows a typical watchDict file.
 
-~~~cpp
+~~~js
 /*---------------------------------*- C++ -*----------------------------------*\
 filetype dictionary; coding utf-8; version 0.1; local --; purpose --;
 \*----------------------------------------------------------------------------*/

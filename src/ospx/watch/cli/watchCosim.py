@@ -42,7 +42,7 @@ def _argparser() -> argparse.ArgumentParser:
         '--converge',
         action='store_true',
         help=
-        'watch convergence progress, finally --dump (reading WATCHDICT and *.csv, plotting convergence until no changes happen for 5s to any *.csv)',
+        'watch convergence progress, finally --dump (reading WATCHDICT and .csv, plotting convergence until no changes happen for 5s to any .csv)',
         default=False,
         required=False
     )
@@ -52,7 +52,7 @@ def _argparser() -> argparse.ArgumentParser:
         '--plot',
         action='store_true',
         help=
-        'plot data including --dump (reading WATCHDICT and *.csv, throwing results/SIMULATIONNAME.png)',
+        'plot data including --dump (reading WATCHDICT and .csv, throwing results/SIMULATIONNAME.png)',
         default=False,
         required=False
     )
@@ -62,7 +62,7 @@ def _argparser() -> argparse.ArgumentParser:
         '--dump',
         action='store_true',
         help=
-        'dump data (reading WATCHDICT and *.csv, throwing results/{dataFrameDump, resultsDict})',
+        'dump data (reading WATCHDICT and .csv, throwing results/{dataFrameDump, resultsDict})',
         default=False,
         required=False
     )
