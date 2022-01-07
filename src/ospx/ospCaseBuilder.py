@@ -38,14 +38,17 @@ logger = logging.getLogger(__name__)
 class OspCaseBuilder():
     """class OspCaseBuilder
     Collecting functins and methods to generate an OSP simulation case
-    Input:  - C++ dict
-            - knowledge about the case
-    Output: - OspSystemStructure.xml
-            - SystemStructure.ssd
-            - Plot.json
-            - statisticsDict
-            - watchDict
-    instanciating: OspSimulationCase
+    Input:
+        - C++ dict
+        - knowledge about the case
+    Output:
+        - OspSystemStructure.xml
+        - SystemStructure.ssd
+        - Plot.json
+        - statisticsDict
+        - watchDict
+    instanciating:
+        - OspSimulationCase
     """
     def __init__(self):
         return
@@ -99,7 +102,7 @@ class OspCaseBuilder():
         case.write_osp_system_structure_xml()
 
         case.write_system_structure_ssd()
-        
+
         if 'postProcessing' in case_dict.keys():
             case.write_plot_config()
 
@@ -117,7 +120,7 @@ class OspCaseBuilder():
 
 
 class OspSimulationCase():
-    """class OspSumulationCase
+    """class OspSimulationCase
     """
 
     def __init__(
@@ -603,7 +606,7 @@ class OspSimulationCase():
         """collecting all measures
         and writing to dict for other non-specific purposes
         """
-        
+
         statistics_dict = {}
 
         statistics_dict.update(
