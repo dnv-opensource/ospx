@@ -99,7 +99,7 @@ class OspCaseBuilder():
         case.write_osp_system_structure_xml()
 
         case.write_system_structure_ssd()
-
+        
         if 'postProcessing' in case_dict.keys():
             case.write_plot_config()
 
@@ -461,6 +461,28 @@ class OspSimulationCase():
         """
         ssd = {}
 
+        # global settings
+        settings = {
+            'Annotations': {
+                'Annotation': {
+                    '_attributes': {
+                        'type': "com.opensimulationplatform"
+                    },
+                    'Algorithm': {
+                        'FixedStepAlgorithm': {
+                            '_attributes': {
+                                'baseStepSize': str(self.simulation['baseStepSize']),
+                                'startTime': str(self.simulation['startTime']),
+                                'stopTime': str(self.simulation['stopTime'])
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        ssd.update({'DefaultExperiment': settings})
+
         # ssd meta data
         ssd.update({'System': {'_attributes': {'name': self.name, 'description': self.name}}})
 
@@ -526,26 +548,6 @@ class OspSimulationCase():
             )
         ssd['System'].update({'Connections': connections})
 
-        # global settings
-        settings = {
-            'Annotations': {
-                'Annotation': {
-                    '_attributes': {
-                        'type': "com.opensimulationplatform"
-                    },
-                    'Algorithm': {
-                        'FixedStepAlgorithm': {
-                            '_attributes': {
-                                'baseStepSize': str(self.simulation['baseStepSize'])
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        ssd.update({'DefaultExperiment': settings})
-
         # _xmlOpts
         ssd.update(
             {
@@ -565,7 +567,6 @@ class OspSimulationCase():
         formatter = XmlFormatter(omit_prefix=False)
         DictWriter.write(ssd, target_file_path, formatter=formatter)
 
-        exit(0)
         return
 
     def write_plot_config(self):
@@ -602,7 +603,8 @@ class OspSimulationCase():
         """collecting all measures
         and writing to dict for other non-specific purposes
         """
-        statistics_dict = DictReader.read(Path('statisticsDict'))
+        
+        statistics_dict = {}
 
         statistics_dict.update(
             {'simulation': {
