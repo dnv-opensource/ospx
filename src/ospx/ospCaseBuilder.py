@@ -36,7 +36,17 @@ logger = logging.getLogger(__name__)
 
 
 class OspCaseBuilder():
-
+    """class OspCaseBuilder
+    Collecting functins and methods to generate an OSP simulation case
+    Input:  - C++ dict
+            - knowledge about the case
+    Output: - OspSystemStructure.xml
+            - SystemStructure.ssd
+            - Plot.json
+            - statisticsDict
+            - watchDict
+    instanciating: OspSimulationCase
+    """
     def __init__(self):
         return
 
@@ -46,7 +56,8 @@ class OspCaseBuilder():
         inspect: bool = False,
         graph: bool = True,
     ):
-
+        """
+        """
         # Make sure source_file argument is of type Path. If not, cast it to Path type.
         case_dict_file = case_dict_file if isinstance(case_dict_file,
                                                       Path) else Path(case_dict_file)
@@ -106,9 +117,8 @@ class OspCaseBuilder():
 
 
 class OspSimulationCase():
-    '''
-    OSP (Co-)Simulation case
-    '''
+    """class OspSumulationCase
+    """
 
     def __init__(
         self,
@@ -144,9 +154,9 @@ class OspSimulationCase():
         logger.info(f'initalizing simulation {self.name}')  # 0
 
     def clean(self):
-        '''
-        removes all existing case files
-        '''
+        """Removes all formerly generated case output files
+        retaining initial case configuration
+        """
 
         # specify all files to be deleted (or comment-in / comment-out as needed)
         file_types = [
@@ -175,14 +185,17 @@ class OspSimulationCase():
                     rmtree(file)
 
     def get_simulation_properties(self):
-
+        """read simulation base properties
+        """
         logger.info('reading simulation properties')    # 0
 
         # self.simulation_dict = dict({k:str(v) for k, v in self.config['simulation'].items() if re.match('(StartTime|BaseStepSize|Algorithm)', k)})
         self.simulation = dict({k: str(v) for k, v in self.case_dict['run']['simulation'].items()})
 
     def get_components(self):
-
+        """read FMU involved
+        generate dict of models
+        """
         logger.info('read model information from case dict')            # 0
         for model_index, (model_name, model_properties) in enumerate(
             self.case_dict['systemStructure']['components'].items()
@@ -254,8 +267,9 @@ class OspSimulationCase():
         return
 
     def get_connectors(self):   # sourcery skip: merge-nested-ifs
-        '''
-        '''
+        """read connectors
+        update list of models with connectors
+        """
         for model_name in self.case_dict['systemStructure']['components'].keys():
 
             if 'connectors' in self.case_dict['systemStructure']['components'][model_name].keys():
@@ -276,9 +290,9 @@ class OspSimulationCase():
                     item['component'] = in_component_proxy
 
     def get_connections(self):
-        '''
-        extract connections from maually given configuration
-        '''
+        """read connections from maually given configuration
+        generate dict of connections
+        """
         for key, item in self.case_dict['systemStructure']['connections'].items():
 
             i = self.counter()
@@ -317,10 +331,9 @@ class OspSimulationCase():
         return
 
     def inspect(self):
-        '''
-        see what variable names and units are populating
-        the connected fmu modelDescriptions
-        '''
+        """see what variable names and units are populating
+        the involved FMU (modelDescription.xml)
+        """
         delim = '\t' * 3
         logger.info("Main attributes collocated from modelDescription.xml's")   # 0
         logger.info('name%sattributes%s\n' % (delim, delim))                    # 1
@@ -381,9 +394,8 @@ class OspSimulationCase():
         )
 
     def write_osp_system_structure_xml(self):
-        '''
-        collocates and writes OspSystemStructure.xml
-        '''
+        """collocating and writing OspSystemStructure.xml
+        """
         osp_ss = {}
 
         # osp_ss meta data
@@ -445,9 +457,8 @@ class OspSimulationCase():
         )
 
     def write_system_structure_ssd(self):
-        '''
-        collocates and writes SystemStructure.ssd
-        '''
+        """collocating and writing SystemStructure.ssd
+        """
         ssd = {}
 
         # ssd meta data
@@ -558,10 +569,9 @@ class OspSimulationCase():
         return
 
     def write_plot_config(self):
-        '''
-        write postproc
+        """writing postprocessing information
         e.g. PlotConfig.json
-        '''
+        """
         temp_dict = {'plots': []}
         if 'plots' in self.case_dict['postproc'].keys():
             for key, item in self.case_dict['postproc']['plots'].items():
@@ -589,9 +599,9 @@ class OspSimulationCase():
         return
 
     def write_statistics(self):
-        '''
-        collect all measures und write to dict for later use
-        '''
+        """collecting all measures
+        and writing to dict for other non-specific purposes
+        """
         statistics_dict = DictReader.read(Path('statisticsDict'))
 
         statistics_dict.update(
@@ -662,9 +672,9 @@ class OspSimulationCase():
         DictWriter.write(statistics_dict, target_file_path, mode='a')
 
     def generate_dependency_graph(self):
-        '''
-        generate a dependency graph by use of graphviz
-        '''
+        """generating a dependency graph for documentation
+        proper installation of graphviz is required
+        """
         # default styles
         text_size = '11'
         styles = {
@@ -791,7 +801,12 @@ class OspSimulationCase():
         cg.render('%s_callGraph' % self.simulation['name'], format='pdf')
 
     def write_watch_dict(self):
-
+        """writing at most possible watchDict
+        used by watchCosim for
+            - convergence control
+            - convergence plotting
+            - extracting the results
+        """
         watch_dict = {
             'datasources': {},
             'delimiter': ',',                       # 'objects': {},
@@ -819,9 +834,9 @@ class OspSimulationCase():
         DictWriter.write(watch_dict, target_file_path, mode='a')
 
     def _update_model_description(self, model_dict, name):
-        '''
-        generate
-        '''
+        """updating modelDescripion.xml
+        used whithin proxification (may be obsolete in future)
+        """
         # update root attributes
         root_attributes = dict({})
         # take existing
@@ -871,11 +886,10 @@ class OspSimulationCase():
         generate_proxy=False,
         remote_access=None
     ):                                      # sourcery skip: list-comprehension, merge-nested-ifs, remove-pass-body
-        '''
-        copy from source directory,
+        """copy from source directory,
         write model description xml and
         modify/initialize parameters
-        '''
+        """
         source_fmu_file = Path(self.lib_source) / Path(prototype)
         target_fmu_file = self.work_dir / Path(f'{name}.fmu')
         target_xml_file = self.work_dir / Path(f'{name}_OspModelDescription.xml')
@@ -1062,6 +1076,8 @@ class OspSimulationCase():
         return
 
     def _write_osp_model_description(self, target_xml_file: Path):
+        """writing OspModelDescription.xml
+        """
         osp_md = dict({'UnitDefinitions': self.unit_definitions})
 
         osp_md.update({'VariableGroups': {}})
@@ -1118,6 +1134,9 @@ class OspSimulationCase():
         DictWriter.write(osp_md, target_xml_file)
 
     def _xml_sub_wrong_namespace(self, file_name, subst=None):
+        """Substitute namespace
+        (may be obsolete in future)
+        """
         buffer = ''
 
         with open(file_name, 'r') as f:
@@ -1129,10 +1148,9 @@ class OspSimulationCase():
         return
 
     def _get_key_name(self, dd):
-        '''
-        return the key name of the list
+        """return the key name of the list
         {Unknown|Real|Integer|String|Boolean}
-        '''
+        """
         key_list = ['Unknown', 'Real', 'Integer', 'String', 'Boolean']
         return_key = []
         for key in dd.keys():
@@ -1147,21 +1165,18 @@ class OspSimulationCase():
             return return_key[0]
 
     def _find_numbered_key_by_string(self, dd, search_string):
-        '''
-        this is a hack to
-        find the element name for an (anyways unique) element
+        """find the element name for an (anyways unique) element
         after it was preceeded by a number to keep the sequence of xml elements
         as this is not the "nature" of dicts
-        '''
+        """
         try:
             return [k for k in dd.keys() if re.search(search_string, k)][0]
         except Exception:
             return 'ELEMENTNOTFOUND'
 
     def _get_fmi_data_type(self, arg):
-        '''
-        estimate the data type, if available
-        '''
+        """estimate the data type, if available
+        """
         if isinstance(arg, int):
             return 'Integer'
         elif isinstance(arg, float):
@@ -1253,9 +1268,8 @@ class OspSimulationCase():
 
 
 def _shrink_dict(dictionary, make_unique=['']):
-    '''
-    function removes doubled dicts
-    '''
+    """function removes doubled entries in dicts
+    """
     make_unique = "['" + "']['".join(make_unique) + "']"
     # sort an ordered dict for attribute (child) where the dict is to make unique for
     eval_string = f'sorted(dictionary.items(), key=lambda x: x[1]{make_unique})'

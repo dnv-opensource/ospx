@@ -93,7 +93,8 @@ def _argparser() -> argparse.ArgumentParser:
 
 
 def cli():
-
+    """Main
+    """
     parser = _argparser()
     args = parser.parse_args()
 
@@ -119,12 +120,9 @@ def cli():
     )
 
 
-def main(
-    case_dict_file: Path,
-    inspect: bool = False,
-    graph: bool = True,
-):
-
+def main(case_dict_file: Path, inspect: bool = False, graph: bool = True):
+    """Why this?
+    """
     # Check whether case dict file exists
     if not case_dict_file.exists():
         logger.error(f"ospCaseBuilder.py: File {case_dict_file} not found.")
