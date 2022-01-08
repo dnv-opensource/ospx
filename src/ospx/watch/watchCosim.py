@@ -13,6 +13,8 @@ from matplotlib import cm
 from dictIO.dictReader import DictReader
 from dictIO.dictWriter import DictWriter
 from ospx.utils.plotting import create_meta_dict, save_figure
+from typing import Union
+import os
 
 
 logger = logging.getLogger(__name__)
@@ -20,9 +22,13 @@ logger = logging.getLogger(__name__)
 
 class CosimWatcher:
 
-    def __init__(self, csv_file_names: MutableSequence, skipValues: int, latestValues: int):
-        '''
-        '''
+    def __init__(
+        self,
+        csv_file_names: MutableSequence,
+        skip_values: int,
+        latest_values: int,
+    ):
+        self.watch_dict_file = None
         self.csv_file_names = csv_file_names
         self.title = 'watch'
         self.delimiter = ','    # default
@@ -30,18 +36,35 @@ class CosimWatcher:
         self.results_dir = 'results'
         self.number_of_columns = 3
         self.number_of_subplots = 0
-        self.skipValues = skipValues
-        self.latestValues = latestValues
+        self.skip_values = skip_values
+        self.latest_values = latest_values
 
-    def read_config_dict(self, config_dict_file_name: str):
-        '''
-        default watchDict
-        contains the parameters to be plotted
-        not containing the file name
-        '''
-        self.config_dict_file_name = config_dict_file_name
+    def read_watch_dict(self, watch_dict_file: Union[str, os.PathLike[str]]):
+        """Reads watchDict file. The watchDict file Ccntains the parameters to be plotted
 
-        self.config_dict = DictReader.read(Path(self.config_dict_file_name), comments=False)
+        Parameters
+        ----------
+        watch_dict_file : Union[str, os.PathLike[str]]
+            watchDict file in C++ dictionary format. Contains the parameters to be plotted.
+
+        Raises
+        ------
+        FileNotFoundError
+            if watch_dict_file does not exist
+        """
+
+        # Make sure watch_dict_file argument is of type Path. If not, cast it to Path type.
+        watch_dict_file = watch_dict_file if isinstance(watch_dict_file,
+                                                        Path) else Path(watch_dict_file)
+        if not watch_dict_file.exists():
+            logger.error(f"CosimWatcher: File {watch_dict_file} not found.")
+            raise FileNotFoundError(watch_dict_file)
+
+        logger.info(f"Configure CosimWatcher with {watch_dict_file}..")
+
+        self.watch_dict_file = watch_dict_file
+
+        self.config_dict = DictReader.read(Path(self.watch_dict_file), comments=False)
 
         # read datasources, if available.
         # normally this part should be written by ospCaseBulder entirely
@@ -51,25 +74,24 @@ class CosimWatcher:
             self.delimiter = self.config_dict['delimiter']
 
         if 'simulation' in self.config_dict:
-            self.title = '-'.join(
-                [self.config_dict_file_name, self.config_dict['simulation']['name']]
-            )
+            self.title = f"{self.watch_dict_file.name}-{self.config_dict['simulation']['name']}"
 
-    def determine_optimum_screen_size(self):
-        '''
-        opening and closing may be deprecated when using better a solution
-        '''
+    def _determine_optimum_screen_size(self):
+        """Determines the optimum screen size.
+        """
+        # Opening and closing of window may be deprecated when a better solution is found
         mgr = plt.get_current_fig_manager()
         mgr.full_screen_toggle()
         self.screenSize = (mgr.canvas.width(), mgr.canvas.height())
         mgr.window.close()
 
     def define_data_source_properties_for_plotting(self):
-        '''
-        detail out the properties of all data source, making sure they contain the following fields required for plotting
-        - file name
-        - column names (= variable names)
-        '''
+        """Details out the properties of all data source for plotting.
+
+        Details out the properties of all data source, making sure they contain the following fields required for plotting
+            - file name
+            - column names (= variable names)
+        """
 
         for data_source_name, data_source_properties in self.data_sources.items():                                    # loop over all data sources
             for csv_file_name in self.csv_file_names:
@@ -119,10 +141,7 @@ class CosimWatcher:
                                 }
                             )
                             data_source_properties.update(
-                                {
-                                    'columns':
-                                    [x for x in range(len(data_source_properties['colNames']))]
-                                }
+                                {'columns': list(range(len(data_source_properties['colNames'])))}
                             )
 
                     data_source_properties.update(
@@ -132,12 +151,18 @@ class CosimWatcher:
                         {'yColumns': data_source_properties['columns'][1:]}
                     )
 
-    def read_csv_files_into_dataframe(self):
-        '''
+    def _read_csv_files_into_dataframe(self):
+        """Reads all csv files into one joint Panda dataframe.
+
         Read all csv files (=all data sources, one csv file per data source) into one joint Pandas dataframe.
-        The returned dataframe hence contains the data of all datasources.
-        This dataframe can then be used for plotting, and to dump a pickle
-        '''
+        The returned dataframe hence contains the data of all datas ources.
+        This dataframe can then be used for plotting and to dump a pickle.
+
+        Returns
+        -------
+        pandas.core.frame.DataFrame
+            Pandas dataframe containing the data of all csv files
+        """
 
         df_all_data_sources = pd.DataFrame()    # initialize empty df
 
@@ -177,15 +202,15 @@ class CosimWatcher:
 
         # find latest common start point for skip and latest
         # consider skipping negative values due to wrong inputs
-        if df_all_data_sources.shape[0] - self.skipValues < 0:  # safety
-            logger.error(f"there will be no data, consider adjusting --skip: {self.skipValues}")
-                                                                # cases
-        if self.skipValues > 0 and self.latestValues > 0:
-            start = max(self.skipValues, df_all_data_sources.shape[0] - self.latestValues)
-        elif self.skipValues > 0 and self.latestValues == 0:
-            start = self.skipValues
-        elif self.latestValues > 0 and self.skipValues == 0:
-            start = df_all_data_sources.shape[0] - self.latestValues
+        if df_all_data_sources.shape[0] - self.skip_values < 0:     # safety
+            logger.error(f"there will be no data, consider adjusting --skip: {self.skip_values}")
+                                                                    # cases
+        if self.skip_values > 0 and self.latest_values > 0:
+            start = max(self.skip_values, df_all_data_sources.shape[0] - self.latest_values)
+        elif self.skip_values > 0 and self.latest_values == 0:
+            start = self.skip_values
+        elif self.latest_values > 0 and self.skip_values == 0:
+            start = df_all_data_sources.shape[0] - self.latest_values
         else:
             start = 0
 
@@ -193,9 +218,10 @@ class CosimWatcher:
         return df_all_data_sources.iloc[start:df_all_data_sources.shape[0], :]
 
     def initialize_plot(self):
-        '''collect data
-        namely header line
-        '''
+        """Initializes the plot.
+
+        Collects data and sets plot header line
+        """
         self.figure = plt.figure(figsize=(16, 9), dpi=150)
         # self.fig.tight_layout() #constraint_layout()
         self.figure.subplots_adjust(
@@ -208,7 +234,7 @@ class CosimWatcher:
         )
         self.terminate = False
 
-        df = self.read_csv_files_into_dataframe(
+        df = self._read_csv_files_into_dataframe(
         )                                           # do it once to find the number of respective columns
 
         self.number_of_subplots = len(list(df)) - 1     # one of the columns is the abscissa
@@ -216,10 +242,17 @@ class CosimWatcher:
         self.maxRow = int(self.number_of_subplots / self.number_of_columns - 0.1) + 1
 
     def plot(self, converge: bool = False):
-        '''used for plotting + convergence checker (future task)
-        '''
+        """Plotting
 
-        if converge is True:
+        Plotting + convergence checker (future task)
+
+        Parameters
+        ----------
+        converge : bool, optional
+            if True, convergence is checked, by default False
+        """
+
+        if converge:
             terminate_loops = 0
             max_no_change_loops = 4
         else:
@@ -230,7 +263,7 @@ class CosimWatcher:
 
         while True:     # do as long as not interrupted
 
-            df = self.read_csv_files_into_dataframe()
+            df = self._read_csv_files_into_dataframe()
 
             # cumulate counter for termination if no changes
             if df_row_size == len(df):
@@ -269,7 +302,7 @@ class CosimWatcher:
 
             self.figure.suptitle(self.title)
 
-            if converge is True:
+            if converge:
                 plt.show(block=False)
                 plt.pause(3)
 
@@ -288,35 +321,30 @@ class CosimWatcher:
             # implement keypress for termination
 
     def dump(self):
-        '''
-        write df to dump
-        '''
+        """Write dataframe to dump.
+        """
 
-        df = self.read_csv_files_into_dataframe()
+        df = self._read_csv_files_into_dataframe()
 
         result_dict = {}
         for item in list(df):
             arr = df[item].to_numpy()
-            result_dict.update(
-                {
-                    item: {
-                        'latestValue': arr[-1],
-                        'firstValue': arr[0],
-                        'mean': np.mean(arr),
-                        'stdev': np.std(arr),
-                        'min': np.min(arr),
-                        'max': np.max(arr)
-                    }
-                }
-            )
+            result_dict[item] = {
+                'latestValue': arr[-1],
+                'firstValue': arr[0],
+                'mean': np.mean(arr),
+                'stdev': np.std(arr),
+                'min': np.min(arr),
+                'max': np.max(arr)
+            }
 
         # debug
         # result_dict.update({'_datasources':self.data_sources})
-        resultDictName = '-'.join([self.title, 'resultDict'])
+        result_dict_name = '-'.join([self.title, 'resultDict'])
 
-        target_file_path = Path.cwd() / self.results_dir / resultDictName
+        target_file_path = Path.cwd() / self.results_dir / result_dict_name
         DictWriter.write(result_dict, target_file_path, mode='a')
 
-        dumpDictName = '-'.join([self.title, 'dataFrame.dump'])
-        target_file_path = Path.cwd() / self.results_dir / dumpDictName
+        dump_dict_name = '-'.join([self.title, 'dataFrame.dump'])
+        target_file_path = Path.cwd() / self.results_dir / dump_dict_name
         df.to_pickle(str(target_file_path.absolute()), compression='gzip')

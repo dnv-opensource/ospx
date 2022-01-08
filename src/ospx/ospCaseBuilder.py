@@ -237,21 +237,16 @@ class OspSimulationCase():
                 ):
 
                     fmi_data_type = self._get_fmi_data_type(variable_properties['start'])
-                    initial_values.update(
-                        {
-                            f'{variable_index:06d}_InitialValue': {
-                                fmi_data_type: {
-                                    '_attributes': {
-                                        'value': variable_properties['start']
-                                    }
-                                },
-                                '_attributes': {
-                                    'variable': variable_name
-                                }
+                    initial_values[f'{variable_index:06d}_InitialValue'] = {
+                        fmi_data_type: {
+                            '_attributes': {
+                                'value': variable_properties['start']
                             }
+                        },
+                        '_attributes': {
+                            'variable': variable_name
                         }
-                    )
-
+                    }
                 self.models[simulator_id].update({'InitialValues': initial_values})
 
             if 'generateProxy' in model_properties.keys():
@@ -289,7 +284,7 @@ class OspSimulationCase():
                     self.connectors.update({connector_name: item})
 
         # correct "proxy"-reference, if NTNU-IHB fmu-proxy code is used
-        for index, (key, item) in enumerate(self.connectors.items()):
+        for _, item in self.connectors.items():
             # source component name
             in_component = item['component']
             if in_component in self.case_dict['systemStructure']['components'].keys():
@@ -431,23 +426,15 @@ class OspSimulationCase():
             }
             for k1 in self.models.keys()
         }
-        osp_ss.update({'Simulators': models})
+        osp_ss['Simulators'] = models
+        osp_ss['Connections'] = self.connections
+        osp_ss['_xmlOpts'] = {
+            '_nameSpaces': {
+                'osp': 'https://opensimulationplatform.com/xsd/OspModelDescription-1.0.0.xsd'
+            },
+            '_rootTag': 'OspSystemStructure',
+        }
 
-        # connections
-        osp_ss.update({'Connections': self.connections})
-
-        # _xmlOpts
-        osp_ss.update(
-            {
-                '_xmlOpts': {
-                    '_nameSpaces': {
-                        'osp':
-                        'https://opensimulationplatform.com/xsd/OspModelDescription-1.0.0.xsd'
-                    },
-                    '_rootTag': 'OspSystemStructure',
-                }
-            }
-        )
         # '_nameSpaces':{'osp':'https://opensimulationplatform.com/xsd/OspSystemStructure'},
         # '_nameSpaces':{'osp':'file:///C:/Software/OSP/xsd/OspSystemStructure-0.1.xsd'},
         # '_nameSpaces':{'osp':'file:///C:/Software/OSP/xsd/OspSystemStructure'},
@@ -490,11 +477,8 @@ class OspSimulationCase():
             }
         }
 
-        ssd.update({'DefaultExperiment': settings})
-
-        # ssd meta data
-        ssd.update({'System': {'_attributes': {'name': self.name, 'description': self.name}}})
-
+        ssd['DefaultExperiment'] = settings
+        ssd['System'] = {'_attributes': {'name': self.name, 'description': self.name}}
         # models (elements)
         # (an 'element' in ssd equals what is a 'simulator' in osp_ss: An instance of a model.)
         models = {}
@@ -506,32 +490,24 @@ class OspSimulationCase():
                 i = self.counter()
 
                 if self.connectors[key1]['component'] == self.models[key]['_attributes']['name']:
-                    connectors.update(
-                        {
-                            '%06i_Connector' % i: {
-                                '_attributes': {
-                                    'name': self.connectors[key1]['reference'],
-                                    'kind': self.connectors[key1]['type']
-                                },
-                                'Real': {},
-                            }
-                        }
-                    )
-
-            parameter_bindings = {}
+                    connectors['%06i_Connector' % i] = {
+                        '_attributes': {
+                            'name': self.connectors[key1]['reference'],
+                            'kind': self.connectors[key1]['type']
+                        },
+                        'Real': {},
+                    }
+            # parameter_bindings = {}
 
             j = self.counter()
-            models.update(
-                {
-                    '%06i_Component' % j: {
-                        '_attributes': {
-                            'name': self.models[key]['_attributes']['name'],
-                            'source': self.models[key]['_attributes']['source']
-                        },
-                        'Connectors': connectors,                                   # 'ParameterBindings': parameter_bindings,
-                    }
-                }
-            )
+            models['%06i_Component' % j] = {
+                '_attributes': {
+                    'name': self.models[key]['_attributes']['name'],
+                    'source': self.models[key]['_attributes']['source'],
+                },
+                'Connectors': connectors,                                   # 'ParameterBindings': parameter_bindings,
+            }
+
         ssd['System'].update({'Elements': models})
 
         # connections
@@ -539,37 +515,29 @@ class OspSimulationCase():
         for key, item in self.connections.items():
             i = self.counter()
 
-            connections.update(
-                {
-                    '%06i_Connection' % i: {
-                        '_attributes': {
-                            'startElement':
-                            self.connections[key]['000000_Variable']['_attributes']['simulator'],
-                            'startConnector':
-                            self.connections[key]['000000_Variable']['_attributes']['name'],
-                            'endElement':
-                            self.connections[key]['000001_Variable']['_attributes']['simulator'],
-                            'endConnector':
-                            self.connections[key]['000001_Variable']['_attributes']['name']
-                        }
-                    }
-                }
-            )
-        ssd['System'].update({'Connections': connections})
-
-        # _xmlOpts
-        ssd.update(
-            {
-                '_xmlOpts': {
-                    '_nameSpaces': {
-                        'ssd': 'file:///C:/Software/OSP/xsd/SystemStructureDescription',
-                        'ssv': 'file:///C:/Software/OSP/xsd/SystemStructureParameterValues',
-                        'ssc': 'file:///C:/Software/OSP/xsd/SystemStructureCommon',
-                    },
-                    '_rootTag': 'SystemStructureDescription',
+            connections['%06i_Connection' % i] = {
+                '_attributes': {
+                    'startElement':
+                    self.connections[key]['000000_Variable']['_attributes']['simulator'],
+                    'startConnector':
+                    self.connections[key]['000000_Variable']['_attributes']['name'],
+                    'endElement':
+                    self.connections[key]['000001_Variable']['_attributes']['simulator'],
+                    'endConnector':
+                    self.connections[key]['000001_Variable']['_attributes']['name'],
                 }
             }
-        )
+
+        ssd['System'].update({'Connections': connections})
+
+        ssd['_xmlOpts'] = {
+            '_nameSpaces': {
+                'ssd': 'file:///C:/Software/OSP/xsd/SystemStructureDescription',
+                'ssv': 'file:///C:/Software/OSP/xsd/SystemStructureParameterValues',
+                'ssc': 'file:///C:/Software/OSP/xsd/SystemStructureCommon',
+            },
+            '_rootTag': 'SystemStructureDescription',
+        }
 
         # Write SystemStructure.ssd
         target_file_path = Path.cwd() / 'SystemStructure.ssd'
@@ -612,43 +580,31 @@ class OspSimulationCase():
         """collecting all measures
         and writing to dict for other non-specific purposes
         """
+        # sourcery skip: merge-dict-assign, simplify-dictionary-update
 
         statistics_dict = {}
 
-        statistics_dict.update(
-            {'simulation': {
-                'name': self.case_dict['run']['simulation']['name']
-            }}
-        )
-        statistics_dict.update(
-            {
-                'components': {
-                    'count': len(self.case_dict['systemStructure']['components'].keys()),
-                    'names': list(self.case_dict['systemStructure']['components'].keys())
-                }
-            }
-        )
-        statistics_dict.update(
-            {
-                'connections': {
-                    'count': len(self.case_dict['systemStructure']['connections'].keys()),
-                    'names': list(self.case_dict['systemStructure']['connections'].keys())
-                }
-            }
-        )
-        statistics_dict.update(
-            {
-                'connectors': {
-                    'count': len(self.connectors.keys()), 'names': list(self.connectors.keys())
-                }
-            }
-        )
+        statistics_dict['simulation'] = {'name': self.case_dict['run']['simulation']['name']}
+
+        statistics_dict['components'] = {
+            'count': len(self.case_dict['systemStructure']['components'].keys()),
+            'names': list(self.case_dict['systemStructure']['components'].keys())
+        }
+
+        statistics_dict['connections'] = {
+            'count': len(self.case_dict['systemStructure']['connections'].keys()),
+            'names': list(self.case_dict['systemStructure']['connections'].keys())
+        }
+
+        statistics_dict['connectors'] = {
+            'count': len(self.connectors.keys()), 'names': list(self.connectors.keys())
+        }
 
         unit_list = []
         display_unit_list = []
         factors_list = []
         offsets_list = []
-        for index, (key, item) in enumerate(self.unit_definitions.items()):
+        for _, item in self.unit_definitions.items():
             display_unit_key = self._find_numbered_key_by_string(item, 'DisplayUnit$')
             unit_list.append(item['_attributes']['name'])
             display_unit_list.append(item[display_unit_key]['_attributes']['name'])
@@ -852,18 +808,18 @@ class OspSimulationCase():
         root_attributes = dict({})
         # take existing
         for key, item in model_dict['_xmlOpts']['_rootAttributes'].items():
-            root_attributes.update({key: item})
+            root_attributes[key] = item
         # new guid
         # root_attributes.update({'guid':'{%s}' % str(uuid4()).upper()})
         # new date
-        root_attributes.update({'generationDateAndTime': str(today())})
+        root_attributes['generationDateAndTime'] = str(today())
         # author
         if platform.system() == 'Linux':
-            root_attributes.update({'author': os.environ['USER']})
+            root_attributes['author'] = os.environ['USER']
         else:
-            root_attributes.update({'author': os.environ['USERNAME']})
+            root_attributes['author'] = os.environ['USERNAME']
 
-        root_attributes.update({'modelName': name})
+        root_attributes['modelName'] = name
 
         # also find and replace model_dict['CoSimulation']['_attributes']['modelIdentifier']
         # this is now required if someone want to proxify the fmu
@@ -964,8 +920,8 @@ class OspSimulationCase():
                                     name,
                                     model_dict[model_variables_key][key]['_attributes']['name'],
                                     base_key,
-                                    name, {k: v
-                                           for k, v in list_item.items()}
+                                    name,
+                                    dict(list_item.items()),
                                 )
                             )                                                                       # 2
 

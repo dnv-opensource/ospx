@@ -151,7 +151,7 @@ def main():
     dump: bool = args.dump
     skip: int = args.skip
     latest: int = args.latest
-    if converge is False and plot is False and dump is False:
+    if not converge and not plot and not dump:
         logger.error('give at least one option what to do: --converge, --plot or --dump')
         parser.print_help()
         exit(0)
@@ -162,8 +162,8 @@ def main():
         converge=converge,
         plot=plot,
         dump=dump,
-        skipValues=skip,
-        latestValues=latest,
+        skip_values=skip,
+        latest_values=latest,
     )
 
 
@@ -172,8 +172,8 @@ def _main(
     converge: bool = False,
     plot: bool = False,
     dump: bool = False,
-    skipValues: int = 0,
-    latestValues: int = 0,
+    skip_values: int = 0,
+    latest_values: int = 0,
 ):
     """Entry point for unit tests.
 
@@ -211,9 +211,9 @@ def _main(
         )[-1] for data_source_name in data_source_names
     ]
 
-    watcher = CosimWatcher(latest_csv_file_names, skipValues, latestValues)
+    watcher = CosimWatcher(latest_csv_file_names, skip_values, latest_values)
 
-    watcher.read_config_dict(watch_dict_file_name)
+    watcher.read_watch_dict(watch_dict_file_name)
 
     Path(watcher.results_dir).mkdir(parents=True, exist_ok=True)
 
@@ -222,15 +222,12 @@ def _main(
     if converge:
         watcher.initialize_plot()
         watcher.plot(converge=True)
-        watcher.dump()
 
     elif plot:
         watcher.initialize_plot()
         watcher.plot()
-        watcher.dump()
 
-    else:   # dump
-        watcher.dump()
+    watcher.dump()
 
 
 if __name__ == '__main__':
