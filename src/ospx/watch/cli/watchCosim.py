@@ -125,7 +125,11 @@ def _argparser() -> argparse.ArgumentParser:
     return parser
 
 
-def cli():
+def main():
+    """Entry point for console script as configured in setup.cfg
+
+    Runs the command line interface and parses arguments and options entered on the console.
+    """
 
     parser = _argparser()
     args = parser.parse_args()
@@ -152,7 +156,8 @@ def cli():
         parser.print_help()
         exit(0)
 
-    main(
+    # Dispatch to _main(), which takes care of processing the arguments and invoking the API.
+    _main(
         watch_dict_file_name=watch_dict_file_name,
         converge=converge,
         plot=plot,
@@ -162,7 +167,7 @@ def cli():
     )
 
 
-def main(
+def _main(
     watch_dict_file_name: str,
     converge: bool = False,
     plot: bool = False,
@@ -170,6 +175,10 @@ def main(
     skipValues: int = 0,
     latestValues: int = 0,
 ):
+    """Entry point for unit tests.
+
+    Processes the arguments parsed by main() on the console and invokes the API.
+    """
 
     watch_dict_file = Path(watch_dict_file_name)
 
@@ -225,4 +234,4 @@ def main(
 
 
 if __name__ == '__main__':
-    cli()
+    main()

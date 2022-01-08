@@ -92,8 +92,10 @@ def _argparser() -> argparse.ArgumentParser:
     return parser
 
 
-def cli():
-    """Main
+def main():
+    """Entry point for console script as configured in setup.cfg
+
+    Runs the command line interface and parses arguments and options entered on the console.
     """
     parser = _argparser()
     args = parser.parse_args()
@@ -113,15 +115,22 @@ def cli():
     inspect: bool = args.inspect
     graph: bool = args.graph
 
-    main(
+    # Dispatch to _main(), which takes care of processing the arguments and invoking the API.
+    _main(
         case_dict_file=case_dict_file,
         inspect=inspect,
         graph=graph,
     )
 
 
-def main(case_dict_file: Path, inspect: bool = False, graph: bool = True):
-    """Why this?
+def _main(
+    case_dict_file: Path,
+    inspect: bool = False,
+    graph: bool = True,
+):
+    """Entry point for unit tests.
+
+    Processes the arguments parsed by main() on the console and invokes the API.
     """
     # Check whether case dict file exists
     if not case_dict_file.exists():
@@ -145,4 +154,4 @@ def main(case_dict_file: Path, inspect: bool = False, graph: bool = True):
 
 
 if __name__ == '__main__':
-    cli()
+    main()

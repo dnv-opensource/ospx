@@ -36,20 +36,20 @@ logger = logging.getLogger(__name__)
 
 
 class OspCaseBuilder():
-    """class OspCaseBuilder
-    Collecting functins and methods to generate an OSP simulation case
+    """Builder for OSP-specific configuration files needed to run an OSP (co-)simulation case.
+
     Input:
-        - C++ dict
-        - knowledge about the case
+        - caseDict file (OspCaseBuilder configuration file in C++ dictionary format)
     Output:
         - OspSystemStructure.xml
         - SystemStructure.ssd
         - Plot.json
         - statisticsDict
         - watchDict
-    instanciating:
+    instantiating:
         - OspSimulationCase
     """
+
     def __init__(self):
         return
 
@@ -59,7 +59,23 @@ class OspCaseBuilder():
         inspect: bool = False,
         graph: bool = True,
     ):
-        """
+        """Builds the OSP-specific configuration files needed to run an OSP (co-)simulation case.
+
+        [extended_summary]
+
+        Parameters
+        ----------
+        case_dict_file : Union[str, os.PathLike[str]]
+            case file in C++ dictionary format. Contains all case-specific information OspCaseBuilder needs to generate the OSP files.
+        inspect : bool, optional
+            inspect mode. If True, build() checks all modelDescription.xml references but does not actually write connectors and connections, by default False
+        graph : bool, optional
+            if True, creates a dependency graph using graphviz, by default True
+
+        Raises
+        ------
+        FileNotFoundError
+            [description]
         """
         # Make sure source_file argument is of type Path. If not, cast it to Path type.
         case_dict_file = case_dict_file if isinstance(case_dict_file,
