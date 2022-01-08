@@ -47,7 +47,7 @@ def _argparser() -> argparse.ArgumentParser:
         '-g',
         '--graph',
         action='store_true',
-        help='creates a dependency graph using graphviz',
+        help='creates a dependency graph image using graphviz',
         default=False,
         required=False,
     )
@@ -126,7 +126,7 @@ def main():
 def _main(
     case_dict_file: Path,
     inspect: bool = False,
-    graph: bool = True,
+    graph: bool = False,
 ):
     """Entry point for unit tests.
 

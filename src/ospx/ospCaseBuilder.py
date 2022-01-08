@@ -57,7 +57,7 @@ class OspCaseBuilder():
     def build(
         case_dict_file: Union[str, os.PathLike[str]],
         inspect: bool = False,
-        graph: bool = True,
+        graph: bool = False,
     ):
         """Builds the OSP-specific configuration files needed to run an OSP (co-)simulation case.
 
@@ -70,7 +70,7 @@ class OspCaseBuilder():
         inspect : bool, optional
             inspect mode. If True, build() checks all modelDescription.xml references but does not actually write connectors and connections, by default False
         graph : bool, optional
-            if True, creates a dependency graph using graphviz, by default True
+            if True, creates a dependency graph image using graphviz, by default False
 
         Raises
         ------
