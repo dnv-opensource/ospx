@@ -37,17 +37,6 @@ logger = logging.getLogger(__name__)
 
 class OspCaseBuilder():
     """Builder for OSP-specific configuration files needed to run an OSP (co-)simulation case.
-
-    Input:
-        - caseDict file (OspCaseBuilder configuration file in C++ dictionary format)
-    Output:
-        - OspSystemStructure.xml
-        - SystemStructure.ssd
-        - Plot.json
-        - statisticsDict
-        - watchDict
-    instantiating:
-        - OspSimulationCase
     """
 
     def __init__(self):
@@ -61,22 +50,28 @@ class OspCaseBuilder():
     ):
         """Builds the OSP-specific configuration files needed to run an OSP (co-)simulation case.
 
-        [extended_summary]
+        Builds following files:
+            - OspSystemStructure.xml
+            - SystemStructure.ssd
+            - Plot.json
+            - statisticsDict
+            - watchDict
 
         Parameters
         ----------
         case_dict_file : Union[str, os.PathLike[str]]
             case file in C++ dictionary format. Contains all case-specific information OspCaseBuilder needs to generate the OSP files.
         inspect : bool, optional
-            inspect mode. If True, build() checks all modelDescription.xml references but does not actually write connectors and connections, by default False
+            inspect mode. If True, build() checks all references in modelDescription.xml but does not actually create connectors and connections, by default False
         graph : bool, optional
             if True, creates a dependency graph image using graphviz, by default False
 
         Raises
         ------
         FileNotFoundError
-            [description]
+            if case_dict_file does not exist
         """
+
         # Make sure source_file argument is of type Path. If not, cast it to Path type.
         case_dict_file = case_dict_file if isinstance(case_dict_file,
                                                       Path) else Path(case_dict_file)
@@ -173,8 +168,7 @@ class OspSimulationCase():
         logger.info(f'initalizing simulation {self.name}')  # 0
 
     def clean(self):
-        """Removes all formerly generated case output files
-        retaining initial case configuration
+        """Removes all formerly generated case output files, retaining initial case configuration.
         """
 
         # specify all files to be deleted (or comment-in / comment-out as needed)
@@ -204,7 +198,7 @@ class OspSimulationCase():
                     rmtree(file)
 
     def get_simulation_properties(self):
-        """read simulation base properties
+        """Reads simulation base properties.
         """
         logger.info('reading simulation properties')    # 0
 
@@ -212,8 +206,7 @@ class OspSimulationCase():
         self.simulation = dict({k: str(v) for k, v in self.case_dict['run']['simulation'].items()})
 
     def get_components(self):
-        """read FMU involved
-        generate dict of models
+        """Reads all FMUs involved and generates dict of models.
         """
         logger.info('read model information from case dict')            # 0
         for model_index, (model_name, model_properties) in enumerate(
@@ -286,8 +279,7 @@ class OspSimulationCase():
         return
 
     def get_connectors(self):   # sourcery skip: merge-nested-ifs
-        """read connectors
-        update list of models with connectors
+        """Reads connectors and updates list of models with connectors.
         """
         for model_name in self.case_dict['systemStructure']['components'].keys():
 
@@ -309,8 +301,7 @@ class OspSimulationCase():
                     item['component'] = in_component_proxy
 
     def get_connections(self):
-        """read connections from maually given configuration
-        generate dict of connections
+        """Read connections from the case_dict_file and generates dict of connections.
         """
         for key, item in self.case_dict['systemStructure']['connections'].items():
 
@@ -350,8 +341,7 @@ class OspSimulationCase():
         return
 
     def inspect(self):
-        """see what variable names and units are populating
-        the involved FMU (modelDescription.xml)
+        """Inspects all FMUs for the public variable names and units they declare (as documented in their modelDescription.xml's)
         """
         delim = '\t' * 3
         logger.info("Main attributes collocated from modelDescription.xml's")   # 0
@@ -907,9 +897,10 @@ class OspSimulationCase():
         generate_proxy=False,
         remote_access=None
     ):                                      # sourcery skip: list-comprehension, merge-nested-ifs, remove-pass-body
-        """copy from source directory,
-        write model description xml and
-        modify/initialize parameters
+        """Copies an FMU from the source library and initializes it.
+
+        Copies the prototype FMU from the source library directory,
+        writes its OspModelDescription.xml and sets / initializes its parameters to their case specific values.
         """
         source_fmu_file = Path(self.lib_source) / Path(prototype)
         target_fmu_file = self.work_dir / Path(f'{name}.fmu')
