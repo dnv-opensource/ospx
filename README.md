@@ -1,4 +1,4 @@
-# README
+# ospx
 ospx is an extension package to [farn][farn_docs] supporting the creation of OSP (co-)simulation cases using functional mockup units (FMUs).
 
 ospx supports
