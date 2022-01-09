@@ -60,7 +60,7 @@ class OspCaseBuilder():
         Parameters
         ----------
         case_dict_file : Union[str, os.PathLike[str]]
-            case file in C++ dictionary format. Contains all case-specific information OspCaseBuilder needs to generate the OSP files.
+            caseDict file. Contains all case-specific information OspCaseBuilder needs to generate the OSP files.
         inspect : bool, optional
             inspect mode. If True, build() checks all references in modelDescription.xml but does not actually create connectors and connections, by default False
         graph : bool, optional

@@ -17,7 +17,7 @@ def _argparser() -> argparse.ArgumentParser:
 
     parser = argparse.ArgumentParser(
         prog='ospCaseBuilder',
-        usage='%(prog)s [options [args]]',
+        usage='%(prog)s caseDict [options [args]]',
         epilog='_________________ospCaseBuilder___________________',
         prefix_chars='-',
         add_help=True,
@@ -26,7 +26,7 @@ def _argparser() -> argparse.ArgumentParser:
 
     parser.add_argument(
         'caseDict',
-        metavar='CASEDICT',
+        metavar='caseDict',
         type=str,
         help='name of the dict file containing the OSP simulation case configuration.',
     )

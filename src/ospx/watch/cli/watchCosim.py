@@ -21,7 +21,7 @@ def _argparser() -> argparse.ArgumentParser:
 
     parser = ArgumentParser(
         prog='watchCosim',
-        usage='%(prog)s [options [args]]',
+        usage='%(prog)s watchDict [options [args]]',
         epilog='_________________watchCosim___________________',
         prefix_chars='-',
         add_help=True,
@@ -31,7 +31,7 @@ def _argparser() -> argparse.ArgumentParser:
 
     parser.add_argument(
         'watchDict',
-        metavar='WATCHDICT',
+        metavar='watchDict',
         type=str,
         help=
         'name of the dict file containing the watch configuration (will also be part of the result file names).',

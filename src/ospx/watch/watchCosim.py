@@ -40,12 +40,12 @@ class CosimWatcher:
         self.latest_values = latest_values
 
     def read_watch_dict(self, watch_dict_file: Union[str, os.PathLike[str]]):
-        """Reads watchDict file. The watchDict file Ccntains the parameters to be plotted
+        """Reads watchDict file. The watchDict file contains the parameters to be plotted.
 
         Parameters
         ----------
         watch_dict_file : Union[str, os.PathLike[str]]
-            watchDict file in C++ dictionary format. Contains the parameters to be plotted.
+            watchDict file. Contains the parameters to be plotted.
 
         Raises
         ------
@@ -86,7 +86,7 @@ class CosimWatcher:
         mgr.window.close()
 
     def define_data_source_properties_for_plotting(self):
-        """Details out the properties of all data source for plotting.
+        """Details out the properties of all data sources for plotting.
 
         Details out the properties of all data source, making sure they contain the following fields required for plotting
             - file name
