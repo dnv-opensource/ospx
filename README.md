@@ -12,7 +12,7 @@ pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://
 ospx requires the following (sub-)package:
 * [dictIO][dictIO_docs]: foundation package, enabling ospx to handle configuration files in C++ dictionary format.
 
-However, dictIO gets installed automatically with farn.
+However, dictIO gets installed automatically with ospx.
 
 ## Usage Example
 
