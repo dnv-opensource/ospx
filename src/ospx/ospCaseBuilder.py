@@ -769,6 +769,7 @@ class OspSimulationCase():
 
     def write_watch_dict(self):
         """writing at most possible watchDict
+
         used by watchCosim for
             - convergence control
             - convergence plotting
