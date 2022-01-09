@@ -7,7 +7,7 @@ ospx supports
 
 ## Installation
 ```sh
-pip install ospx
+pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ ospx
 ```
 ospx requires the following (sub-)package:
 * [dictIO][dictIO_docs]: foundation package, enabling ospx to handle configuration files in C++ dictionary format.
