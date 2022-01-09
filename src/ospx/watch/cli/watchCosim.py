@@ -42,7 +42,7 @@ def _argparser() -> argparse.ArgumentParser:
         '--converge',
         action='store_true',
         help=
-        'watch convergence progress, finally --dump (reading WATCHDICT and .csv, plotting convergence until no changes happen for 5s to any .csv)',
+        'watch convergence progress, finally --dump (reading watchDict and .csv, plotting convergence until no changes happen for 5s to any .csv)',
         default=False,
         required=False
     )
@@ -52,7 +52,7 @@ def _argparser() -> argparse.ArgumentParser:
         '--plot',
         action='store_true',
         help=
-        'plot data including --dump (reading WATCHDICT and .csv, throwing results/SIMULATIONNAME.png)',
+        'plot data including --dump (reading watchDict and .csv, creating results/SIMULATIONNAME.png)',
         default=False,
         required=False
     )
@@ -62,7 +62,7 @@ def _argparser() -> argparse.ArgumentParser:
         '--dump',
         action='store_true',
         help=
-        'dump data (reading WATCHDICT and .csv, throwing results/{dataFrameDump, resultsDict})',
+        'dump data (reading watchDict and .csv, creating results/{dataFrameDump, resultsDict})',
         default=False,
         required=False
     )
@@ -212,22 +212,18 @@ def _main(
     ]
 
     watcher = CosimWatcher(latest_csv_file_names, skip_values, latest_values)
-
     watcher.read_watch_dict(watch_dict_file_name)
 
     Path(watcher.results_dir).mkdir(parents=True, exist_ok=True)
 
-    watcher.define_data_source_properties_for_plotting()
-
     if converge:
-        watcher.initialize_plot()
         watcher.plot(converge=True)
 
     elif plot:
-        watcher.initialize_plot()
         watcher.plot()
 
-    watcher.dump()
+    if dump:
+        watcher.dump()
 
 
 if __name__ == '__main__':
