@@ -2,7 +2,7 @@
 
 ## Description
 
-A caseDict is a file in C++ dictionary format used with ospCaseBuilder
+A caseDict is a file in dictIO dict file format used with ospCaseBuilder
 
 A caseDict acts as input for ospCaseBuilder to
 * generate an osp-compatible simulation case, consisting of one or multiple fmu's

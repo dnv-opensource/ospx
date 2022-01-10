@@ -10,7 +10,7 @@ ospx supports
 pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ ospx
 ```
 ospx requires the following (sub-)package:
-* [dictIO][dictIO_docs]: foundation package, enabling ospx to handle configuration files in C++ dictionary format.
+* [dictIO][dictIO_docs]: foundation package, enabling ospx to handle configuration files in dictIO dict file format.
 
 However, dictIO gets installed automatically with ospx.
 
@@ -33,11 +33,11 @@ ospCaseBuilder caseDict
 _For more examples and usage, please refer to [ospx's documentation][ospx_docs] on GitHub Pages._
 
 ## File Format
-A caseDict is a file in C++ dictionary format used with farn.
+A caseDict is a file in dictIO dict file format used with farn.
 
 _For a documentation of the caseDict file format, see [File Format](fileFormat.md) in [ospx's documentation][ospx_docs] on GitHub Pages._
 
-_For a detailed documentation of the C++ dictionary format used by farn, see [dictIO's documentation][dictIO_docs] on GitHub Pages._
+_For a detailed documentation of the dictIO dict file format used by farn, see [dictIO's documentation][dictIO_docs] on GitHub Pages._
 
 ## Development Setup
 

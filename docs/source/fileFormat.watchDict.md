@@ -2,7 +2,7 @@
 
 ## Description
 
-A watchDict is a file in C++ dictionary format used with cosim and watchCosim.
+A watchDict is a file in dictIO dict file format used with cosim and watchCosim.
 
 A watchDict is suitable for
 * monitor the progress of a running cosim simulation
