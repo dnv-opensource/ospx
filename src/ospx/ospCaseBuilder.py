@@ -222,7 +222,7 @@ class OspSimulationCase():
                         '_attributes': {
                             'name': model_name,
                             'source': f'{model_name}.fmu',
-                            'prototype': model_properties['prototype'],
+                            'fmu': model_properties['fmu'],
                             'stepSize': self.baseStepSize
                         }
                     }
@@ -257,7 +257,7 @@ class OspSimulationCase():
                     model_index,
                     model_name,
                     model_properties,
-                    prototype=model_properties['prototype'],
+                    fmu=model_properties['fmu'],
                     write_osp_model_description=True,
                     generate_proxy=True,
                     remote_access=remote_access
@@ -267,7 +267,7 @@ class OspSimulationCase():
                     model_index,
                     model_name,
                     model_properties,
-                    prototype=model_properties['prototype'],
+                    fmu=model_properties['fmu'],
                     write_osp_model_description=False
                 )
 
@@ -420,7 +420,7 @@ class OspSimulationCase():
                     k3: v3
                     for k3,
                     v3 in self.models[k1][k2].items()
-                    if not re.match('prototype', k3)
+                    if not re.match('fmu', k3)
                 }
                 for k2 in self.models[k1].keys()
             }
@@ -679,7 +679,7 @@ class OspSimulationCase():
             }
         }
 
-        basic_op_names = '(power|dot|sum|diff|prod|div)'
+        basic_op_names = '(power|dot|sum|diff|prod|div|quotient)'
         input_names = '^(IN|in)'
 
         digraph = functools.partial(gv.Digraph, format='png')
@@ -692,16 +692,16 @@ class OspSimulationCase():
 
             label_key, label = self._set_node_label(self.models[key]['_attributes']['name'], self.models[key])
 
-            if re.search(basic_op_names, self.models[key]['_attributes']['name'], re.I):
+            if re.search(input_names, self.models[key]['_attributes']['name']):
+                shape = 'diamond'
+                style = 'filled,rounded'
+                fillcolor = '#FFFFFF'
+            elif re.search(basic_op_names, self.models[key]['_attributes']['name'], re.I):
                 # label = self._create_table(label_key, {'source:':self.models_dict[key]['_attributes']['source'], 'stepsize:':self.models_dict[key]['_attributes']['stepSize']})
                 label = label
                 shape = 'square'
                 style = 'filled, rounded'
                 fillcolor = '#EEBBDD'
-            elif re.search(input_names, self.models[key]['_attributes']['name']):
-                shape = 'diamond'
-                style = 'filled,rounded'
-                fillcolor = '#FFFFFF'
             else:
                 shape = 'square'
                 style = 'filled'
@@ -849,17 +849,17 @@ class OspSimulationCase():
         index,
         name,
         properties,
-        prototype=None,
+        fmu=None,
         write_osp_model_description=False,
         generate_proxy=False,
         remote_access=None
     ):                                      # sourcery skip: list-comprehension, merge-nested-ifs, remove-pass-body
         """Copies an FMU from the source library and initializes it.
 
-        Copies the prototype FMU from the source library directory,
+        Copies the fmu FMU from the source library directory,
         writes its OspModelDescription.xml and sets / initializes its parameters to their case specific values.
         """
-        source_fmu_file = Path(self.lib_source) / Path(prototype)
+        source_fmu_file = Path(self.lib_source) / Path(fmu)
         target_fmu_file = self.work_dir / Path(f'{name}.fmu')
         target_xml_file = self.work_dir / Path(f'{name}_OspModelDescription.xml')
 
@@ -892,7 +892,7 @@ class OspSimulationCase():
 
         model_variables_key = self._find_numbered_key_by_string(model_dict, 'ModelVariables$')
 
-        prototype_name = model_dict['_xmlOpts']['_rootAttributes']['modelName']
+        fmu_name = model_dict['_xmlOpts']['_rootAttributes']['modelName']
 
         # if not in "inspect mode"
         # also change modelDescription.xml (in zip file) for completeness
@@ -950,7 +950,7 @@ class OspSimulationCase():
                 old_date = model_dict['_xmlOpts']['_rootAttributes']['generationDateAndTime']
                 new_date = str(today())
                 add_description_string = '\nmodified %s:\n' % date.today()
-                add_description_string += '\tmodelName %s to %s\n' % (prototype_name, name)
+                add_description_string += '\tmodelName %s to %s\n' % (fmu_name, name)
                 add_description_string += '\tauthor %s to %s\n' % (old_author, new_author)
                 add_description_string += '\tgenerationDateAndTime %s to %s\n' % (
                     old_date, new_date
@@ -998,7 +998,7 @@ class OspSimulationCase():
             if generate_proxy is True:
                 self._generate_proxy(
                     target_fmu_file,
-                    prototype_name,
+                    fmu_name,
                     name,
                     remote_access,
                 )
@@ -1162,8 +1162,8 @@ class OspSimulationCase():
         return digraph
 
     def _set_node_label(self, key, sub_dict):
-        label = f"{sub_dict['_attributes']['name']}\n___________\n\nprototype\n"
-        label += re.sub(r'(^.*/|^.*\\|\.fmu.*$)', '', sub_dict['_attributes']['prototype'])
+        label = f"{sub_dict['_attributes']['name']}\n___________\n\nfmu\n"
+        label += re.sub(r'(^.*/|^.*\\|\.fmu.*$)', '', sub_dict['_attributes']['fmu'])
 
         label_key = sub_dict['_attributes']['name']
         return label_key, label
@@ -1187,7 +1187,7 @@ class OspSimulationCase():
         return string
 
     def _generate_proxy(
-        self, target_fmu_file: Path, prototype_name: str, name: str, remote_access: MutableMapping
+        self, target_fmu_file: Path, fmu_name: str, name: str, remote_access: MutableMapping
     ):
 
         # read file names of all *.dll files contained in target_fmu_file
@@ -1197,8 +1197,8 @@ class OspSimulationCase():
         ]
         document.close()
 
-        # rename first from ['_attributes']['prototype'] to ['_attributes']['source']
-        destination_file_names = [re.sub(prototype_name, name, file) for file in files_to_modify]
+        # rename first from ['_attributes']['fmu'] to ['_attributes']['source']
+        destination_file_names = [re.sub(fmu_name, name, file) for file in files_to_modify]
 
         for file_name, new_file_name in zip(files_to_modify, destination_file_names):
             logger.info(
