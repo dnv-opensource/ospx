@@ -199,7 +199,7 @@ class CosimWatcher:
 
         for data_source_name, data_source_properties in self.data_sources.items():                                    # loop over all data sources
             for csv_file_name in self.csv_file_names:
-                if re.match(data_source_name, csv_file_name):                                       # find the regarding csv file
+                if re.match(data_source_name, csv_file_name):                                       # find the correct csv file
                     data_source_properties.update({'csvFile': csv_file_name})
                     with open(csv_file_name, 'r') as f:
                         data_header = f.readline().strip().split(
