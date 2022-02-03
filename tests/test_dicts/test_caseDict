@@ -1,0 +1,157 @@
+/*---------------------------------*- C++ -*----------------------------------*\
+filetype dictionary; coding utf-8; version 0.1; local --; purpose --;
+\*----------------------------------------------------------------------------*/
+#include '.\paramDict'
+
+_environment
+{
+    libSource                 'C:\Dev\farn-demo\library';  //adjust this path to point to the library folder containing the fmu's
+    root                     .;
+}
+systemStructure
+{
+    connections
+    {
+        minuend_to_difference
+        {
+            source                minuend_output_port;
+            target                difference_minuend_input_port;
+        }
+        subtrahend_to_difference
+        {
+            source                subtrahend_output_port;
+            target                difference_subtrahend_input_port;
+        }
+        dividend_to_quotient
+        {
+            source                dividend_output_port;
+            target                quotient_dividend_input_port;
+        }
+        difference_to_divisor
+        {
+            source                difference_output_port;
+            target                quotient_divisor_input_port;
+        }
+    }
+    components
+    {
+        difference
+        {
+            connectors
+            {
+                difference_minuend_input_port
+                {
+                    reference             difference.IN1;
+                    type                  input;
+                }
+                difference_subtrahend_input_port
+                {
+                    reference             difference.IN2;
+                    type                  input;
+                }
+                difference_output_port
+                {
+                    reference             difference.OUT;
+                    type                  input;
+                }
+            }
+            fmu              difference.fmu;
+        }
+        quotient
+        {
+            connectors
+            {
+                quotient_dividend_input_port
+                {
+                    reference     quotient.IN1;
+                    type          input;
+                }
+                quotient_divisor_input_port
+                {
+                    reference     quotient.IN2;
+                    type          input;
+                }
+                quotient_output_port
+                {
+                    reference     quotient.OUT;
+                    type          input;
+                }
+
+            }
+            fmu             quotient.fmu;
+        }
+        minuend
+            {
+            connectors
+            {
+                minuend_output_port
+                {
+                    reference     constVal.OUT;
+                    type          output;
+                }
+            }
+            initialize
+            {
+                constVal.IN
+                {
+                    causality     parameter;
+                    start         $minuend;
+                    variability   fixed;
+                }
+            }
+            fmu             constantVal.fmu;
+        }
+        subtrahend
+        {
+            connectors
+            {
+                subtrahend_output_port
+                {
+                    reference     constVal.OUT;
+                    type          output;
+                }
+            }
+            initialize
+            {
+                constVal.IN
+                {
+                    causality     parameter;
+                    start         $subtrahend;
+                    variability   fixed;
+                }
+            }
+            fmu             constantVal.fmu;
+        }
+        dividend
+        {
+            connectors
+            {
+                dividend_output_port
+                {
+                    reference     constVal.OUT;
+                    type          output;
+                }
+            }
+            initialize
+            {
+                constVal.IN
+                {
+                    causality     parameter;
+                    start         $dividend;
+                    variability   fixed;
+                }
+            }
+            fmu             constantVal.fmu;
+        }
+    }
+}
+run
+{
+    simulation
+    {
+        name                  demoCase;
+        startTime             0;
+        stopTime              10;
+        baseStepSize          0.01;
+    }
+}
