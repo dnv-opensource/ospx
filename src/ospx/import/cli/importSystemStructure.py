@@ -119,18 +119,26 @@ def main():
         logger.error(f"file {xmlFilePath} not implemented yet.")
         return
 
+    # gather the source xml
+    # this is provided from a side path, not the actual folder, otherwise it will be overwritten!
     sourceDict = DictReader.read(xmlFilePath, comments=False)
 
-    connectionsDict = {}; connectorsDict = {}
-    numberedConnectionsDictName = _find_numbered_key_by_string(sourceDict, 'Connections')
-    for key, item in sourceDict[numberedConnectionsDictName].items():
+    # the to main subdicts contained by systemStructure dict
+    componentsDict = {}; connectorsDict = {}; connectionsDict = {}
+
+    # iterate over the connections first,
+    # because they contain the var names and the component name
+    # collecting and naming the ports
+    numberedConnectionsDictKey = _find_numbered_key_by_string(sourceDict, 'Connections')
+    for key, item in sourceDict[numberedConnectionsDictKey].items():
 
         connectionName = []; tempConnectionDict = {}
         #this loop has the range {0,1}
-        for index, (sKey, sItem) in enumerate(sourceDict[numberedConnectionsDictName][key].items()):
+        for index, (sKey, sItem) in enumerate(sourceDict[numberedConnectionsDictKey][key].items()):
 
             connectorName = 'PORT_' + sItem['_attributes']['simulator'] + '_VAR_' + sItem['_attributes']['name']
 
+            # alternator for source <--> target (because there are always 2 entries in VariableConnection in always the same sequence)
             if index % 2 == 0:
                 tempConnectionDict.update({'source':connectorName})
                 type = 'output'
@@ -145,24 +153,44 @@ def main():
 
         connectionsDict.update({connectionName:tempConnectionDict})
 
-    componentsDict = {}
-    numberedComponentsDictName = _find_numbered_key_by_string(sourceDict, 'Simulator')
-    for key, item in sourceDict[numberedComponentsDictName].items():
+
+    # iterate over "Simulators"
+    numberedComponentsDictKey = _find_numbered_key_by_string(sourceDict, 'Simulator')
+    for key, item in sourceDict[numberedComponentsDictKey].items():
         namedKey = item['_attributes']['name']
         sourceFmuName = item['_attributes']['source']
-
         tempConnectorsDict = {}
+
         for cKey, cItem in connectorsDict.items():
 
             if namedKey in cKey:
                 tempConnectorsDict.update(cItem)
 
-        componentsDict.update({namedKey:{'connectors':tempConnectorsDict, 'fmu':{sourceFmuName}}})
+        componentsDict.update({namedKey:{'connectors':tempConnectorsDict, 'fmu':sourceFmuName}})
 
-    systemStructureDict = {'Components':componentsDict, 'Connections':connectionsDict}
+        # if there is a InitialValues in numberedComponentDictKey
+        numberedInitialValuesKey = _find_numbered_key_by_string(item, 'InitialValues')
+        if 'InitialValues' in numberedInitialValuesKey:
 
+            # find numbered key names
+            numberedInitialValueKey = _find_numbered_key_by_string(item[numberedInitialValuesKey], 'InitialValue')
+            numberedRealKey = _find_numbered_key_by_string(item[numberedInitialValuesKey][numberedInitialValueKey], 'Real')
+
+            # extract var name, value
+            varName = item[numberedInitialValuesKey][numberedInitialValueKey]['_attributes']['variable']
+            value = item[numberedInitialValuesKey][numberedInitialValueKey][numberedRealKey]['_attributes']['value']
+
+            # sub dict
+            initializeDict = {'initialize':{varName:{'causality':'parameter', 'variability':'fixed', 'start':value}}}
+
+            # update
+            componentsDict[namedKey].update(initializeDict)
+
+    systemStructureDict = {'components':componentsDict, 'connections':connectionsDict}
+
+    # finally assemble all
     caseDict = {
-        '_environment':{'libSource':'', 'root':Path.cwd()},
+        '_environment':{'libSource':'.', 'root':Path.cwd()},
         'systemStructure':systemStructureDict,
         'run':{'simulation':{'name':'demoCase', 'startTime':0., 'stopTime':None, 'baseStepSize':0.01}},
         }

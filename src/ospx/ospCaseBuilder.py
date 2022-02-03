@@ -680,7 +680,7 @@ class OspSimulationCase():
         }
 
         basic_op_names = '(power|dot|sum|diff|prod|div|quotient)'
-        input_names = '^(IN|in)'
+        input_names = '^(INP|inp)'
 
         digraph = functools.partial(gv.Digraph, format='png')
 
