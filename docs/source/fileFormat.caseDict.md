@@ -34,7 +34,7 @@ A caseDict file contains
 | &numsp;&numsp;&numsp;&numsp;&numsp;causality      | string    | causality of the variable. Choices: {input, output, parameter} |
 | &numsp;&numsp;&numsp;&numsp;&numsp;start          | float     | initial value the variable shall be set to. |
 | &numsp;&numsp;&numsp;&numsp;&numsp;variabliity    | string    | variability of the variable. Choices: {fixed, calculated, tunable} |
-| &numsp;&numsp;&numsp;prototype                    | string    | relative path to the location of the source FMU (relative to libSource) |
+| &numsp;&numsp;&numsp;fmu                          | string    | relative path to the location of the source FMU (relative to libSource) |
 | &numsp;connections                                | dict      | itemization of connections |
 | &numsp;&numsp;\<CONNECTION>                       | dict      | speaking name of the connection |
 | &numsp;&numsp;&numsp;source                       | string    | name of source \<COMPONENT> |

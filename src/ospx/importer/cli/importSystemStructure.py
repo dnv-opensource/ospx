@@ -21,11 +21,13 @@ def _argparser() -> argparse.ArgumentParser:
 
     parser = ArgumentParser(
         prog='importSystemStructure',
-        usage='%(prog)s [options [args]]',
+        usage='%(prog)s systemStructureFile [options [args]]',
         epilog='_________________importSystemStructure___________________',
         prefix_chars='-',
         add_help=True,
-        description='Import OspSystemStructure.xml or SystemStructure.ssd'
+        description=(
+            'Imports an existing OspSystemStructure.xml and translates it into a caseDict.'
+        )
     )
 
     parser.add_argument(
@@ -33,6 +35,7 @@ def _argparser() -> argparse.ArgumentParser:
         metavar='systemStructureFile',
         type=str,
         help='name of the system structure file',
+        default='OspSystemStructure.xml'
     )
 
     console_verbosity = parser.add_mutually_exclusive_group(required=False)
