@@ -6,3 +6,4 @@ CLI Documentation
 
    cli.ospCaseBuilder
    cli.watchCosim
+   cli.importSystemStructure

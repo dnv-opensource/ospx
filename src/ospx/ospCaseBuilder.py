@@ -392,8 +392,8 @@ class OspSimulationCase():
                 % (', '.join(suspect_names))
             )
 
-        logger.error(
-            'stopped here: update connections in %s and continue without --inspect'
+        logger.info(
+            'inspect mode: Stopped after 1 case. You can now detail out the connector and connection elements in %s and then continue without --inspect'
             % self.case_dict.name
         )
 
@@ -416,12 +416,9 @@ class OspSimulationCase():
         # ('simulators' is OSP terminology. Any instance of a model is referred to as a 'simulator' in OSP.)
         models = {
             k1: {
-                k2: {
-                    k3: v3
-                    for k3,
-                    v3 in self.models[k1][k2].items()
-                    if not re.match('fmu', k3)
-                }
+                k2: {k3: v3
+                     for k3, v3 in self.models[k1][k2].items()
+                     if not re.match('fmu', k3)}
                 for k2 in self.models[k1].keys()
             }
             for k1 in self.models.keys()
@@ -455,7 +452,6 @@ class OspSimulationCase():
     def write_system_structure_ssd(self):
         """collocating and writing SystemStructure.ssd
         """
-        ssd = {}
 
         # global settings
         settings = {
@@ -477,8 +473,6 @@ class OspSimulationCase():
             }
         }
 
-        ssd['DefaultExperiment'] = settings
-        ssd['System'] = {'_attributes': {'name': self.name, 'description': self.name}}
         # models (elements)
         # (an 'element' in ssd equals what is a 'simulator' in osp_ss: An instance of a model.)
         models = {}
@@ -508,8 +502,6 @@ class OspSimulationCase():
                 'Connectors': connectors,                                   # 'ParameterBindings': parameter_bindings,
             }
 
-        ssd['System'].update({'Elements': models})
-
         # connections
         connections = {}
         for key, item in self.connections.items():
@@ -528,15 +520,24 @@ class OspSimulationCase():
                 }
             }
 
-        ssd['System'].update({'Connections': connections})
-
-        ssd['_xmlOpts'] = {
-            '_nameSpaces': {
-                'ssd': 'file:///C:/Software/OSP/xsd/SystemStructureDescription',
-                'ssv': 'file:///C:/Software/OSP/xsd/SystemStructureParameterValues',
-                'ssc': 'file:///C:/Software/OSP/xsd/SystemStructureCommon',
+        ssd = {
+            'DefaultExperiment': settings,
+            'System': {
+                '_attributes': {
+                    'name': self.name,
+                    'description': self.name,
+                },
+                'Elements': models,
+                'Connections': connections,
             },
-            '_rootTag': 'SystemStructureDescription',
+            '_xmlOpts': {
+                '_nameSpaces': {
+                    'ssd': 'file:///C:/Software/OSP/xsd/SystemStructureDescription',
+                    'ssv': 'file:///C:/Software/OSP/xsd/SystemStructureParameterValues',
+                    'ssc': 'file:///C:/Software/OSP/xsd/SystemStructureCommon',
+                },
+                '_rootTag': 'SystemStructureDescription',
+            },
         }
 
         # Write SystemStructure.ssd
@@ -623,10 +624,7 @@ class OspSimulationCase():
             }
         )
 
-        variables_list = [
-            item['_attributes']['name']
-            for index, (key, item) in enumerate(self.variables.items())
-        ]
+        variables_list = [item['_attributes']['name'] for key, item in self.variables.items()]
 
         statistics_dict.update(
             {'variables': {
@@ -1049,7 +1047,7 @@ class OspSimulationCase():
         """
         osp_md = dict({'UnitDefinitions': self.unit_definitions})
 
-        osp_md.update({'VariableGroups': {}})
+        osp_md['VariableGroups'] = {}
 
         temp_dict = dict({})
 
@@ -1065,41 +1063,34 @@ class OspSimulationCase():
                 quantity_name = 'UNKNOWN'
                 quantity_unit = 'UNKNOWN'
 
-            temp_dict.update(
-                {
-                    '%06i_Generic' % i: {
+            temp_dict['%06i_Generic' % i] = {
+                '_attributes': {
+                    'name': quantity_name
+                },
+                quantity_name: {
+                    '_attributes': {
+                        'name': quantity_name
+                    },
+                    'Variable': {
                         '_attributes': {
-                            'name': quantity_name
-                        },
-                        quantity_name: {
-                            '_attributes': {
-                                'name': quantity_name
-                            },
-                            'Variable': {
-                                '_attributes': {
-                                    'ref': item['_attributes']['name'], 'unit': quantity_unit
-                                }
-                            }
+                            'ref': item['_attributes']['name'],
+                            'unit': quantity_unit,
                         }
-                    }
-                }
-            )
+                    },
+                },
+            }
 
         # this is the content of OspModelDescription
-        osp_md.update({'VariableGroups': temp_dict})
+        osp_md['VariableGroups'] = temp_dict
 
         # _xmlOpts
-        osp_md.update(
-            {
-                '_xmlOpts': {
-                    '_nameSpaces': {
-                        'osp':
-                        'https://opensimulationplatform.com/xsd/OspModelDescription-1.0.0.xsd'
-                    },
-                    '_rootTag': 'ospModelDescription',
-                }
-            }
-        )
+        osp_md['_xmlOpts'] = {
+            '_nameSpaces': {
+                'osp': 'https://opensimulationplatform.com/xsd/OspModelDescription-1.0.0.xsd'
+            },
+            '_rootTag': 'ospModelDescription',
+        }
+
         DictWriter.write(osp_md, target_xml_file)
 
     def _xml_sub_wrong_namespace(self, file_name, subst=None):
@@ -1128,10 +1119,7 @@ class OspSimulationCase():
             if key in key_list:
                 return_key.append(key)
 
-        if len(return_key) != 1:
-            return 'ELEMENTNOTFOUND'
-        else:
-            return return_key[0]
+        return return_key[0] if len(return_key) == 1 else 'ELEMENTNOTFOUND'
 
     def _find_numbered_key_by_string(self, dd, search_string):
         """find the element name for an (anyways unique) element
@@ -1175,7 +1163,9 @@ class OspSimulationCase():
             f"{sub_dict['000001_Variable']['_attributes']['simulator']}"
         )
 
-    def _create_table(self, name, child={' ': ' '}):
+    def _create_table(self, name, child=None):
+
+        child = child or {' ': ' '}
         n_child = len(child)
         string = (
             f'<\n<TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0">\n<TR>\n<TD COLSPAN="{2 * n_child:d}">{name}</TD>\n</TR>\n'
@@ -1236,9 +1226,10 @@ class OspSimulationCase():
             logger.exception(f'Timeout occured when calling {command}.')
 
 
-def _shrink_dict(dictionary, make_unique=['']):
+def _shrink_dict(dictionary, make_unique=None):
     """function removes doubled entries in dicts
     """
+    make_unique = make_unique or ['']
     make_unique = "['" + "']['".join(make_unique) + "']"
     # sort an ordered dict for attribute (child) where the dict is to make unique for
     eval_string = f'sorted(dictionary.items(), key=lambda x: x[1]{make_unique})'
@@ -1258,6 +1249,6 @@ def _shrink_dict(dictionary, make_unique=['']):
 
     for key in dictionary.keys():
         if key not in remove_key:
-            out_dict.update({key: dictionary[key]})
+            out_dict[key] = dictionary[key]
 
     return out_dict
