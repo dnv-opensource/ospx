@@ -209,11 +209,12 @@ class OspSimulationCase():
         """Reads all FMUs involved and generates dict of models.
         """
         logger.info('read model information from case dict')            # 0
-        for model_index, (model_name, model_properties) in enumerate(
-            self.case_dict['systemStructure']['components'].items()
-        ):
+        for index, (model_name, model_properties) in enumerate(self.case_dict['systemStructure']['components'].items()):
 
-            simulator_id = f'{model_index:06d}_Simulator'
+            generate_proxy = False
+            remote_access = False
+
+            simulator_id = f'{index:06d}_Simulator'
 
             # Attributes
             self.models.update(
@@ -251,25 +252,18 @@ class OspSimulationCase():
 
             if 'generateProxy' in model_properties.keys():
                 # generate fmu-proxy (NTNU-IHB/fmu-proxify)
-                remote_access = model_properties['remoteAccess'
-                                                 ] if 'remoteAccess' in model_properties else None
-                self._prepare_model(
-                    model_index,
-                    model_name,
-                    model_properties,
-                    fmu=model_properties['fmu'],
-                    write_osp_model_description=True,
-                    generate_proxy=True,
-                    remote_access=remote_access
-                )
-            else:
-                self._prepare_model(
-                    model_index,
-                    model_name,
-                    model_properties,
-                    fmu=model_properties['fmu'],
-                    write_osp_model_description=False
-                )
+                remote_access = model_properties['remoteAccess'] if 'remoteAccess' in model_properties else None
+                generate_proxy = True
+
+            self._prepare_model(
+                index,
+                model_name,
+                model_properties,
+                fmu = model_properties['fmu'],
+                write_osp_model_description = True,
+                generate_proxy = generate_proxy,
+                remote_access = remote_access
+            )
 
         return
 
@@ -289,8 +283,7 @@ class OspSimulationCase():
             in_component = item['component']
             if in_component in self.case_dict['systemStructure']['components'].keys():
                 # subdict in initial config
-                if 'generateProxy' in self.case_dict['systemStructure']['components'][in_component
-                                                                                      ].keys():
+                if 'generateProxy' in self.case_dict['systemStructure']['components'][in_component].keys():
                     # config subdict has key 'generateProxy'
                     in_component_proxy = in_component + '-proxy'
                     item['component'] = in_component_proxy
@@ -541,10 +534,11 @@ class OspSimulationCase():
         }
 
         # Write SystemStructure.ssd
+
         target_file_path = Path.cwd() / 'SystemStructure.ssd'
         formatter = XmlFormatter(omit_prefix=False)
         DictWriter.write(ssd, target_file_path, formatter=formatter)
-
+        exit(0)
         return
 
     def write_plot_config(self):
@@ -931,33 +925,26 @@ class OspSimulationCase():
                             model_dict[model_variables_key][key]['_attributes'][
                                 'causality'] = list_item['causality']
 
-            # if component has "generateProxy"
-            # take ownerhsip of attributes in modelDescription.xml
-            if generate_proxy is True:
+            # take ownerhsip of attributes in modelDescription.xml on copy
+            # STC requires consistency between <fmiModelDescription><modelName> and <CoSimulation modelIdentifier>
+            logger.info(f'{name}: updating fmiModelDescription:description in modelDescription.xml')                                                                                           # 2
 
-                logger.info(
-                    '%s generate_proxy: updating fmiModelDescription:description in modelDescription.xml'
-                    % name
-                )                                                                                           # 2
+            old_author = model_dict['_xmlOpts']['_rootAttributes']['author']
+            if platform.system() == 'Linux':
+                new_author = os.environ['USER']
+            else:
+                new_author = os.environ['USERNAME']
+            old_date = model_dict['_xmlOpts']['_rootAttributes']['generationDateAndTime']
+            new_date = str(today())
+            add_description_string = '\nmodified %s:\n' % date.today()
+            add_description_string += '\tmodelName %s to %s\n' % (fmu_name, name)
+            add_description_string += '\tauthor %s to %s\n' % (old_author, new_author)
+            add_description_string += '\tgenerationDateAndTime %s to %s\n' % (
+                old_date, new_date
+            )
+            model_dict['_xmlOpts']['_rootAttributes']['description'] += add_description_string
 
-                old_author = model_dict['_xmlOpts']['_rootAttributes']['author']
-                if platform.system() == 'Linux':
-                    new_author = os.environ['USER']
-                else:
-                    new_author = os.environ['USERNAME']
-                old_date = model_dict['_xmlOpts']['_rootAttributes']['generationDateAndTime']
-                new_date = str(today())
-                add_description_string = '\nmodified %s:\n' % date.today()
-                add_description_string += '\tmodelName %s to %s\n' % (fmu_name, name)
-                add_description_string += '\tauthor %s to %s\n' % (old_author, new_author)
-                add_description_string += '\tgenerationDateAndTime %s to %s\n' % (
-                    old_date, new_date
-                )
-                model_dict['_xmlOpts']['_rootAttributes']['description'] += add_description_string
-
-                # if 'initialize' in properties.keys() or generate_proxy is True:
-                # logger.info('%s initialize: updating fmiModelDescription in modelDescription.xml' % name)  # 2
-                model_dict = self._update_model_description(model_dict, name)
+            model_dict = self._update_model_description(model_dict, name)
 
         # substitute new model_dict as modelDescription.xml in FMU
         # and make always a copy for reference
@@ -978,28 +965,26 @@ class OspSimulationCase():
         formatter = XmlFormatter()
         formatted_xml = formatter.to_string(model_dict)
 
-        if not self.inspect_mode:
-
-            if 'initialize' in properties.keys() or generate_proxy is True:
-                logger.info(
-                    '%s initialize: substituting modelDescription.xml in %s.fmu' % (name, name)
-                )                                                                                   # 2
-                remove_files_from_zip(target_fmu_file, 'modelDescription.xml')
-                add_file_content_to_zip(target_fmu_file, 'modelDescription.xml', formatted_xml)
-
         with open(f'{name}_ModelDescription.xml', 'w') as f:
             f.write(formatted_xml)
 
         if not self.inspect_mode:
+            #if 'initialize' in properties.keys() or generate_proxy is True:
+            #do always, does not cost so much if original name remains the same but removes confusion here
+            logger.info('%s initialize: substituting modelDescription.xml in %s.fmu' % (name, name))
+            remove_files_from_zip(target_fmu_file, 'modelDescription.xml')
+            add_file_content_to_zip(target_fmu_file, 'modelDescription.xml', formatted_xml)
 
-            # do a dll rename for all proxified fmu
-            if generate_proxy is True:
-                self._generate_proxy(
-                    target_fmu_file,
-                    fmu_name,
-                    name,
-                    remote_access,
-                )
+            # do a dll rename for all copyied fmu
+            # required by STC
+            # reason: ask me (frl)
+            self._generate_copy(
+                target_fmu_file,
+                fmu_name,
+                name,
+                remote_access,
+                generate_proxy
+            )
 
         # avoid units with "-" as they do not have to declared (signal only)
         # give add. index for distinguishing betwee modelDescription.xml's containing one single ScalaVariable, otherwise it will be overwritten here
@@ -1176,54 +1161,59 @@ class OspSimulationCase():
 
         return string
 
-    def _generate_proxy(
-        self, target_fmu_file: Path, fmu_name: str, name: str, remote_access: MutableMapping
-    ):
-
+    def _generate_copy(
+            self,
+            target_fmu_file: Path,
+            fmu_name: str,
+            name: str,
+            remote_access: MutableMapping,
+            generate_proxy: bool
+        ):
+        '''generate_proxy and remote_access are relatives:
+        there is no remote acess without generating proxy.
+        but nowadays, all fmu uploaded to STC needs special "generate_proxy" treatment, now called generate copy
+        the problem is, that I could not find so far a way to host one fmu in model library (STC) and using it several times in the same simulation
+        This might be solved in the future
+        '''
         # read file names of all *.dll files contained in target_fmu_file
         document = ZipFile(target_fmu_file, 'r')
-        files_to_modify = [
-            file.filename for file in document.infolist() if re.search(r'.*\.dll$', file.filename)
-        ]
+        files_to_modify = [file.filename for file in document.infolist() if re.search(r'.*\.dll$', file.filename)]
         document.close()
 
         # rename first from ['_attributes']['fmu'] to ['_attributes']['source']
         destination_file_names = [re.sub(fmu_name, name, file) for file in files_to_modify]
 
         for file_name, new_file_name in zip(files_to_modify, destination_file_names):
-            logger.info(
-                f'{name} generate_proxy or modify: renaming {file_name} to {new_file_name}'
-            )                                                                                   # 2
+            logger.info(f'{name} generate_proxy or modify: renaming {file_name} to {new_file_name}')
             rename_file_in_zip(target_fmu_file, file_name, new_file_name)
 
-        new_name = name + '-proxy'
+        new_name = name
+        if generate_proxy is True:
+            #only change the name if fmu is to be proxified, following
+            new_name = name + '-proxy'
 
         # update models_dict
         for key, value in self.models.items():
 
             if value['_attributes']['name'] == name:
-                logger.info(
-                    '%s generate_proxy: renaming %s to %s / %s.fmu' %
-                    (name, name, new_name, new_name)
-                )                                                       # 2
+                logger.info('%s generate_proxy: renaming %s to %s / %s.fmu' % (name, name, new_name, new_name))
                 value['_attributes']['name'] = new_name
                 value['_attributes']['source'] = new_name + '.fmu'
 
-        if remote_access is not None:
+        if not remote_access in [None, False]:
+            ''' now start proxification
+            if remote access is list
+            if generate_proxy is true
+            or whatever is useful to trigger this action
+            '''
             remote_string = f"--remote={remote_access['host']}:{remote_access['port']}"
-        else:
-            remote_string = ''
 
-        command = (f'fmu-proxify {name}.fmu {remote_string}')
+            command = (f'fmu-proxify {name}.fmu {remote_string}')
 
-        # sub_process = execute_in_sub_process(Path.cwd(), command, 60)
-        # if sub_process:
-        #     (stdout, stderr) = sub_process
-
-        try:
-            subprocess.run(command, timeout=60)
-        except subprocess.TimeoutExpired:
-            logger.exception(f'Timeout occured when calling {command}.')
+            try:
+                subprocess.run(command, timeout=60)
+            except subprocess.TimeoutExpired:
+                logger.exception(f'Timeout occured when calling {command}.')
 
 
 def _shrink_dict(dictionary, make_unique=None):

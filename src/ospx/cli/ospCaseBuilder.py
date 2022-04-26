@@ -28,7 +28,18 @@ def _argparser() -> argparse.ArgumentParser:
         'caseDict',
         metavar='caseDict',
         type=str,
+        nargs='?',
         help='name of the dict file containing the OSP simulation case configuration.',
+    )
+
+    parser.add_argument(
+        '--clean',
+        action='store_true',
+        help=(
+            'clean from *modelDescription.xml *.fmu *.csv etc.'
+        ),
+        default=False,
+        required=False,
     )
 
     parser.add_argument(
@@ -102,18 +113,25 @@ def main():
 
     # Configure Logging
     # ..to console
-    log_level_console: str = 'WARNING'
+    log_level_console: str = 'INFO'
     if any([args.quiet, args.verbose]):
         log_level_console = 'ERROR' if args.quiet else log_level_console
         log_level_console = 'DEBUG' if args.verbose else log_level_console
+
     # ..to file
     log_file: Union[Path, None] = Path(args.log) if args.log else None
     log_level_file: str = args.log_level
     configure_logging(log_level_console, log_file, log_level_file)
 
-    case_dict_file: Path = Path(args.caseDict)
     inspect: bool = args.inspect
     graph: bool = args.graph
+    clean: bool = args.clean
+
+    if clean:
+        _clean()
+        exit(0)
+
+    case_dict_file: Path = Path(args.caseDict)
 
     # Dispatch to _main(), which takes care of processing the arguments and invoking the API.
     _main(
@@ -150,6 +168,30 @@ def _main(
         graph=graph,
     )
 
+    return
+
+
+def _clean():
+
+    from glob import glob
+
+    # potential future caseDict content
+    cList = [
+        '*.csv',
+        '*.ssd',
+        '*.fmu',
+        '*.xml',
+        '*callGraph*',
+        'watchDict',
+        'statisticsDict'
+    ]
+
+    logger.warning('removing %s' % "\n\t*\t".join(['']+cList))
+
+    for item in cList:
+        paths = [Path(p) for p in glob(item)]
+        for path in paths:
+            path.unlink()
     return
 
 
