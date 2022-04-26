@@ -350,7 +350,7 @@ class OspSimulationCase():
         logger.info('unit%sfactor%soffset\n' % (delim, delim))                  # 1
 
         for key, item in self.unit_definitions.items():
-            real_key = self._find_numbered_key_by_string(item, 'DisplayUnit$')
+            real_key = self._find_numbered_key_by_string(item, 'DisplayUnit$')[0]
             logger.info(
                 '%s%s%s%s%s' % (
                     item['_attributes']['name'],
@@ -366,7 +366,7 @@ class OspSimulationCase():
 
         for key, item in self.variables.items():
             try:
-                real_key = self._find_numbered_key_by_string(item, 'Real$')
+                real_key = self._find_numbered_key_by_string(item, 'Real$')[0]
                 string = '%s%s%s%s%s' % (
                     item['_origin'],
                     delim,
@@ -538,7 +538,7 @@ class OspSimulationCase():
         target_file_path = Path.cwd() / 'SystemStructure.ssd'
         formatter = XmlFormatter(omit_prefix=False)
         DictWriter.write(ssd, target_file_path, formatter=formatter)
-        exit(0)
+
         return
 
     def write_plot_config(self):
@@ -600,7 +600,7 @@ class OspSimulationCase():
         factors_list = []
         offsets_list = []
         for _, item in self.unit_definitions.items():
-            display_unit_key = self._find_numbered_key_by_string(item, 'DisplayUnit$')
+            display_unit_key = self._find_numbered_key_by_string(item, 'DisplayUnit$')[0]
             unit_list.append(item['_attributes']['name'])
             display_unit_list.append(item[display_unit_key]['_attributes']['name'])
             factors_list.append(item[display_unit_key]['_attributes']['factor'])
@@ -683,13 +683,23 @@ class OspSimulationCase():
         for key in self.models.keys():
 
             label_key, label = self._set_node_label(self.models[key]['_attributes']['name'], self.models[key])
+            #var_keys = self._find_numbered_key_by_string(self.models[key]['InitialValues'], 'InitialValue')
+            #variables = {}
+            label = self._create_table(
+                label_key,
+                {
+                    'source:':self.models[key]['_attributes']['source'],
+                    #'stepsize:':self.models[key]['_attributes']['stepSize'],
+                    'variables:':'',
+                }
+            )
 
             if re.search(input_names, self.models[key]['_attributes']['name']):
                 shape = 'diamond'
                 style = 'filled,rounded'
                 fillcolor = '#FFFFFF'
             elif re.search(basic_op_names, self.models[key]['_attributes']['name'], re.I):
-                # label = self._create_table(label_key, {'source:':self.models_dict[key]['_attributes']['source'], 'stepsize:':self.models_dict[key]['_attributes']['stepSize']})
+                #label = self._create_table(label_key, {'source:':self.models_dict[key]['_attributes']['source'], 'stepsize:':self.models_dict[key]['_attributes']['stepSize']})
                 label = label
                 shape = 'square'
                 style = 'filled, rounded'
@@ -822,7 +832,7 @@ class OspSimulationCase():
 
         # this function is only to be used with fmu-proxify, temporary disabled
         # because it requires also a rename of dll's
-        cosim_string = self._find_numbered_key_by_string(model_dict, 'CoSimulation')
+        cosim_string = self._find_numbered_key_by_string(model_dict, 'CoSimulation')[0]
         model_dict[cosim_string]['_attributes'].update({'modelIdentifier': name})
 
         model_dict.update(
@@ -882,7 +892,7 @@ class OspSimulationCase():
 
         self.attributes.update({name: model_dict['_xmlOpts']['_rootAttributes']})
 
-        model_variables_key = self._find_numbered_key_by_string(model_dict, 'ModelVariables$')
+        model_variables_key = self._find_numbered_key_by_string(model_dict, 'ModelVariables$')[0]
 
         fmu_name = model_dict['_xmlOpts']['_rootAttributes']['modelName']
 
@@ -901,9 +911,7 @@ class OspSimulationCase():
                         if model_dict[model_variables_key][key]['_attributes']['name'] == list_key:
 
                             base_key = self._get_key_name(model_dict[model_variables_key][key])
-                            numbered_key = self._find_numbered_key_by_string(
-                                model_dict[model_variables_key][key], '%s$' % base_key
-                            )
+                            numbered_key = self._find_numbered_key_by_string(model_dict[model_variables_key][key], '%s$' % base_key)[0]
                             # if there is to do a translation from e.g. Real to Integer, it has to be done here
                             # substituting numbered_key with an other one, deleting the orginal
                             # a key hat to be made therefor in generator dict
@@ -988,7 +996,7 @@ class OspSimulationCase():
 
         # avoid units with "-" as they do not have to declared (signal only)
         # give add. index for distinguishing betwee modelDescription.xml's containing one single ScalaVariable, otherwise it will be overwritten here
-        unit_definitions_key = self._find_numbered_key_by_string(model_dict, 'UnitDefinitions$')
+        unit_definitions_key = self._find_numbered_key_by_string(model_dict, 'UnitDefinitions$')[0]
         if unit_definitions_key == 'ELEMENTNOTFOUND':
             # self.unit_d.update({'%06i_UnitDefinitions'% self.counter():{'name':'ELEMENTNOTFOUND'}})
             pass
@@ -1038,16 +1046,22 @@ class OspSimulationCase():
 
         for key, item in self.variables.items():
 
-            real_key = self._find_numbered_key_by_string(self.variables[key], 'Real$')
+            real_key = ''
+            try:
+                real_key = self._find_numbered_key_by_string(item, 'Real$')[0]
+                if 'quantity' in item[real_key]['_attributes'].keys():
+                    quantity_name = item[real_key]['_attributes']['quantity']
+                    quantity_unit = item[real_key]['_attributes']['unit']
+                else:
+                    quantity_name = 'UNKNOWN'
+                    quantity_unit = 'UNKNOWN'
 
-            i = self.counter()
-            if 'quantity' in item[real_key]['_attributes'].keys():
-                quantity_name = item[real_key]['_attributes']['quantity']
-                quantity_unit = item[real_key]['_attributes']['unit']
-            else:
+            except:
+                logger.warning(f'no quantity or unit given for {key}')
                 quantity_name = 'UNKNOWN'
                 quantity_unit = 'UNKNOWN'
 
+            i = self.counter()
             temp_dict['%06i_Generic' % i] = {
                 '_attributes': {
                     'name': quantity_name
@@ -1112,9 +1126,10 @@ class OspSimulationCase():
         as this is not the "nature" of dicts
         """
         try:
-            return [k for k in dd.keys() if re.search(search_string, k)][0]
+            return [k for k in dd.keys() if re.search(search_string, k)]
         except Exception:
-            return 'ELEMENTNOTFOUND'
+            return ['ELEMENTNOTFOUND']
+
 
     def _get_fmi_data_type(self, arg):
         """estimate the data type, if available
