@@ -7,7 +7,7 @@ ospx supports
 
 ## Installation
 ```sh
-pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ ospx
+pip install ospx
 ```
 ospx requires the following (sub-)package:
 * [dictIO][dictIO_docs]: foundation package, enabling ospx to handle configuration files in dictIO dict file format.
