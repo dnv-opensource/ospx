@@ -16,5 +16,4 @@ pandas>=1.3.4
 graphviz>=0.17
 
 # ../dictIO
-# git+https://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@github.com/dnv-opensource/dictIO.git
 dictIO>=0.0.21
