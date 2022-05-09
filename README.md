@@ -46,7 +46,7 @@ _For a detailed documentation of the dictIO dict file format used by farn, see [
 2. git clone the farn repository into your local development directory:
 
 ~~~sh
-git clone git://github.com/dnv-opensource/ospx.git path/to/your/dev/ospx
+git clone https://github.com/dnv-opensource/ospx path/to/your/dev/ospx
 ~~~
 
 3. In the ospx root folder:
