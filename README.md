@@ -1,8 +1,8 @@
 # ospx
-ospx is an extension package to [farn][farn_docs] supporting the creation of OSP (co-)simulation cases using functional mockup units (FMUs).
+ospx is an extension package to [farn][farn_docs], adding support to build [OSP][osp_docs] (co-)simulation cases using functional mockup units (FMUs).
 
 ospx supports
-* building of case-specific OSP (co-)simulation configuration files
+* building of case-specific [OSP][osp_docs] (co-)simulation configuration files
 * watching the progress of cosim, and saving final simulation results as a pandas dataframe.
 
 ## Installation
@@ -113,3 +113,4 @@ For your contribution, please make sure you follow the [STYLEGUIDE](STYLEGUIDE.m
 [dictIO_docs]: https://dnv-opensource.github.io/dictIO/
 [ospx_docs]: https://dnv-opensource.github.io/ospx/
 [farn_docs]: https://dnv-opensource.github.io/farn/
+[osp_docs]: https://open-simulation-platform.github.io/
