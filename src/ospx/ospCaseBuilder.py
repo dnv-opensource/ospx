@@ -1,10 +1,3 @@
-# ospCaseBuilder.py
-# Author: Frank Lumpitzsch <@.>
-# Created: 2020-11-24
-# Version: 0.01
-# Copyright (C) 2020 by Frank Lumpitzsch
-# case builder for OSP cosim simuations
-
 import functools
 import logging
 import os
@@ -12,10 +5,10 @@ import platform
 import re
 import subprocess
 from collections import OrderedDict
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 from shutil import copyfile
-from typing import MutableMapping, Union
+from typing import MutableMapping, Sequence, Union
 from zipfile import ZipFile
 
 import graphviz as gv
@@ -26,9 +19,11 @@ from dictIO.formatter import XmlFormatter
 from dictIO.parser import XmlParser
 from dictIO.utils.counter import BorgCounter
 
-from ospx.utils.dateTime import today
 from ospx.utils.zip import (
-    add_file_content_to_zip, read_file_content_from_zip, remove_files_from_zip, rename_file_in_zip
+    add_file_content_to_zip,
+    read_file_content_from_zip,
+    remove_files_from_zip,
+    rename_file_in_zip,
 )
 
 
@@ -157,14 +152,14 @@ class OspSimulationCase():
 
         self.lib_source: Path = Path(self.case_dict['_environment']['libSource'])
 
-        self.unit_definitions = {}  # all unique unit definitions
-        self.variables = {}         # all ScalarVariables from all fmu's
-        self.attributes = {}        # all original attributes from all fmu's
-        self.connectors = {}        # all connectors from all fmu's
+        self.unit_definitions: dict = {}    # all unique unit definitions
+        self.variables: dict = {}           # all ScalarVariables from all fmu's
+        self.attributes: dict = {}          # all original attributes from all fmu's
+        self.connectors: dict = {}          # all connectors from all fmu's
 
-        self.simulation = {}                                # to be filled with general simulation properties
-        self.models = {}                                    # to be filled with model data as they appear in simulators
-        self.connections = {}                               # to be filled with connection data
+        self.simulation: dict = {}                          # to be filled with general simulation properties
+        self.models: dict = {}                              # to be filled with model data as they appear in simulators
+        self.connections: dict = {}                         # to be filled with connection data
         logger.info(f'initalizing simulation {self.name}')  # 0
 
     def clean(self):
@@ -203,13 +198,15 @@ class OspSimulationCase():
         logger.info('reading simulation properties')    # 0
 
         # self.simulation_dict = dict({k:str(v) for k, v in self.config['simulation'].items() if re.match('(StartTime|BaseStepSize|Algorithm)', k)})
-        self.simulation = dict({k: str(v) for k, v in self.case_dict['run']['simulation'].items()})
+        self.simulation = dict(self.case_dict['run']['simulation'].items())
 
     def get_components(self):
-        """Reads all FMUs involved and generates dict of models.
+        """Reads components (FMUs) from case_dict into a dict of models
         """
-        logger.info('read model information from case dict')            # 0
-        for index, (model_name, model_properties) in enumerate(self.case_dict['systemStructure']['components'].items()):
+        logger.info('read model information from case dict')    # 0
+
+        components = self.case_dict['systemStructure']['components']
+        for index, (model_name, model_properties) in enumerate(components.items()):
 
             generate_proxy = False
             remote_access = False
@@ -252,79 +249,67 @@ class OspSimulationCase():
 
             if 'generateProxy' in model_properties.keys():
                 # generate fmu-proxy (NTNU-IHB/fmu-proxify)
-                remote_access = model_properties['remoteAccess'] if 'remoteAccess' in model_properties else None
+                remote_access = model_properties['remoteAccess'
+                                                 ] if 'remoteAccess' in model_properties else None
                 generate_proxy = True
 
             self._prepare_model(
                 index,
                 model_name,
                 model_properties,
-                fmu = model_properties['fmu'],
-                write_osp_model_description = True,
-                generate_proxy = generate_proxy,
-                remote_access = remote_access
+                fmu=model_properties['fmu'],
+                write_osp_model_description=True,
+                generate_proxy=generate_proxy,
+                remote_access=remote_access
             )
 
         return
 
-    def get_connectors(self):   # sourcery skip: merge-nested-ifs
-        """Reads connectors and updates list of models with connectors.
+    def get_connectors(self):
+        """Reads connectors from case_dict into a dict of connectors
         """
-        for model_name in self.case_dict['systemStructure']['components'].keys():
-
-            if 'connectors' in self.case_dict['systemStructure']['components'][model_name].keys():
-                for connector_name, item in self.case_dict['systemStructure']['components'][model_name]['connectors'].items():
-                    item.update({'component': model_name})
-                    self.connectors.update({connector_name: item})
-
-        # correct "proxy"-reference, if NTNU-IHB fmu-proxy code is used
-        for _, item in self.connectors.items():
-            # source component name
-            in_component = item['component']
-            if in_component in self.case_dict['systemStructure']['components'].keys():
-                # subdict in initial config
-                if 'generateProxy' in self.case_dict['systemStructure']['components'][in_component].keys():
-                    # config subdict has key 'generateProxy'
-                    in_component_proxy = in_component + '-proxy'
-                    item['component'] = in_component_proxy
+        components = self.case_dict['systemStructure']['components']
+        for component_name, component in components.items():
+            if 'connectors' in component:
+                for connector_name, connector in component['connectors'].items():
+                    if 'generateProxy' in component:                        # if NTNU-IHB fmu-proxy code is used
+                        connector['component'] = f'{component_name}-proxy'  # use "proxy"-reference
+                    else:
+                        connector['component'] = component_name
+                    self.connectors[connector_name] = connector             # save connector
 
     def get_connections(self):
-        """Read connections from the case_dict_file and generates dict of connections.
+        """Reads connections from case_dict into a dict of connections
         """
-        for key, item in self.case_dict['systemStructure']['connections'].items():
+        connections = self.case_dict['systemStructure']['connections']
+        for _, connection in connections.items():
 
-            i = self.counter()
+            # Read 'component' and 'reference' properties of source connector
+            source_connector_name = connection['source']
+            source_connector = self.connectors[source_connector_name]
+            source_component = source_connector['component']
+            source_reference = source_connector['reference']
+            # Read 'component' and 'reference' properties of target connector
+            target_connector_name = connection['target']
+            target_connector = self.connectors[target_connector_name]
+            target_component = target_connector['component']
+            target_reference = target_connector['reference']
 
-            source_connector = None
-            target_connector = None
-            for key1 in self.connectors.keys():
-                if key1 == item['source']:
-                    source_connector = key1
-                if key1 == item['target']:
-                    target_connector = key1
-
-            source_component = self.connectors[source_connector]['component']
-            target_component = self.connectors[target_connector]['component']
-            source_reference = self.connectors[source_connector]['reference']
-            target_reference = self.connectors[target_connector]['reference']
-
-            # the order 0, 1 here is essential!
-            self.connections.update(
-                {
-                    '%06i_VariableConnection' % i: {
-                        '000000_Variable': {
-                            '_attributes': {
-                                'simulator': source_component, 'name': source_reference
-                            }
-                        },
-                        '000001_Variable': {
-                            '_attributes': {
-                                'simulator': target_component, 'name': target_reference
-                            }
-                        }
+            # Save connection
+            # (note: the order 000000, 000001 is essential here!)
+            connection_name = f'{self.counter():06d}_VariableConnection'
+            self.connections[connection_name] = {
+                '000000_Variable': {
+                    '_attributes': {
+                        'simulator': source_component, 'name': source_reference
+                    }
+                },
+                '000001_Variable': {
+                    '_attributes': {
+                        'simulator': target_component, 'name': target_reference
                     }
                 }
-            )
+            }
 
         return
 
@@ -332,13 +317,13 @@ class OspSimulationCase():
         """Inspects all FMUs for the public variable names and units they declare (as documented in their modelDescription.xml's)
         """
         delim = '\t' * 3
-        logger.info("Main attributes collocated from modelDescription.xml's")   # 0
-        logger.info('name%sattributes%s\n' % (delim, delim))                    # 1
+        logger.info("Main attributes collected from modelDescription.xml's")    # 0
+        logger.info(f'name{delim}attributes{delim}\n')                          # 1
 
         uuid_set = set([])
         suspect_names = set([])
         for old_len, (key, item) in enumerate(self.attributes.items(), start=1):
-            substring = '\n'.join('%s%s%s%s' % (delim, k, delim, v) for k, v in item.items())
+            substring = '\n'.join(f'{delim}{k}{delim}{v}' for k, v in item.items())
 
             logger.info(key)        # 1
             logger.info(substring)  # 1
@@ -346,68 +331,52 @@ class OspSimulationCase():
             if old_len != len(uuid_set):
                 suspect_names.add(key)
 
-        logger.info("Unit definitions collocated from modelDescription.xml's")  # 0
-        logger.info('unit%sfactor%soffset\n' % (delim, delim))                  # 1
+        logger.info("Unit definitions collected from modelDescription.xml's")   # 0
+        logger.info(f'unit{delim}factor{delim}offset\n')                        # 1
 
         for key, item in self.unit_definitions.items():
             real_key = self._find_numbered_key_by_string(item, 'DisplayUnit$')[0]
             logger.info(
-                '%s%s%s%s%s' % (
-                    item['_attributes']['name'],
-                    delim,
-                    item[real_key]['_attributes']['factor'],
-                    delim,
-                    item[real_key]['_attributes']['offset']
-                )                                               # 1
+                f"{item['_attributes']['name']}{delim}{item[real_key]['_attributes']['factor']}{delim}{item[real_key]['_attributes']['offset']}"
             )
 
-        logger.info("Exposed variables (connectors) collocated from modelDescription.xml's")    # 0
-        logger.info('origin\t%sconnector%sunit\n' % (delim, delim))                             # 1
+        logger.info("Exposed variables (connectors) collected from modelDescription.xml's")     # 0
+        logger.info(f'origin\t{delim}connector{delim}unit\n')                                   # 1
 
         for key, item in self.variables.items():
             try:
                 real_key = self._find_numbered_key_by_string(item, 'Real$')[0]
-                string = '%s%s%s%s%s' % (
-                    item['_origin'],
-                    delim,
-                    item['_attributes']['name'],
-                    delim,
-                    item[real_key]['_attributes']['unit']
-                )
+                string = f"{item['_origin']}{delim}{item['_attributes']['name']}{delim}{item[real_key]['_attributes']['unit']}"
+
             except Exception:
-                string = '%s%s%s' % (item['_origin'], delim, item['_attributes']['name'])
+                string = f"{item['_origin']}{delim}{item['_attributes']['name']}"
             logger.info(string)     # 1
         logger.info('')
 
         if len(uuid_set) != len(self.attributes):
             logger.warning(
-                'there are fmu\'s with the same guid, apply generate_proxy=True -- at least to %s -- to avoid related errors'
-                % (', '.join(suspect_names))
+                f"there are fmu's with the same guid, apply generate_proxy=True -- at least to {(', '.join(suspect_names))} -- to avoid related errors"
             )
 
         logger.info(
-            'inspect mode: Stopped after 1 case. You can now detail out the connector and connection elements in %s and then continue without --inspect'
-            % self.case_dict.name
+            f'inspect mode: Stopped after 1 case. You can now detail out the connector and connection elements in {self.case_dict.name} and then continue without --inspect'
         )
 
     def write_osp_system_structure_xml(self):
-        """collocating and writing OspSystemStructure.xml
+        """Writes OspSystemStructure.xml
         """
-        osp_ss = {}
 
         # osp_ss meta data
-        osp_ss.update(
-            {
-                k: str(v)
-                for k,
-                v in self.simulation.items()
-                if re.match('(StartTime|BaseStepSize|Algorithm)', k)
-            }
-        )
+        osp_ss: dict = {
+            k: v
+            for k,
+            v in self.simulation.items()
+            if re.match('(StartTime|BaseStepSize|Algorithm)', k)
+        }
 
         # models (simulators)
         # ('simulators' is OSP terminology. Any instance of a model is referred to as a 'simulator' in OSP.)
-        models = {
+        models: dict = {
             k1: {
                 k2: {k3: v3
                      for k3, v3 in self.models[k1][k2].items()
@@ -443,7 +412,7 @@ class OspSimulationCase():
         )
 
     def write_system_structure_ssd(self):
-        """collocating and writing SystemStructure.ssd
+        """Collocates and writes SystemStructure.ssd
         """
 
         # global settings
@@ -583,16 +552,17 @@ class OspSimulationCase():
 
         statistics_dict['components'] = {
             'count': len(self.case_dict['systemStructure']['components'].keys()),
-            'names': list(self.case_dict['systemStructure']['components'].keys())
+            'names': list(self.case_dict['systemStructure']['components'].keys()),
         }
 
         statistics_dict['connections'] = {
             'count': len(self.case_dict['systemStructure']['connections'].keys()),
-            'names': list(self.case_dict['systemStructure']['connections'].keys())
+            'names': list(self.case_dict['systemStructure']['connections'].keys()),
         }
 
         statistics_dict['connectors'] = {
-            'count': len(self.connectors.keys()), 'names': list(self.connectors.keys())
+            'count': len(self.connectors.keys()),
+            'names': list(self.connectors.keys()),
         }
 
         unit_list = []
@@ -606,25 +576,20 @@ class OspSimulationCase():
             factors_list.append(item[display_unit_key]['_attributes']['factor'])
             offsets_list.append(item[display_unit_key]['_attributes']['offset'])
 
-        statistics_dict.update(
-            {
-                'units': {
-                    'count': len(self.unit_definitions.keys()),
-                    'unitNames': unit_list,
-                    'displayUnitNames': display_unit_list,
-                    'factors': factors_list,
-                    'offsets': offsets_list
-                }
-            }
-        )
+        statistics_dict['units'] = {
+            'count': len(self.unit_definitions.keys()),
+            'unitNames': unit_list,
+            'displayUnitNames': display_unit_list,
+            'factors': factors_list,
+            'offsets': offsets_list,
+        }
 
         variables_list = [item['_attributes']['name'] for key, item in self.variables.items()]
 
-        statistics_dict.update(
-            {'variables': {
-                'count': len(self.variables.keys()), 'variableNames': variables_list
-            }}
-        )
+        statistics_dict['variables'] = {
+            'count': len(self.variables.keys()),
+            'variableNames': variables_list,
+        }
 
         target_file_path = Path.cwd() / 'statisticsDict'
 
@@ -638,7 +603,7 @@ class OspSimulationCase():
         text_size = '11'
         styles = {
             'graph': {
-                'label': '%s' % self.simulation['name'],
+                'label': f"{self.simulation['name']}",
                 'fontname': 'Verdana',
                 'fontsize': text_size,
                 'fontcolor': 'black',
@@ -649,7 +614,7 @@ class OspSimulationCase():
                 'remincross': 'true',
                 'ratio': 'fill',
                 'margin': '0',
-                'size': '10, 10!',
+                'size': '10, 10!'
             },
             'nodes': {
                 'fontname': 'Verdana',
@@ -683,14 +648,13 @@ class OspSimulationCase():
         for key in self.models.keys():
 
             label_key, label = self._set_node_label(self.models[key]['_attributes']['name'], self.models[key])
-            #var_keys = self._find_numbered_key_by_string(self.models[key]['InitialValues'], 'InitialValue')
-            #variables = {}
+            # var_keys = self._find_numbered_key_by_string(self.models[key]['InitialValues'], 'InitialValue')
+            # variables = {}
             label = self._create_table(
                 label_key,
                 {
-                    'source:':self.models[key]['_attributes']['source'],
-                    #'stepsize:':self.models[key]['_attributes']['stepSize'],
-                    'variables:':'',
+                    'source:': self.models[key]['_attributes']['source'],
+                    'variables:': '',                                       # 'stepsize:':self.models[key]['_attributes']['stepSize'],
                 }
             )
 
@@ -699,7 +663,7 @@ class OspSimulationCase():
                 style = 'filled,rounded'
                 fillcolor = '#FFFFFF'
             elif re.search(basic_op_names, self.models[key]['_attributes']['name'], re.I):
-                #label = self._create_table(label_key, {'source:':self.models_dict[key]['_attributes']['source'], 'stepsize:':self.models_dict[key]['_attributes']['stepSize']})
+                # label = self._create_table(label_key, {'source:':self.models_dict[key]['_attributes']['source'], 'stepsize:':self.models_dict[key]['_attributes']['stepSize']})
                 label = label
                 shape = 'square'
                 style = 'filled, rounded'
@@ -767,7 +731,7 @@ class OspSimulationCase():
                 splines='true'
             )
 
-        cg.render('%s_callGraph' % self.simulation['name'], format='pdf')
+        cg.render(f"{self.simulation['name']}_callGraph", format='pdf')
 
     def write_watch_dict(self):
         """writing at most possible watchDict
@@ -815,7 +779,7 @@ class OspSimulationCase():
         # new guid
         # root_attributes.update({'guid':'{%s}' % str(uuid4()).upper()})
         # new date
-        root_attributes['generationDateAndTime'] = str(today())
+        root_attributes['generationDateAndTime'] = str(datetime.now())
         # author
         if platform.system() == 'Linux':
             root_attributes['author'] = os.environ['USER']
@@ -856,9 +820,9 @@ class OspSimulationCase():
         generate_proxy=False,
         remote_access=None
     ):                                      # sourcery skip: list-comprehension, merge-nested-ifs, remove-pass-body
-        """Copies an FMU from the source library and initializes it.
+        """Copies an FMU from the source library into the working directory (i.e. case folder) and initializes it.
 
-        Copies the fmu FMU from the source library directory,
+        Copies the FMU from the source library into the working directory (i.e. case folder),
         writes its OspModelDescription.xml and sets / initializes its parameters to their case specific values.
         """
         source_fmu_file = Path(self.lib_source) / Path(fmu)
@@ -885,9 +849,7 @@ class OspSimulationCase():
 
         model_dict = CppDict(Path('modelDescription.xml'))
 
-        file_content = read_file_content_from_zip(target_fmu_file, 'modelDescription.xml')
-
-        if file_content:
+        if file_content := read_file_content_from_zip(target_fmu_file, 'modelDescription.xml'):
             model_dict = xml_parser.parse_string(file_content, model_dict)
 
         self.attributes.update({name: model_dict['_xmlOpts']['_rootAttributes']})
@@ -911,20 +873,17 @@ class OspSimulationCase():
                         if model_dict[model_variables_key][key]['_attributes']['name'] == list_key:
 
                             base_key = self._get_key_name(model_dict[model_variables_key][key])
-                            numbered_key = self._find_numbered_key_by_string(model_dict[model_variables_key][key], '%s$' % base_key)[0]
+                            numbered_key = self._find_numbered_key_by_string(
+                                model_dict[model_variables_key][key], f'{base_key}$'
+                            )[0]
+
                             # if there is to do a translation from e.g. Real to Integer, it has to be done here
                             # substituting numbered_key with an other one, deleting the orginal
                             # a key hat to be made therefor in generator dict
 
                             logger.info(
-                                '%s modify: %s %s in %s to %s' % (
-                                    name,
-                                    model_dict[model_variables_key][key]['_attributes']['name'],
-                                    base_key,
-                                    name,
-                                    dict(list_item.items()),
-                                )
-                            )                                                                       # 2
+                                f"{name} modify: {model_dict[model_variables_key][key]['_attributes']['name']} {base_key} in {name} to {dict(list_item.items())}"
+                            )
 
                             model_dict[model_variables_key][key][numbered_key]['_attributes'][
                                 'start'] = list_item['start']
@@ -935,7 +894,9 @@ class OspSimulationCase():
 
             # take ownerhsip of attributes in modelDescription.xml on copy
             # STC requires consistency between <fmiModelDescription><modelName> and <CoSimulation modelIdentifier>
-            logger.info(f'{name}: updating fmiModelDescription:description in modelDescription.xml')                                                                                           # 2
+            logger.info(
+                f'{name}: updating fmiModelDescription:description in modelDescription.xml'
+            )                                                                                   # 2
 
             old_author = model_dict['_xmlOpts']['_rootAttributes']['author']
             if platform.system() == 'Linux':
@@ -943,13 +904,11 @@ class OspSimulationCase():
             else:
                 new_author = os.environ['USERNAME']
             old_date = model_dict['_xmlOpts']['_rootAttributes']['generationDateAndTime']
-            new_date = str(today())
+            new_date = str(datetime.now())
             add_description_string = '\nmodified %s:\n' % date.today()
             add_description_string += '\tmodelName %s to %s\n' % (fmu_name, name)
             add_description_string += '\tauthor %s to %s\n' % (old_author, new_author)
-            add_description_string += '\tgenerationDateAndTime %s to %s\n' % (
-                old_date, new_date
-            )
+            add_description_string += '\tgenerationDateAndTime %s to %s\n' % (old_date, new_date)
             model_dict['_xmlOpts']['_rootAttributes']['description'] += add_description_string
 
             model_dict = self._update_model_description(model_dict, name)
@@ -977,22 +936,17 @@ class OspSimulationCase():
             f.write(formatted_xml)
 
         if not self.inspect_mode:
-            #if 'initialize' in properties.keys() or generate_proxy is True:
-            #do always, does not cost so much if original name remains the same but removes confusion here
-            logger.info('%s initialize: substituting modelDescription.xml in %s.fmu' % (name, name))
+            # if 'initialize' in properties.keys() or generate_proxy is True:
+            # do always, does not cost so much if original name remains the same but removes confusion here
+            logger.info(f'{name} initialize: substituting modelDescription.xml in {name}.fmu')
+
             remove_files_from_zip(target_fmu_file, 'modelDescription.xml')
             add_file_content_to_zip(target_fmu_file, 'modelDescription.xml', formatted_xml)
 
             # do a dll rename for all copyied fmu
             # required by STC
             # reason: ask me (frl)
-            self._generate_copy(
-                target_fmu_file,
-                fmu_name,
-                name,
-                remote_access,
-                generate_proxy
-            )
+            self._generate_copy(target_fmu_file, fmu_name, name, remote_access, generate_proxy)
 
         # avoid units with "-" as they do not have to declared (signal only)
         # give add. index for distinguishing betwee modelDescription.xml's containing one single ScalaVariable, otherwise it will be overwritten here
@@ -1001,10 +955,7 @@ class OspSimulationCase():
             # self.unit_d.update({'%06i_UnitDefinitions'% self.counter():{'name':'ELEMENTNOTFOUND'}})
             pass
         else:
-            self.unit_definitions.update(
-                {'%s' % k: v
-                 for k, v in model_dict[unit_definitions_key].items()}
-            )
+            self.unit_definitions.update(dict(model_dict[unit_definitions_key].items()))
 
         # make always unique units list and keep xml files clean
         self.unit_definitions = _shrink_dict(
@@ -1030,7 +981,7 @@ class OspSimulationCase():
 
         if self.inspect_mode is True:
             # final clean if --inspect
-            logger.info('rm %s' % target_fmu_file)  # 0
+            logger.info(f'rm {target_fmu_file}')
             os.remove(target_fmu_file)
 
         return
@@ -1056,7 +1007,7 @@ class OspSimulationCase():
                     quantity_name = 'UNKNOWN'
                     quantity_unit = 'UNKNOWN'
 
-            except:
+            except Exception:
                 logger.warning(f'no quantity or unit given for {key}')
                 quantity_name = 'UNKNOWN'
                 quantity_unit = 'UNKNOWN'
@@ -1092,12 +1043,11 @@ class OspSimulationCase():
 
         DictWriter.write(osp_md, target_xml_file)
 
-    def _xml_sub_wrong_namespace(self, file_name, subst=None):
+    def _xml_sub_wrong_namespace(self, file_name, subst: Sequence[str]):
         """Substitute namespace
         (may be obsolete in future)
         """
         buffer = ''
-
         with open(file_name, 'r') as f:
             buffer = re.sub(subst[0], subst[1], f.read())
 
@@ -1129,7 +1079,6 @@ class OspSimulationCase():
             return [k for k in dd.keys() if re.search(search_string, k)]
         except Exception:
             return ['ELEMENTNOTFOUND']
-
 
     def _get_fmi_data_type(self, arg):
         """estimate the data type, if available
@@ -1177,13 +1126,13 @@ class OspSimulationCase():
         return string
 
     def _generate_copy(
-            self,
-            target_fmu_file: Path,
-            fmu_name: str,
-            name: str,
-            remote_access: MutableMapping,
-            generate_proxy: bool
-        ):
+        self,
+        target_fmu_file: Path,
+        fmu_name: str,
+        name: str,
+        remote_access: MutableMapping,
+        generate_proxy: bool
+    ):
         '''generate_proxy and remote_access are relatives:
         there is no remote acess without generating proxy.
         but nowadays, all fmu uploaded to STC needs special "generate_proxy" treatment, now called generate copy
@@ -1192,30 +1141,34 @@ class OspSimulationCase():
         '''
         # read file names of all *.dll files contained in target_fmu_file
         document = ZipFile(target_fmu_file, 'r')
-        files_to_modify = [file.filename for file in document.infolist() if re.search(r'.*\.dll$', file.filename)]
+        files_to_modify = [
+            file.filename for file in document.infolist() if re.search(r'.*\.dll$', file.filename)
+        ]
         document.close()
 
         # rename first from ['_attributes']['fmu'] to ['_attributes']['source']
         destination_file_names = [re.sub(fmu_name, name, file) for file in files_to_modify]
 
         for file_name, new_file_name in zip(files_to_modify, destination_file_names):
-            logger.info(f'{name} generate_proxy or modify: renaming {file_name} to {new_file_name}')
+            logger.info(
+                f'{name} generate_proxy or modify: renaming {file_name} to {new_file_name}'
+            )
             rename_file_in_zip(target_fmu_file, file_name, new_file_name)
 
-        new_name = name
-        if generate_proxy is True:
-            #only change the name if fmu is to be proxified, following
-            new_name = name + '-proxy'
+        new_name = f'{name}-proxy' if generate_proxy else name  # change the name only in case fmu is to be proxified
 
         # update models_dict
         for key, value in self.models.items():
 
             if value['_attributes']['name'] == name:
-                logger.info('%s generate_proxy: renaming %s to %s / %s.fmu' % (name, name, new_name, new_name))
-                value['_attributes']['name'] = new_name
-                value['_attributes']['source'] = new_name + '.fmu'
+                logger.info(
+                    f'{name} generate_proxy: renaming {name} to {new_name} / {new_name}.fmu'
+                )
 
-        if not remote_access in [None, False]:
+                value['_attributes']['name'] = new_name
+                value['_attributes']['source'] = f'{new_name}.fmu'
+
+        if remote_access not in [None, False]:
             ''' now start proxification
             if remote access is list
             if generate_proxy is true
