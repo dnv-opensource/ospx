@@ -36,7 +36,7 @@ def _argparser() -> argparse.ArgumentParser:
         '--clean',
         action='store_true',
         help=(
-            'clean from *modelDescription.xml *.fmu *.csv etc.'
+            'cleans up working directory and deletes any existing ospx files, e.g. *modelDescription.xml *.fmu *.csv etc.'
         ),
         default=False,
         required=False,
@@ -133,23 +133,6 @@ def main():
 
     case_dict_file: Path = Path(args.caseDict)
 
-    # Dispatch to _main(), which takes care of processing the arguments and invoking the API.
-    _main(
-        case_dict_file=case_dict_file,
-        inspect=inspect,
-        graph=graph,
-    )
-
-
-def _main(
-    case_dict_file: Path,
-    inspect: bool = False,
-    graph: bool = False,
-):
-    """Entry point for unit tests.
-
-    Processes the arguments parsed by main() on the console and invokes the API.
-    """
     # Check whether case dict file exists
     if not case_dict_file.exists():
         logger.error(f"ospCaseBuilder.py: File {case_dict_file} not found.")
@@ -162,13 +145,12 @@ def _main(
         f"\t graph: \t\t\t{graph}\n"
     )
 
+    # Invoke API
     OspCaseBuilder.build(
         case_dict_file=case_dict_file,
         inspect=inspect,
         graph=graph,
     )
-
-    return
 
 
 def _clean():
@@ -176,22 +158,23 @@ def _clean():
     from glob import glob
 
     # potential future caseDict content
-    cList = [
+    ospx_files = [
         '*.csv',
         '*.ssd',
         '*.fmu',
         '*.xml',
         '*callGraph*',
         'watchDict',
-        'statisticsDict'
+        'statisticsDict',
     ]
 
-    logger.warning('removing %s' % "\n\t*\t".join(['']+cList))
+    logger.warning('removing %s' % "\n\t*\t".join([''] + ospx_files))
 
-    for item in cList:
-        paths = [Path(p) for p in glob(item)]
-        for path in paths:
-            path.unlink()
+    for pattern in ospx_files:
+        for file in glob(pattern):
+            file = Path(file)
+            file.unlink(missing_ok=True)
+
     return
 
 
