@@ -201,41 +201,37 @@ class OspSimulationCase():
         self.simulation = dict(self.case_dict['run']['simulation'].items())
 
     def get_components(self):
-        """Reads components (FMUs) from case_dict into a dict of models
+        """Reads components from case_dict into a dict of models
         """
         logger.info('read model information from case dict')    # 0
 
         components = self.case_dict['systemStructure']['components']
-        for index, (model_name, model_properties) in enumerate(components.items()):
+        for model_index, (model_name, model_properties) in enumerate(components.items()):
 
             generate_proxy = False
-            remote_access = False
+            remote_access: Union[MutableMapping, None] = None
 
-            simulator_id = f'{index:06d}_Simulator'
+            simulator_id = f'{model_index:06d}_Simulator'
 
             # Attributes
-            self.models.update(
-                {
-                    simulator_id: {
-                        '_attributes': {
-                            'name': model_name,
-                            'source': f'{model_name}.fmu',
-                            'fmu': model_properties['fmu'],
-                            'stepSize': self.baseStepSize
-                        }
-                    }
+            self.models[simulator_id] = {
+                '_attributes': {
+                    'name': model_name,
+                    'source': f'{model_name}.fmu',
+                    'fmu': model_properties['fmu'],
+                    'stepSize': self.baseStepSize
                 }
-            )
+            }
 
+            # Initial Values
             if 'initialize' in model_properties.keys():
-                # Initial Values
                 initial_values = {}
                 for variable_index, (variable_name, variable_properties) in enumerate(
                     model_properties['initialize'].items()
                 ):
-
+                    variable_id = f'{variable_index:06d}_InitialValue'
                     fmi_data_type = self._get_fmi_data_type(variable_properties['start'])
-                    initial_values[f'{variable_index:06d}_InitialValue'] = {
+                    initial_values[variable_id] = {
                         fmi_data_type: {
                             '_attributes': {
                                 'value': variable_properties['start']
@@ -245,19 +241,19 @@ class OspSimulationCase():
                             'variable': variable_name
                         }
                     }
-                self.models[simulator_id].update({'InitialValues': initial_values})
+                self.models[simulator_id]['InitialValues'] = initial_values
 
-            if 'generateProxy' in model_properties.keys():
+            if 'generateProxy' in model_properties:
                 # generate fmu-proxy (NTNU-IHB/fmu-proxify)
                 remote_access = model_properties['remoteAccess'
                                                  ] if 'remoteAccess' in model_properties else None
                 generate_proxy = True
 
             self._prepare_model(
-                index,
+                model_index,
                 model_name,
                 model_properties,
-                fmu=model_properties['fmu'],
+                fmu_file_name=model_properties['fmu'],
                 write_osp_model_description=True,
                 generate_proxy=generate_proxy,
                 remote_access=remote_access
@@ -812,22 +808,22 @@ class OspSimulationCase():
 
     def _prepare_model(
         self,
-        index,
-        name,
-        properties,
-        fmu=None,
-        write_osp_model_description=False,
-        generate_proxy=False,
-        remote_access=None
-    ):                                      # sourcery skip: list-comprehension, merge-nested-ifs, remove-pass-body
+        model_index: int,
+        model_name: str,
+        model_properties: MutableMapping,
+        fmu_file_name: str,
+        write_osp_model_description: bool = False,
+        generate_proxy: bool = False,
+        remote_access: Union[MutableMapping, None] = None,
+    ):
         """Copies an FMU from the source library into the working directory (i.e. case folder) and initializes it.
 
         Copies the FMU from the source library into the working directory (i.e. case folder),
         writes its OspModelDescription.xml and sets / initializes its parameters to their case specific values.
         """
-        source_fmu_file = Path(self.lib_source) / Path(fmu)
-        target_fmu_file = self.work_dir / Path(f'{name}.fmu')
-        target_xml_file = self.work_dir / Path(f'{name}_OspModelDescription.xml')
+        source_fmu_file = Path(self.lib_source) / Path(fmu_file_name)
+        target_fmu_file = self.work_dir / Path(f'{model_name}.fmu')
+        target_xml_file = self.work_dir / Path(f'{model_name}_OspModelDescription.xml')
 
         if not source_fmu_file.exists():
             logger.error(f'FMU source file does not exist: {source_fmu_file}')
@@ -852,7 +848,7 @@ class OspSimulationCase():
         if file_content := read_file_content_from_zip(target_fmu_file, 'modelDescription.xml'):
             model_dict = xml_parser.parse_string(file_content, model_dict)
 
-        self.attributes.update({name: model_dict['_xmlOpts']['_rootAttributes']})
+        self.attributes.update({model_name: model_dict['_xmlOpts']['_rootAttributes']})
 
         model_variables_key = self._find_numbered_key_by_string(model_dict, 'ModelVariables$')[0]
 
@@ -862,11 +858,13 @@ class OspSimulationCase():
         # also change modelDescription.xml (in zip file) for completeness
         if not self.inspect_mode:
             # if component has "initialize"
-            if 'initialize' in properties.keys():
-                logger.info(f'{name} initialize: updating variables in modelDescription.xml')   # 2
+            if 'initialize' in model_properties.keys():
+                logger.info(
+                    f'{model_name} initialize: updating variables in modelDescription.xml'
+                )                                                                           # 2
 
                 # foreach key in list
-                for list_key, list_item in properties['initialize'].items():
+                for list_key, list_item in model_properties['initialize'].items():
 
                     # fail, items not dictionaries but lists of k,v pais
                     for key, item in model_dict[model_variables_key].items():
@@ -882,7 +880,7 @@ class OspSimulationCase():
                             # a key hat to be made therefor in generator dict
 
                             logger.info(
-                                f"{name} modify: {model_dict[model_variables_key][key]['_attributes']['name']} {base_key} in {name} to {dict(list_item.items())}"
+                                f"{model_name} modify: {model_dict[model_variables_key][key]['_attributes']['name']} {base_key} in {model_name} to {dict(list_item.items())}"
                             )
 
                             model_dict[model_variables_key][key][numbered_key]['_attributes'][
@@ -895,8 +893,8 @@ class OspSimulationCase():
             # take ownerhsip of attributes in modelDescription.xml on copy
             # STC requires consistency between <fmiModelDescription><modelName> and <CoSimulation modelIdentifier>
             logger.info(
-                f'{name}: updating fmiModelDescription:description in modelDescription.xml'
-            )                                                                                   # 2
+                f'{model_name}: updating fmiModelDescription:description in modelDescription.xml'
+            )                                                                                       # 2
 
             old_author = model_dict['_xmlOpts']['_rootAttributes']['author']
             if platform.system() == 'Linux':
@@ -906,12 +904,12 @@ class OspSimulationCase():
             old_date = model_dict['_xmlOpts']['_rootAttributes']['generationDateAndTime']
             new_date = str(datetime.now())
             add_description_string = '\nmodified %s:\n' % date.today()
-            add_description_string += '\tmodelName %s to %s\n' % (fmu_name, name)
+            add_description_string += '\tmodelName %s to %s\n' % (fmu_name, model_name)
             add_description_string += '\tauthor %s to %s\n' % (old_author, new_author)
             add_description_string += '\tgenerationDateAndTime %s to %s\n' % (old_date, new_date)
             model_dict['_xmlOpts']['_rootAttributes']['description'] += add_description_string
 
-            model_dict = self._update_model_description(model_dict, name)
+            model_dict = self._update_model_description(model_dict, model_name)
 
         # substitute new model_dict as modelDescription.xml in FMU
         # and make always a copy for reference
@@ -932,13 +930,15 @@ class OspSimulationCase():
         formatter = XmlFormatter()
         formatted_xml = formatter.to_string(model_dict)
 
-        with open(f'{name}_ModelDescription.xml', 'w') as f:
+        with open(f'{model_name}_ModelDescription.xml', 'w') as f:
             f.write(formatted_xml)
 
         if not self.inspect_mode:
             # if 'initialize' in properties.keys() or generate_proxy is True:
             # do always, does not cost so much if original name remains the same but removes confusion here
-            logger.info(f'{name} initialize: substituting modelDescription.xml in {name}.fmu')
+            logger.info(
+                f'{model_name} initialize: substituting modelDescription.xml in {model_name}.fmu'
+            )
 
             remove_files_from_zip(target_fmu_file, 'modelDescription.xml')
             add_file_content_to_zip(target_fmu_file, 'modelDescription.xml', formatted_xml)
@@ -946,7 +946,9 @@ class OspSimulationCase():
             # do a dll rename for all copyied fmu
             # required by STC
             # reason: ask me (frl)
-            self._generate_copy(target_fmu_file, fmu_name, name, remote_access, generate_proxy)
+            self._generate_copy(
+                target_fmu_file, fmu_name, model_name, remote_access, generate_proxy
+            )
 
         # avoid units with "-" as they do not have to declared (signal only)
         # give add. index for distinguishing betwee modelDescription.xml's containing one single ScalaVariable, otherwise it will be overwritten here
@@ -964,7 +966,7 @@ class OspSimulationCase():
 
         # avoid solver internal variables, e..g "_iti_..."
         for key in model_dict[model_variables_key].keys():
-            model_dict[model_variables_key][key]['_origin'] = name
+            model_dict[model_variables_key][key]['_origin'] = model_name
 
         # proprietary: removing here "_" and also "settings" from iti namespace
         self.variables.update(
@@ -1129,7 +1131,7 @@ class OspSimulationCase():
         self,
         target_fmu_file: Path,
         fmu_name: str,
-        name: str,
+        model_name: str,
         remote_access: MutableMapping,
         generate_proxy: bool
     ):
@@ -1147,37 +1149,31 @@ class OspSimulationCase():
         document.close()
 
         # rename first from ['_attributes']['fmu'] to ['_attributes']['source']
-        destination_file_names = [re.sub(fmu_name, name, file) for file in files_to_modify]
+        destination_file_names = [re.sub(fmu_name, model_name, file) for file in files_to_modify]
 
         for file_name, new_file_name in zip(files_to_modify, destination_file_names):
             logger.info(
-                f'{name} generate_proxy or modify: renaming {file_name} to {new_file_name}'
+                f'{model_name} generate_proxy or modify: renaming {file_name} to {new_file_name}'
             )
             rename_file_in_zip(target_fmu_file, file_name, new_file_name)
 
-        new_name = f'{name}-proxy' if generate_proxy else name  # change the name only in case fmu is to be proxified
+        new_name = f'{model_name}-proxy' if generate_proxy else model_name  # change the name only in case fmu is to be proxified
 
         # update models_dict
-        for key, value in self.models.items():
+        for _, model_properties in self.models.items():
 
-            if value['_attributes']['name'] == name:
+            if model_properties['_attributes']['name'] == model_name:
                 logger.info(
-                    f'{name} generate_proxy: renaming {name} to {new_name} / {new_name}.fmu'
+                    f'{model_name} generate_proxy: renaming {model_name} to {new_name} / {new_name}.fmu'
                 )
 
-                value['_attributes']['name'] = new_name
-                value['_attributes']['source'] = f'{new_name}.fmu'
+                model_properties['_attributes']['name'] = new_name
+                model_properties['_attributes']['source'] = f'{new_name}.fmu'
 
-        if remote_access not in [None, False]:
-            ''' now start proxification
-            if remote access is list
-            if generate_proxy is true
-            or whatever is useful to trigger this action
-            '''
+        if remote_access:
+            # Proxify the FMU
             remote_string = f"--remote={remote_access['host']}:{remote_access['port']}"
-
-            command = (f'fmu-proxify {name}.fmu {remote_string}')
-
+            command = (f'fmu-proxify {model_name}.fmu {remote_string}')
             try:
                 subprocess.run(command, timeout=60)
             except subprocess.TimeoutExpired:

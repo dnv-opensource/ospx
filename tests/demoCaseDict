@@ -55,7 +55,7 @@ systemStructure
                     type                  input;
                 }
             }
-            prototype             subfolder\in\your\library\difference.fmu;
+            fmu             subfolder\in\your\library\difference.fmu;
         }
         div_0
         {
@@ -78,7 +78,7 @@ systemStructure
                 }
 
             }
-            prototype             subfolder\in\your\library\quotient.fmu;
+            fmu             subfolder\in\your\library\quotient.fmu;
         }
         in_0
             {
@@ -99,7 +99,7 @@ systemStructure
                     variability   fixed;
                 }
             }
-            prototype             subfolder\in\your\library\constantVal.fmu;
+            fmu             subfolder\in\your\library\constantVal.fmu;
         }
         in_1
         {
@@ -120,7 +120,7 @@ systemStructure
                     variability   fixed;
                 }
             }
-            prototype             subfolder\in\your\library\constantVal.fmu;
+            fmu             subfolder\in\your\library\constantVal.fmu;
         }
         in_2
         {
@@ -141,7 +141,7 @@ systemStructure
                     variability   fixed;
                 }
             }
-            prototype             subfolder\in\your\library\constantVal.fmu;
+            fmu             subfolder\in\your\library\constantVal.fmu;
         }
     }
 }
