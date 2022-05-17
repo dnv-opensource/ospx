@@ -1132,7 +1132,7 @@ class OspSimulationCase():
         target_fmu_file: Path,
         fmu_name: str,
         model_name: str,
-        remote_access: MutableMapping,
+        remote_access: Union[MutableMapping, None],
         generate_proxy: bool
     ):
         '''generate_proxy and remote_access are relatives:
@@ -1142,11 +1142,12 @@ class OspSimulationCase():
         This might be solved in the future
         '''
         # read file names of all *.dll files contained in target_fmu_file
-        document = ZipFile(target_fmu_file, 'r')
-        files_to_modify = [
-            file.filename for file in document.infolist() if re.search(r'.*\.dll$', file.filename)
-        ]
-        document.close()
+        with ZipFile(target_fmu_file, 'r') as document:
+            files_to_modify = [
+                file.filename
+                for file in document.infolist()
+                if re.search(r'.*\.dll$', file.filename)
+            ]
 
         # rename first from ['_attributes']['fmu'] to ['_attributes']['source']
         destination_file_names = [re.sub(fmu_name, model_name, file) for file in files_to_modify]

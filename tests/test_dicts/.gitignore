@@ -1,0 +1,6 @@
+*.xml
+*.fmu
+*.csv
+*.ssd
+statisticsDict
+watchDict
