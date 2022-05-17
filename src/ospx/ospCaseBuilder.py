@@ -390,10 +390,6 @@ class OspSimulationCase():
             '_rootTag': 'OspSystemStructure',
         }
 
-        # '_nameSpaces':{'osp':'https://opensimulationplatform.com/xsd/OspSystemStructure'},
-        # '_nameSpaces':{'osp':'file:///C:/Software/OSP/xsd/OspSystemStructure-0.1.xsd'},
-        # '_nameSpaces':{'osp':'file:///C:/Software/OSP/xsd/OspSystemStructure'},
-
         # Write OspSystemStructure.xml
         target_file_path = Path.cwd() / 'OspSystemStructure.xml'
         formatter = XmlFormatter()
@@ -831,16 +827,6 @@ class OspSimulationCase():
         logger.info(f'copy {source_fmu_file} --> {target_fmu_file}')    # 2
         copyfile(source_fmu_file, target_fmu_file)
 
-        # xml_parser = XmlParser(
-        #     {
-        #         '_nameSpaces': {
-        #             'xs': 'file:///C:/Software/OSP/xsd/fmi3ModelDescription.xsd'
-        #         },
-        #     }
-        # )
-        # @TODO: Is the namspace important already during PARSING of XML?
-        #        If so, we might need to make namespaces an attribute of XmlParser.
-        #        CLAROS, 2021-08-23
         xml_parser = XmlParser()
 
         model_dict = CppDict(Path('modelDescription.xml'))
@@ -903,27 +889,17 @@ class OspSimulationCase():
                 new_author = os.environ['USERNAME']
             old_date = model_dict['_xmlOpts']['_rootAttributes']['generationDateAndTime']
             new_date = str(datetime.now())
-            add_description_string = '\nmodified %s:\n' % date.today()
-            add_description_string += '\tmodelName %s to %s\n' % (fmu_name, model_name)
-            add_description_string += '\tauthor %s to %s\n' % (old_author, new_author)
-            add_description_string += '\tgenerationDateAndTime %s to %s\n' % (old_date, new_date)
+            add_description_string = (
+                f'\nmodified {date.today()}:\n'
+                f'\tmodelName {fmu_name} to {model_name}\n'
+                f'\tauthor {old_author} to {new_author}\n'
+                f'\tgenerationDateAndTime {old_date} to %{new_date}\n'
+            )
             model_dict['_xmlOpts']['_rootAttributes']['description'] += add_description_string
 
             model_dict = self._update_model_description(model_dict, model_name)
 
-        # substitute new model_dict as modelDescription.xml in FMU
-        # and make always a copy for reference
-        # formatter = XmlFormatter(
-        #     {
-        #         '_nameSpaces': {
-        #             'xs': 'file:///C:/Software/OSP/xsd/fmi3ModelDescription.xsd'
-        #         },
-        #     }
-        # )
-        # @TODO: Current approach with namespaces is that they are saved with the dict (in ['_xmlOpts']).
-        #        However, if preferred / needed we could also make namespaces an attribute of XmlFormatter.
-        #        To be considered / discussed.
-        #        CLAROS, 2021-08-23
+        # Save new model_dict as modelDescription.xml in FMU
         model_dict['_xmlOpts']['_nameSpaces'] = {
             'xs': 'file:///C:/Software/OSP/xsd/fmi3ModelDescription.xsd'
         }
@@ -934,7 +910,7 @@ class OspSimulationCase():
             f.write(formatted_xml)
 
         if not self.inspect_mode:
-            # if 'initialize' in properties.keys() or generate_proxy is True:
+            # if 'initialize' in model_properties or generate_proxy:
             # do always, does not cost so much if original name remains the same but removes confusion here
             logger.info(
                 f'{model_name} initialize: substituting modelDescription.xml in {model_name}.fmu'
@@ -943,9 +919,12 @@ class OspSimulationCase():
             remove_files_from_zip(target_fmu_file, 'modelDescription.xml')
             add_file_content_to_zip(target_fmu_file, 'modelDescription.xml', formatted_xml)
 
-            # do a dll rename for all copyied fmu
+            # Copy FMU and rename all dll's therein.
             # required by STC
-            # reason: ask me (frl)
+            # @TODO: @Frank: Why is this necessary?
+            # Copying and altering the FMU should only be necessary in case of remote access (-> proxification).
+            # But as long as proxification isn't required, there should be no need to copy and alter the FMU?
+            # CLAROS, 2022-05-17
             self._generate_copy(
                 target_fmu_file, fmu_name, model_name, remote_access, generate_proxy
             )
