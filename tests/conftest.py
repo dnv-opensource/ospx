@@ -29,7 +29,7 @@ ospx_files = [
 def default_setup_and_teardown(caplog):
     _remove_ospx_dirs_and_files()
     yield
-    _remove_ospx_dirs_and_files()
+    # _remove_ospx_dirs_and_files()
 
 
 def _remove_ospx_dirs_and_files():
