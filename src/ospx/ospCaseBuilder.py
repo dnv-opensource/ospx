@@ -1,11 +1,10 @@
 import functools
 import logging
+# from msilib.schema import Component
 import os
-import platform
 import re
 import subprocess
 from collections import OrderedDict
-from datetime import date, datetime
 from pathlib import Path
 from shutil import copyfile
 from typing import MutableMapping, Sequence, Union
@@ -16,13 +15,12 @@ from dictIO.cppDict import CppDict
 from dictIO.dictReader import DictReader
 from dictIO.dictWriter import DictWriter
 from dictIO.formatter import XmlFormatter
-from dictIO.parser import XmlParser
 from dictIO.utils.counter import BorgCounter
 
+from ospx.fmu import FMU
+from ospx.component import Component
+
 from ospx.utils.zip import (
-    add_file_content_to_zip,
-    read_file_content_from_zip,
-    remove_files_from_zip,
     rename_file_in_zip,
 )
 
@@ -84,10 +82,13 @@ class OspCaseBuilder():
         case.clean()
 
         # general properties
-        case.get_simulation_properties()
+        case.read_simulation_properties()
+
+        # register and copy to local case folder all FMUs referenced by components in the case dict
+        case.register_fmus()
 
         # get models, get simulators
-        case.get_components()
+        case.read_components()
 
         if inspect:
             # inspect and stop
@@ -140,27 +141,30 @@ class OspSimulationCase():
         self.inspect_mode: bool = inspect
 
         self.name: str = self.case_dict['run']['simulation']['name']
+        logger.info(f'initalizing simulation case {self.name}')     # 0
+
         self.baseStepSize: str = self.case_dict['run']['simulation']['baseStepSize']
 
-        self.work_dir: Path = Path.cwd()
+        self.case_folder: Path = Path.cwd()
         for key in self.case_dict['_environment'].keys():
             if re.match('root', key, re.I):
-                self.work_dir: Path = Path.cwd() / self.case_dict['_environment'][key]
+                self.case_folder: Path = Path.cwd() / self.case_dict['_environment'][key]
 
-        if not self.work_dir.exists():
-            logger.error(f'work dir {self.work_dir} does not exist')
+        if not self.case_folder.exists():
+            logger.error(f'case folder {self.case_folder} does not exist')
+            return
 
         self.lib_source: Path = Path(self.case_dict['_environment']['libSource'])
 
-        self.unit_definitions: dict = {}    # all unique unit definitions
-        self.variables: dict = {}           # all ScalarVariables from all fmu's
-        self.attributes: dict = {}          # all original attributes from all fmu's
-        self.connectors: dict = {}          # all connectors from all fmu's
-
-        self.simulation: dict = {}                          # to be filled with general simulation properties
-        self.models: dict = {}                              # to be filled with model data as they appear in simulators
-        self.connections: dict = {}                         # to be filled with connection data
-        logger.info(f'initalizing simulation {self.name}')  # 0
+        self.unit_definitions: dict = {}            # all unique unit definitions
+        self.variables: dict = {}                   # all ScalarVariables from all fmu's
+        self.attributes: dict = {}                  # all original attributes from all fmu's
+        self.connectors: dict = {}                  # all connectors from all fmu's
+        self.simulation: dict = {}                  # general properties of the simulation case
+        self.components: dict[str, Component] = {
+        }                                           # component = instance of a model. OSP calls this 'simulator'.
+        self.fmus: dict[str, FMU] = {}              # register of FMUs referenced by the components
+        self.connections: dict = {}                 # to be filled with connection data
 
     def clean(self):
         """Removes all formerly generated case output files, retaining initial case configuration.
@@ -180,7 +184,7 @@ class OspSimulationCase():
             'zip',
         ]
 
-        logger.info('remove all existing case files')
+        logger.info(f'clean case folder: {self.case_folder}')
 
         for file_type in file_types:
             files = list(Path('.').rglob(file_type))
@@ -192,71 +196,62 @@ class OspSimulationCase():
                     from shutil import rmtree
                     rmtree(file)
 
-    def get_simulation_properties(self):
-        """Reads simulation base properties.
+    def read_simulation_properties(self):
+        """Reads general simulation properties from case dict.
         """
         logger.info('reading simulation properties')    # 0
 
         # self.simulation_dict = dict({k:str(v) for k, v in self.config['simulation'].items() if re.match('(StartTime|BaseStepSize|Algorithm)', k)})
         self.simulation = dict(self.case_dict['run']['simulation'].items())
 
-    def get_components(self):
-        """Reads components from case_dict into a dict of models
+    def register_fmus(self):
+        """Register all FMUs referenced by components in the case dict, and copy them into the case folder.
+
+        Important: In case multiple components reference the same FMU, these are registered and copied only once.
         """
-        logger.info('read model information from case dict')    # 0
+        logger.info('register FMUs referenced in case dict')    # 0
 
         components = self.case_dict['systemStructure']['components']
-        for model_index, (model_name, model_properties) in enumerate(components.items()):
 
-            generate_proxy = False
-            remote_access: Union[MutableMapping, None] = None
+        self.fmus.clear()
+        for component_name, component_properties in components.items():
+            if 'fmu' not in component_properties:
+                logger.error(f"element 'fmu' missing in component {component_name}")
+                return
+            fmu_file_name_in_case_dict: str = component_properties['fmu']
+            fmu_file_name = Path(fmu_file_name_in_case_dict).name
+            fmu_file_in_library = self.lib_source / fmu_file_name_in_case_dict
+            fmu_file_in_case_folder = self.case_folder / fmu_file_name
+            if fmu_file_name not in self.fmus:
+                if not fmu_file_in_library.exists():
+                    logger.error(
+                        f'FMU file {fmu_file_name} referenced by component {component_name} does not exist in library {self.lib_source.absolute()}'
+                    )
+                    raise FileNotFoundError(f'file not found: {fmu_file_in_library.absolute()}')
 
-            simulator_id = f'{model_index:06d}_Simulator'
+                logger.info(f'copy {fmu_file_in_library} --> {fmu_file_in_case_folder}')    # 2
+                copyfile(fmu_file_in_library, fmu_file_in_case_folder)
+                self.fmus[fmu_file_name] = FMU(fmu_file_in_case_folder)
 
-            # Attributes
-            self.models[simulator_id] = {
-                '_attributes': {
-                    'name': model_name,
-                    'source': f'{model_name}.fmu',
-                    'fmu': model_properties['fmu'],
-                    'stepSize': self.baseStepSize
-                }
-            }
+    def read_components(self):
+        """Read the components from case dict
+        """
+        logger.info('read components from case dict')   # 0
 
-            # Initial Values
-            if 'initialize' in model_properties.keys():
-                initial_values = {}
-                for variable_index, (variable_name, variable_properties) in enumerate(
-                    model_properties['initialize'].items()
-                ):
-                    variable_id = f'{variable_index:06d}_InitialValue'
-                    fmi_data_type = self._get_fmi_data_type(variable_properties['start'])
-                    initial_values[variable_id] = {
-                        fmi_data_type: {
-                            '_attributes': {
-                                'value': variable_properties['start']
-                            }
-                        },
-                        '_attributes': {
-                            'variable': variable_name
-                        }
-                    }
-                self.models[simulator_id]['InitialValues'] = initial_values
+        components = self.case_dict['systemStructure']['components']
 
-            if 'generateProxy' in model_properties:
-                # generate fmu-proxy (NTNU-IHB/fmu-proxify)
-                remote_access = model_properties['remoteAccess'
-                                                 ] if 'remoteAccess' in model_properties else None
-                generate_proxy = True
+        self.components.clear()
+        for component_name, component_properties in components.items():
+            component = Component(component_name, component_properties)     # type: ignore
+                                                                            # Have each component point to the correct FMU instance it references
+            fmu_file_name_in_case_dict: str = component_properties['fmu']
+            fmu_file_name = Path(fmu_file_name_in_case_dict).name
+            component.fmu = self.fmus[fmu_file_name]
+            self.components[component_name] = component
 
-            self._prepare_model(
-                model_index,
-                model_name,
-                model_properties,
-                fmu_file_name=model_properties['fmu'],
+            self._prepare_component(
+                component,
                 write_osp_model_description=True,
-                generate_proxy=generate_proxy,
-                remote_access=remote_access
             )
 
         return
@@ -374,12 +369,13 @@ class OspSimulationCase():
         # ('simulators' is OSP terminology. Any instance of a model is referred to as a 'simulator' in OSP.)
         models: dict = {
             k1: {
-                k2: {k3: v3
-                     for k3, v3 in self.models[k1][k2].items()
-                     if not re.match('fmu', k3)}
-                for k2 in self.models[k1].keys()
+                k2:
+                {k3: v3
+                 for k3, v3 in self.components[k1][k2].items()
+                 if not re.match('fmu', k3)}
+                for k2 in self.components[k1].keys()
             }
-            for k1 in self.models.keys()
+            for k1 in self.components.keys()
         }
         osp_ss['Simulators'] = models
         osp_ss['Connections'] = self.connections
@@ -430,14 +426,15 @@ class OspSimulationCase():
         # models (elements)
         # (an 'element' in ssd equals what is a 'simulator' in osp_ss: An instance of a model.)
         models = {}
-        for key, item in self.models.items():
+        for key, item in self.components.items():
 
             connectors = dict({})
 
             for key1, item1 in self.connectors.items():
                 i = self.counter()
 
-                if self.connectors[key1]['component'] == self.models[key]['_attributes']['name']:
+                if self.connectors[key1]['component'] == self.components[key]['_attributes']['name'
+                                                                                             ]:
                     connectors['%06i_Connector' % i] = {
                         '_attributes': {
                             'name': self.connectors[key1]['reference'],
@@ -450,10 +447,10 @@ class OspSimulationCase():
             j = self.counter()
             models['%06i_Component' % j] = {
                 '_attributes': {
-                    'name': self.models[key]['_attributes']['name'],
-                    'source': self.models[key]['_attributes']['source'],
+                    'name': self.components[key]['_attributes']['name'],
+                    'source': self.components[key]['_attributes']['source'],
                 },
-                'Connectors': connectors,                                   # 'ParameterBindings': parameter_bindings,
+                'Connectors': connectors,                                       # 'ParameterBindings': parameter_bindings,
             }
 
         # connections
@@ -637,24 +634,24 @@ class OspSimulationCase():
 
         cg = self._apply_styles(cg, styles)
 
-        for key in self.models.keys():
+        for key in self.components.keys():
 
-            label_key, label = self._set_node_label(self.models[key]['_attributes']['name'], self.models[key])
+            label_key, label = self._set_node_label(self.components[key]['_attributes']['name'], self.components[key])
             # var_keys = self._find_numbered_key_by_string(self.models[key]['InitialValues'], 'InitialValue')
             # variables = {}
             label = self._create_table(
                 label_key,
                 {
-                    'source:': self.models[key]['_attributes']['source'],
-                    'variables:': '',                                       # 'stepsize:':self.models[key]['_attributes']['stepSize'],
+                    'source:': self.components[key]['_attributes']['source'],
+                    'variables:': '',                                           # 'stepsize:':self.models[key]['_attributes']['stepSize'],
                 }
             )
 
-            if re.search(input_names, self.models[key]['_attributes']['name']):
+            if re.search(input_names, self.components[key]['_attributes']['name']):
                 shape = 'diamond'
                 style = 'filled,rounded'
                 fillcolor = '#FFFFFF'
-            elif re.search(basic_op_names, self.models[key]['_attributes']['name'], re.I):
+            elif re.search(basic_op_names, self.components[key]['_attributes']['name'], re.I):
                 # label = self._create_table(label_key, {'source:':self.models_dict[key]['_attributes']['source'], 'stepsize:':self.models_dict[key]['_attributes']['stepSize']})
                 label = label
                 shape = 'square'
@@ -742,7 +739,7 @@ class OspSimulationCase():
         }
 
         # append model
-        for m_key, m_item in self.models.items():
+        for m_key, m_item in self.components.items():
             last_index = sum(
                 c_item['component'] == m_item['_attributes']['name'] for _,
                 c_item in self.connectors.items()
@@ -759,165 +756,26 @@ class OspSimulationCase():
         target_file_path = Path.cwd() / 'watchDict'
         DictWriter.write(watch_dict, target_file_path, mode='a')
 
-    def _update_model_description(self, model_dict, name):
-        """updating modelDescripion.xml
-        used whithin proxification (may be obsolete in future)
-        """
-        # update root attributes
-        root_attributes = dict({})
-        # take existing
-        for key, item in model_dict['_xmlOpts']['_rootAttributes'].items():
-            root_attributes[key] = item
-        # new guid
-        # root_attributes.update({'guid':'{%s}' % str(uuid4()).upper()})
-        # new date
-        root_attributes['generationDateAndTime'] = str(datetime.now())
-        # author
-        if platform.system() == 'Linux':
-            root_attributes['author'] = os.environ['USER']
-        else:
-            root_attributes['author'] = os.environ['USERNAME']
-
-        root_attributes['modelName'] = name
-
-        # also find and replace model_dict['CoSimulation']['_attributes']['modelIdentifier']
-        # this is now required if someone want to proxify the fmu
-        # it changes also the modelIdentifier in CoSimulation xml tag,
-        # what is used by fmu-proxify to estimate the output name
-        # related to limitation of the -d option
-
-        # this function is only to be used with fmu-proxify, temporary disabled
-        # because it requires also a rename of dll's
-        cosim_string = self._find_numbered_key_by_string(model_dict, 'CoSimulation')[0]
-        model_dict[cosim_string]['_attributes'].update({'modelIdentifier': name})
-
-        model_dict.update(
-            {
-                '_xmlOpts': {
-                    '_rootTag': 'fmiModelDescription',
-                    '_rootAttributes': root_attributes,
-                }
-            }
-        )
-
-        return model_dict
-
-    def _prepare_model(
+    def _prepare_component(
         self,
-        model_index: int,
-        model_name: str,
-        model_properties: MutableMapping,
-        fmu_file_name: str,
+        component: Component,
         write_osp_model_description: bool = False,
-        generate_proxy: bool = False,
-        remote_access: Union[MutableMapping, None] = None,
     ):
-        """Copies an FMU from the source library into the working directory (i.e. case folder) and initializes it.
-
-        Copies the FMU from the source library into the working directory (i.e. case folder),
-        writes its OspModelDescription.xml and sets / initializes its parameters to their case specific values.
+        """Writes OspModelDescription.xml and sets / initializes its parameters to their case specific values.
         """
         source_fmu_file = Path(self.lib_source) / Path(fmu_file_name)
-        target_fmu_file = self.work_dir / Path(f'{model_name}.fmu')
-        target_xml_file = self.work_dir / Path(f'{model_name}_OspModelDescription.xml')
-
-        if not source_fmu_file.exists():
-            logger.error(f'FMU source file does not exist: {source_fmu_file}')
-
-        logger.info(f'copy {source_fmu_file} --> {target_fmu_file}')    # 2
-        copyfile(source_fmu_file, target_fmu_file)
-
-        xml_parser = XmlParser()
-
-        model_dict = CppDict(Path('modelDescription.xml'))
-
-        if file_content := read_file_content_from_zip(target_fmu_file, 'modelDescription.xml'):
-            model_dict = xml_parser.parse_string(file_content, model_dict)
-
-        self.attributes.update({model_name: model_dict['_xmlOpts']['_rootAttributes']})
-
-        model_variables_key = self._find_numbered_key_by_string(model_dict, 'ModelVariables$')[0]
-
-        fmu_name = model_dict['_xmlOpts']['_rootAttributes']['modelName']
+        target_fmu_file = self.case_folder / Path(f'{component}.fmu')
+        target_xml_file = self.case_folder / Path(f'{component}_OspModelDescription.xml')
 
         # if not in "inspect mode"
         # also change modelDescription.xml (in zip file) for completeness
         if not self.inspect_mode:
-            # if component has "initialize"
-            if 'initialize' in model_properties.keys():
-                logger.info(
-                    f'{model_name} initialize: updating variables in modelDescription.xml'
-                )                                                                           # 2
-
-                # foreach key in list
-                for list_key, list_item in model_properties['initialize'].items():
-
-                    # fail, items not dictionaries but lists of k,v pais
-                    for key, item in model_dict[model_variables_key].items():
-                        if model_dict[model_variables_key][key]['_attributes']['name'] == list_key:
-
-                            base_key = self._get_key_name(model_dict[model_variables_key][key])
-                            numbered_key = self._find_numbered_key_by_string(
-                                model_dict[model_variables_key][key], f'{base_key}$'
-                            )[0]
-
-                            # if there is to do a translation from e.g. Real to Integer, it has to be done here
-                            # substituting numbered_key with an other one, deleting the orginal
-                            # a key hat to be made therefor in generator dict
-
-                            logger.info(
-                                f"{model_name} modify: {model_dict[model_variables_key][key]['_attributes']['name']} {base_key} in {model_name} to {dict(list_item.items())}"
-                            )
-
-                            model_dict[model_variables_key][key][numbered_key]['_attributes'][
-                                'start'] = list_item['start']
-                            model_dict[model_variables_key][key]['_attributes'][
-                                'variability'] = list_item['variability']
-                            model_dict[model_variables_key][key]['_attributes'][
-                                'causality'] = list_item['causality']
-
-            # take ownerhsip of attributes in modelDescription.xml on copy
-            # STC requires consistency between <fmiModelDescription><modelName> and <CoSimulation modelIdentifier>
-            logger.info(
-                f'{model_name}: updating fmiModelDescription:description in modelDescription.xml'
-            )                                                                                       # 2
-
-            old_author = model_dict['_xmlOpts']['_rootAttributes']['author']
-            if platform.system() == 'Linux':
-                new_author = os.environ['USER']
-            else:
-                new_author = os.environ['USERNAME']
-            old_date = model_dict['_xmlOpts']['_rootAttributes']['generationDateAndTime']
-            new_date = str(datetime.now())
-            add_description_string = (
-                f'\nmodified {date.today()}:\n'
-                f'\tmodelName {fmu_name} to {model_name}\n'
-                f'\tauthor {old_author} to {new_author}\n'
-                f'\tgenerationDateAndTime {old_date} to %{new_date}\n'
+            component.fmu.set_start_values(component.variables_with_initial_values)
+            self.attributes.update(
+                {component.name: model_description['_xmlOpts']['_rootAttributes']}
             )
-            model_dict['_xmlOpts']['_rootAttributes']['description'] += add_description_string
-
-            model_dict = self._update_model_description(model_dict, model_name)
-
-        # Save new model_dict as modelDescription.xml in FMU
-        model_dict['_xmlOpts']['_nameSpaces'] = {
-            'xs': 'file:///C:/Software/OSP/xsd/fmi3ModelDescription.xsd'
-        }
-        formatter = XmlFormatter()
-        formatted_xml = formatter.to_string(model_dict)
-
-        with open(f'{model_name}_ModelDescription.xml', 'w') as f:
-            f.write(formatted_xml)
 
         if not self.inspect_mode:
-            # if 'initialize' in model_properties or generate_proxy:
-            # do always, does not cost so much if original name remains the same but removes confusion here
-            logger.info(
-                f'{model_name} initialize: substituting modelDescription.xml in {model_name}.fmu'
-            )
-
-            remove_files_from_zip(target_fmu_file, 'modelDescription.xml')
-            add_file_content_to_zip(target_fmu_file, 'modelDescription.xml', formatted_xml)
 
             # Copy FMU and rename all dll's therein.
             # required by STC
@@ -926,36 +784,9 @@ class OspSimulationCase():
             # But as long as proxification isn't required, there should be no need to copy and alter the FMU?
             # CLAROS, 2022-05-17
             self._generate_copy(
-                target_fmu_file, fmu_name, model_name, remote_access, generate_proxy
+                target_fmu_file, fmu_name, component, remote_access, generate_proxy
             )
-
-        # avoid units with "-" as they do not have to declared (signal only)
-        # give add. index for distinguishing betwee modelDescription.xml's containing one single ScalaVariable, otherwise it will be overwritten here
-        unit_definitions_key = self._find_numbered_key_by_string(model_dict, 'UnitDefinitions$')[0]
-        if unit_definitions_key == 'ELEMENTNOTFOUND':
-            # self.unit_d.update({'%06i_UnitDefinitions'% self.counter():{'name':'ELEMENTNOTFOUND'}})
-            pass
-        else:
-            self.unit_definitions.update(dict(model_dict[unit_definitions_key].items()))
-
-        # make always unique units list and keep xml files clean
-        self.unit_definitions = _shrink_dict(
-            self.unit_definitions, make_unique=['_attributes', 'name']
-        )
-
-        # avoid solver internal variables, e..g "_iti_..."
-        for key in model_dict[model_variables_key].keys():
-            model_dict[model_variables_key][key]['_origin'] = model_name
-
-        # proprietary: removing here "_" and also "settings" from iti namespace
-        self.variables.update(
-            {
-                '%06i_%s' % (self.counter(), re.sub(r'^\d{6}_', '', k)): v
-                for k,
-                v in model_dict[model_variables_key].items()
-                if not re.match('^(_|settings)', v['_attributes']['name'])
-            }
-        )
+            # proxify_fmu()
 
         if write_osp_model_description is True and not self.inspect_mode:
             self._write_osp_model_description(target_xml_file)
@@ -1037,20 +868,6 @@ class OspSimulationCase():
 
         return
 
-    def _get_key_name(self, dd):
-        """return the key name of the list
-        {Unknown|Real|Integer|String|Boolean}
-        """
-        key_list = ['Unknown', 'Real', 'Integer', 'String', 'Boolean']
-        return_key = []
-        for key in dd.keys():
-            key = re.sub(r'^\d{6}_', '', key)
-
-            if key in key_list:
-                return_key.append(key)
-
-        return return_key[0] if len(return_key) == 1 else 'ELEMENTNOTFOUND'
-
     def _find_numbered_key_by_string(self, dd, search_string):
         """find the element name for an (anyways unique) element
         after it was preceeded by a number to keep the sequence of xml elements
@@ -1060,18 +877,6 @@ class OspSimulationCase():
             return [k for k in dd.keys() if re.search(search_string, k)]
         except Exception:
             return ['ELEMENTNOTFOUND']
-
-    def _get_fmi_data_type(self, arg):
-        """estimate the data type, if available
-        """
-        if isinstance(arg, int):
-            return 'Integer'
-        elif isinstance(arg, float):
-            return 'Real'
-        elif isinstance(arg, bool):
-            return 'Bool'
-        else:
-            return 'String'
 
     def _apply_styles(self, digraph, styles):
         digraph.graph_attr.update(('graph' in styles and styles['graph']) or {})
@@ -1140,7 +945,7 @@ class OspSimulationCase():
         new_name = f'{model_name}-proxy' if generate_proxy else model_name  # change the name only in case fmu is to be proxified
 
         # update models_dict
-        for _, model_properties in self.models.items():
+        for _, model_properties in self.components.items():
 
             if model_properties['_attributes']['name'] == model_name:
                 logger.info(
@@ -1158,6 +963,19 @@ class OspSimulationCase():
                 subprocess.run(command, timeout=60)
             except subprocess.TimeoutExpired:
                 logger.exception(f'Timeout occured when calling {command}.')
+
+
+def proxify_fmu(fmu: FMU, host: str, port: int):
+    """Proxifies an FMU
+
+    Generates fmu-proxy (NTNU-IHB/fmu-proxify)
+    """
+    remote_string = f"--remote={host}:{port}"
+    command = (f'fmu-proxify {fmu.file.name} {remote_string}')
+    try:
+        subprocess.run(command, timeout=60)
+    except subprocess.TimeoutExpired:
+        logger.exception(f'Timeout occured when calling {command}.')
 
 
 def _shrink_dict(dictionary, make_unique=None):
