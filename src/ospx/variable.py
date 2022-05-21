@@ -23,7 +23,7 @@ class Variable():
             self.causality = properties['variability']
 
     def _get_fmi_data_type(self, arg):
-        """estimate the data type, if available
+        """Returns the fmi data type of the passed in argument (best guess)
         """
         if isinstance(arg, int):
             return 'Integer'

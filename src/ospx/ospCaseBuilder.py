@@ -3,12 +3,9 @@ import logging
 # from msilib.schema import Component
 import os
 import re
-import subprocess
-from collections import OrderedDict
 from pathlib import Path
 from shutil import copyfile
-from typing import MutableMapping, Sequence, Union
-from zipfile import ZipFile
+from typing import Sequence, Union
 
 import graphviz as gv
 from dictIO.cppDict import CppDict
@@ -17,12 +14,9 @@ from dictIO.dictWriter import DictWriter
 from dictIO.formatter import XmlFormatter
 from dictIO.utils.counter import BorgCounter
 
-from ospx.fmu import FMU
 from ospx.component import Component
-
-from ospx.utils.zip import (
-    rename_file_in_zip,
-)
+from ospx.fmu import FMU
+from ospx.utils.dict import shrink_dict
 
 
 logger = logging.getLogger(__name__)
@@ -85,7 +79,7 @@ class OspCaseBuilder():
         case.read_simulation_properties()
 
         # register and copy to local case folder all FMUs referenced by components in the case dict
-        case.register_fmus()
+        case.copy_fmus_from_library()
 
         # get models, get simulators
         case.read_components()
@@ -96,11 +90,11 @@ class OspCaseBuilder():
             return
 
         # this dict is to put into every NAME_OspModelDescription.xml
-        case.unit_definitions = _shrink_dict(
-            case.unit_definitions, make_unique=['_attributes', 'name']
+        case.unit_definitions = shrink_dict(
+            case.unit_definitions, unique_keys=['_attributes', 'name']
         )
 
-        case.variables = _shrink_dict(case.variables, make_unique=['_attributes', 'name'])
+        case.variables = shrink_dict(case.variables, unique_keys=['_attributes', 'name'])
 
         case.get_connectors()   # useful to sort connections later
 
@@ -204,12 +198,12 @@ class OspSimulationCase():
         # self.simulation_dict = dict({k:str(v) for k, v in self.config['simulation'].items() if re.match('(StartTime|BaseStepSize|Algorithm)', k)})
         self.simulation = dict(self.case_dict['run']['simulation'].items())
 
-    def register_fmus(self):
-        """Register all FMUs referenced by components in the case dict, and copy them into the case folder.
+    def copy_fmus_from_library(self):
+        """Copies all referenced FMUs from the library into the case folder.
 
         Important: In case multiple components reference the same FMU, these are registered and copied only once.
         """
-        logger.info('register FMUs referenced in case dict')    # 0
+        logger.info('Copy referenced FMUs from library into case folder')   # 0
 
         components = self.case_dict['systemStructure']['components']
 
@@ -243,16 +237,20 @@ class OspSimulationCase():
         self.components.clear()
         for component_name, component_properties in components.items():
             component = Component(component_name, component_properties)     # type: ignore
-                                                                            # Have each component point to the correct FMU instance it references
-            fmu_file_name_in_case_dict: str = component_properties['fmu']
-            fmu_file_name = Path(fmu_file_name_in_case_dict).name
-            component.fmu = self.fmus[fmu_file_name]
             self.components[component_name] = component
 
-            self._prepare_component(
-                component,
-                write_osp_model_description=True,
-            )
+            if not self.inspect_mode:
+                component.fmu.set_start_values(component.initial_values)
+                # self.attributes.update(
+                #     {component.name: model_description['_xmlOpts']['_rootAttributes']}
+                # )
+
+                component._write_osp_model_description()
+
+            if self.inspect_mode:
+                # clean up
+                logger.info(f'inspect mode: delete {component.fmu.file.name}')
+                component.fmu.file.unlink()
 
         return
 
@@ -358,7 +356,7 @@ class OspSimulationCase():
         """
 
         # osp_ss meta data
-        osp_ss: dict = {
+        osp_system_structure: dict = {
             k: v
             for k,
             v in self.simulation.items()
@@ -367,19 +365,31 @@ class OspSimulationCase():
 
         # models (simulators)
         # ('simulators' is OSP terminology. Any instance of a model is referred to as a 'simulator' in OSP.)
-        models: dict = {
-            k1: {
-                k2:
-                {k3: v3
-                 for k3, v3 in self.components[k1][k2].items()
-                 if not re.match('fmu', k3)}
-                for k2 in self.components[k1].keys()
+        simulators: dict = {}
+        for index, (_, component) in enumerate(self.components.items()):
+            simulator_key = f'{index:06d}_Simulator'
+            simulator_properties = {
+                'name': component.name,
+                'source': component.fmu.file.name,
+                'stepSize': component.step_size
             }
-            for k1 in self.components.keys()
-        }
-        osp_ss['Simulators'] = models
-        osp_ss['Connections'] = self.connections
-        osp_ss['_xmlOpts'] = {
+            if component.initial_values:
+                simulator_properties['InitialValues'] = {}
+                for index, (_, variable) in enumerate(component.initial_values.items()):
+                    initial_value_key = f'{index:06d}_InitialValue'
+                    initial_value_properties: dict = {
+                        'variable': variable.name,
+                        variable.fmi_data_type: {
+                            'value': variable.initial_value
+                        },
+                    }
+                    simulator_properties['InitialValues'][initial_value_key
+                                                          ] = initial_value_properties
+            simulators[simulator_key] = simulator_properties
+
+        osp_system_structure['Simulators'] = simulators
+        osp_system_structure['Connections'] = self.connections
+        osp_system_structure['_xmlOpts'] = {
             '_nameSpaces': {
                 'osp': 'https://opensimulationplatform.com/xsd/OspModelDescription-1.0.0.xsd'
             },
@@ -387,9 +397,9 @@ class OspSimulationCase():
         }
 
         # Write OspSystemStructure.xml
-        target_file_path = Path.cwd() / 'OspSystemStructure.xml'
+        target_file = self.case_folder / 'OspSystemStructure.xml'
         formatter = XmlFormatter()
-        DictWriter.write(osp_ss, target_file_path, formatter=formatter)
+        DictWriter.write(osp_system_structure, target_file, formatter=formatter)
 
         self._xml_sub_wrong_namespace(
             'OspSystemStructure.xml',
@@ -423,53 +433,43 @@ class OspSimulationCase():
             }
         }
 
-        # models (elements)
+        # elements
         # (an 'element' in ssd equals what is a 'simulator' in osp_ss: An instance of a model.)
-        models = {}
-        for key, item in self.components.items():
+        elements = {}
+        for component_key, component in self.components.items():
+            connectors = {
+                f'{self.counter():06d}_Connector': {
+                    '_attributes': {
+                        'name': self.connectors[connector_key]['reference'],
+                        'kind': self.connectors[connector_key]['type']
+                    },
+                    'Real': {},
+                }
+                for connector_key in self.connectors
+                if self.connectors[connector_key]['component'] == component.name
+            }
 
-            connectors = dict({})
-
-            for key1, item1 in self.connectors.items():
-                i = self.counter()
-
-                if self.connectors[key1]['component'] == self.components[key]['_attributes']['name'
-                                                                                             ]:
-                    connectors['%06i_Connector' % i] = {
-                        '_attributes': {
-                            'name': self.connectors[key1]['reference'],
-                            'kind': self.connectors[key1]['type']
-                        },
-                        'Real': {},
-                    }
-            # parameter_bindings = {}
-
-            j = self.counter()
-            models['%06i_Component' % j] = {
+            elements[f'{self.counter():06d}_Component'] = {
                 '_attributes': {
-                    'name': self.components[key]['_attributes']['name'],
-                    'source': self.components[key]['_attributes']['source'],
+                    'name': component.name,
+                    'source': component.fmu,
                 },
-                'Connectors': connectors,                                       # 'ParameterBindings': parameter_bindings,
+                'Connectors': connectors,
             }
 
         # connections
-        connections = {}
-        for key, item in self.connections.items():
-            i = self.counter()
-
-            connections['%06i_Connection' % i] = {
+        connections = {
+            f'{self.counter():06d}_Connection': {
                 '_attributes': {
-                    'startElement':
-                    self.connections[key]['000000_Variable']['_attributes']['simulator'],
-                    'startConnector':
-                    self.connections[key]['000000_Variable']['_attributes']['name'],
-                    'endElement':
-                    self.connections[key]['000001_Variable']['_attributes']['simulator'],
-                    'endConnector':
-                    self.connections[key]['000001_Variable']['_attributes']['name'],
+                    'startElement': connection['000000_Variable']['_attributes']['simulator'],
+                    'startConnector': connection['000000_Variable']['_attributes']['name'],
+                    'endElement': connection['000001_Variable']['_attributes']['simulator'],
+                    'endConnector': connection['000001_Variable']['_attributes']['name'],
                 }
             }
+            for _,
+            connection in self.connections.items()
+        }
 
         ssd = {
             'DefaultExperiment': settings,
@@ -478,7 +478,7 @@ class OspSimulationCase():
                     'name': self.name,
                     'description': self.name,
                 },
-                'Elements': models,
+                'Elements': elements,
                 'Connections': connections,
             },
             '_xmlOpts': {
@@ -634,24 +634,24 @@ class OspSimulationCase():
 
         cg = self._apply_styles(cg, styles)
 
-        for key in self.components.keys():
+        for _, component in self.components.items():
 
-            label_key, label = self._set_node_label(self.components[key]['_attributes']['name'], self.components[key])
+            label_key, label = self._set_node_label(component.name, component)
             # var_keys = self._find_numbered_key_by_string(self.models[key]['InitialValues'], 'InitialValue')
             # variables = {}
             label = self._create_table(
                 label_key,
                 {
-                    'source:': self.components[key]['_attributes']['source'],
-                    'variables:': '',                                           # 'stepsize:':self.models[key]['_attributes']['stepSize'],
+                    'source:': component.fmu,
+                    'variables:': '',           # 'stepsize:':self.models[key]['_attributes']['stepSize'],
                 }
             )
 
-            if re.search(input_names, self.components[key]['_attributes']['name']):
+            if re.search(input_names, component.name):
                 shape = 'diamond'
                 style = 'filled,rounded'
                 fillcolor = '#FFFFFF'
-            elif re.search(basic_op_names, self.components[key]['_attributes']['name'], re.I):
+            elif re.search(basic_op_names, component.name, re.I):
                 # label = self._create_table(label_key, {'source:':self.models_dict[key]['_attributes']['source'], 'stepsize:':self.models_dict[key]['_attributes']['stepSize']})
                 label = label
                 shape = 'square'
@@ -674,11 +674,11 @@ class OspSimulationCase():
                 fillcolor=fillcolor
             )
 
-        for key in self.connections:
+        for connection_key, connection in self.connections.items():
 
-            from_key = self.connections[key]['000000_Variable']['_attributes']['simulator']
-            to_key = self.connections[key]['000001_Variable']['_attributes']['simulator']
-            label = self._set_edge_label(key, self.connections[key])
+            from_key = connection['000000_Variable']['_attributes']['simulator']
+            to_key = connection['000001_Variable']['_attributes']['simulator']
+            label = self._set_edge_label(connection_key, connection)
 
             if re.search(input_names, from_key, re.I):
                 label = 'input\n%s' % label
@@ -701,8 +701,8 @@ class OspSimulationCase():
                 style = 'bold'
                 color = 'black'
                 fontcolor = 'black'
-                penwidth = '%i' % int(round((len(self.connections[key]))**1.5, 0)),
-                weight = '%i' % int(round((len(self.connections[key]))**1.5, 0)),
+                penwidth = '%i' % int(round((len(connection))**1.5, 0)),
+                weight = '%i' % int(round((len(connection))**1.5, 0)),
 
             cg.edge(
                 from_key,
@@ -739,10 +739,9 @@ class OspSimulationCase():
         }
 
         # append model
-        for m_key, m_item in self.components.items():
+        for _, component in self.components.items():
             last_index = sum(
-                c_item['component'] == m_item['_attributes']['name'] for _,
-                c_item in self.connectors.items()
+                c_item['component'] == component.name for _, c_item in self.connectors.items()
             )
 
             # Time, StepCount, conn0, conn1, etc from modelDescription.xml ModelVariables
@@ -751,109 +750,12 @@ class OspSimulationCase():
             # columns = [0, 1]+[x+2 for x in range(last_index)]
             columns = [0, 1] + [x + 2 for x in range(last_index)]   # f*** StepCount
 
-            watch_dict['datasources'].update({m_item['_attributes']['name']: {'columns': columns}})
+            watch_dict['datasources'].update({component.name: {'columns': columns}})
 
         target_file_path = Path.cwd() / 'watchDict'
         DictWriter.write(watch_dict, target_file_path, mode='a')
 
-    def _prepare_component(
-        self,
-        component: Component,
-        write_osp_model_description: bool = False,
-    ):
-        """Writes OspModelDescription.xml and sets / initializes its parameters to their case specific values.
-        """
-        source_fmu_file = Path(self.lib_source) / Path(fmu_file_name)
-        target_fmu_file = self.case_folder / Path(f'{component}.fmu')
-        target_xml_file = self.case_folder / Path(f'{component}_OspModelDescription.xml')
-
-        # if not in "inspect mode"
-        # also change modelDescription.xml (in zip file) for completeness
-        if not self.inspect_mode:
-            component.fmu.set_start_values(component.variables_with_initial_values)
-            self.attributes.update(
-                {component.name: model_description['_xmlOpts']['_rootAttributes']}
-            )
-
-        if not self.inspect_mode:
-
-            # Copy FMU and rename all dll's therein.
-            # required by STC
-            # @TODO: @Frank: Why is this necessary?
-            # Copying and altering the FMU should only be necessary in case of remote access (-> proxification).
-            # But as long as proxification isn't required, there should be no need to copy and alter the FMU?
-            # CLAROS, 2022-05-17
-            self._generate_copy(
-                target_fmu_file, fmu_name, component, remote_access, generate_proxy
-            )
-            # proxify_fmu()
-
-        if write_osp_model_description is True and not self.inspect_mode:
-            self._write_osp_model_description(target_xml_file)
-
-        if self.inspect_mode is True:
-            # final clean if --inspect
-            logger.info(f'rm {target_fmu_file}')
-            os.remove(target_fmu_file)
-
         return
-
-    def _write_osp_model_description(self, target_xml_file: Path):
-        """writing OspModelDescription.xml
-        """
-        osp_md = dict({'UnitDefinitions': self.unit_definitions})
-
-        osp_md['VariableGroups'] = {}
-
-        temp_dict = dict({})
-
-        for key, item in self.variables.items():
-
-            real_key = ''
-            try:
-                real_key = self._find_numbered_key_by_string(item, 'Real$')[0]
-                if 'quantity' in item[real_key]['_attributes'].keys():
-                    quantity_name = item[real_key]['_attributes']['quantity']
-                    quantity_unit = item[real_key]['_attributes']['unit']
-                else:
-                    quantity_name = 'UNKNOWN'
-                    quantity_unit = 'UNKNOWN'
-
-            except Exception:
-                logger.warning(f'no quantity or unit given for {key}')
-                quantity_name = 'UNKNOWN'
-                quantity_unit = 'UNKNOWN'
-
-            i = self.counter()
-            temp_dict['%06i_Generic' % i] = {
-                '_attributes': {
-                    'name': quantity_name
-                },
-                quantity_name: {
-                    '_attributes': {
-                        'name': quantity_name
-                    },
-                    'Variable': {
-                        '_attributes': {
-                            'ref': item['_attributes']['name'],
-                            'unit': quantity_unit,
-                        }
-                    },
-                },
-            }
-
-        # this is the content of OspModelDescription
-        osp_md['VariableGroups'] = temp_dict
-
-        # _xmlOpts
-        osp_md['_xmlOpts'] = {
-            '_nameSpaces': {
-                'osp': 'https://opensimulationplatform.com/xsd/OspModelDescription-1.0.0.xsd'
-            },
-            '_rootTag': 'ospModelDescription',
-        }
-
-        DictWriter.write(osp_md, target_xml_file)
 
     def _xml_sub_wrong_namespace(self, file_name, subst: Sequence[str]):
         """Substitute namespace
@@ -910,97 +812,3 @@ class OspSimulationCase():
         string += '</TABLE>\n>'
 
         return string
-
-    def _generate_copy(
-        self,
-        target_fmu_file: Path,
-        fmu_name: str,
-        model_name: str,
-        remote_access: Union[MutableMapping, None],
-        generate_proxy: bool
-    ):
-        '''generate_proxy and remote_access are relatives:
-        there is no remote acess without generating proxy.
-        but nowadays, all fmu uploaded to STC needs special "generate_proxy" treatment, now called generate copy
-        the problem is, that I could not find so far a way to host one fmu in model library (STC) and using it several times in the same simulation
-        This might be solved in the future
-        '''
-        # read file names of all *.dll files contained in target_fmu_file
-        with ZipFile(target_fmu_file, 'r') as document:
-            files_to_modify = [
-                file.filename
-                for file in document.infolist()
-                if re.search(r'.*\.dll$', file.filename)
-            ]
-
-        # rename first from ['_attributes']['fmu'] to ['_attributes']['source']
-        destination_file_names = [re.sub(fmu_name, model_name, file) for file in files_to_modify]
-
-        for file_name, new_file_name in zip(files_to_modify, destination_file_names):
-            logger.info(
-                f'{model_name} generate_proxy or modify: renaming {file_name} to {new_file_name}'
-            )
-            rename_file_in_zip(target_fmu_file, file_name, new_file_name)
-
-        new_name = f'{model_name}-proxy' if generate_proxy else model_name  # change the name only in case fmu is to be proxified
-
-        # update models_dict
-        for _, model_properties in self.components.items():
-
-            if model_properties['_attributes']['name'] == model_name:
-                logger.info(
-                    f'{model_name} generate_proxy: renaming {model_name} to {new_name} / {new_name}.fmu'
-                )
-
-                model_properties['_attributes']['name'] = new_name
-                model_properties['_attributes']['source'] = f'{new_name}.fmu'
-
-        if remote_access:
-            # Proxify the FMU
-            remote_string = f"--remote={remote_access['host']}:{remote_access['port']}"
-            command = (f'fmu-proxify {model_name}.fmu {remote_string}')
-            try:
-                subprocess.run(command, timeout=60)
-            except subprocess.TimeoutExpired:
-                logger.exception(f'Timeout occured when calling {command}.')
-
-
-def proxify_fmu(fmu: FMU, host: str, port: int):
-    """Proxifies an FMU
-
-    Generates fmu-proxy (NTNU-IHB/fmu-proxify)
-    """
-    remote_string = f"--remote={host}:{port}"
-    command = (f'fmu-proxify {fmu.file.name} {remote_string}')
-    try:
-        subprocess.run(command, timeout=60)
-    except subprocess.TimeoutExpired:
-        logger.exception(f'Timeout occured when calling {command}.')
-
-
-def _shrink_dict(dictionary, make_unique=None):
-    """function removes doubled entries in dicts
-    """
-    make_unique = make_unique or ['']
-    make_unique = "['" + "']['".join(make_unique) + "']"
-    # sort an ordered dict for attribute (child) where the dict is to make unique for
-    eval_string = f'sorted(dictionary.items(), key=lambda x: x[1]{make_unique})'
-
-    # list doubles and remember for deleting
-    seen = set([])
-    remove_key = []
-
-    for key, value in OrderedDict(eval(eval_string)).items():
-        proove_value = eval(f'value{make_unique}')
-        if proove_value in seen:
-            remove_key.append(key)
-        else:
-            seen.add(eval(f'value{make_unique}'))
-
-    out_dict = dict({})
-
-    for key in dictionary.keys():
-        if key not in remove_key:
-            out_dict[key] = dictionary[key]
-
-    return out_dict

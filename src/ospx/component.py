@@ -1,8 +1,14 @@
-from dataclasses import dataclass
 import logging
+from dataclasses import dataclass
+from pathlib import Path
 from typing import MutableMapping, Union
-from ospx.variable import Variable
+
+from dictIO.dictWriter import DictWriter
+from dictIO.utils.counter import BorgCounter
+
 from ospx.fmu import FMU
+from ospx.utils.dict import find_key, find_type_identifier_in_keys
+from ospx.variable import Variable
 
 
 logger = logging.getLogger(__name__)
@@ -22,12 +28,26 @@ class Component():
         self.generate_proxy = False
         self.fmu: FMU
         self.step_size: float = 1.
-        self.variables_with_initial_values: dict[str, Variable] = {}
+        self.initial_values: dict[str, Variable] = {}
         self.generate_proxy: bool = False
         self.remote_access: Union[RemoteAccess, None] = None
+        self.counter = BorgCounter()
+
+        if 'fmu' in properties:
+            fmu_file_name = properties['fmu']
+            fmu_file = Path(fmu_file_name)
+            if not fmu_file.exists():
+                logger.exception(
+                    f"component {self.name}: referenced FMU '{fmu_file_name}' not found."
+                )
+                raise FileNotFoundError(fmu_file)
+            self.fmu = FMU(fmu_file)
+        else:
+            logger.error(f"component {self.name}: 'fmu' element missing in case dict.")
+            return
 
         if 'initialize' in properties:
-            self.variables_with_initial_values.update(
+            self.initial_values.update(
                 {
                     name: Variable(name, properties)
                     for name,
@@ -45,10 +65,85 @@ class Component():
                     port=properties['remoteAccess']['port'],
                 )
 
-        if self.generate_proxy and not self.remote_access:
-            logger.error(
-                f"component {self.name}: 'generate_proxy' set to True, but the 'remoteAccess' element is not correctly defined."
-            )
+        if self.generate_proxy:
+            if not self.remote_access:
+                logger.error(
+                    f"component {self.name}: 'generate_proxy' set to True, but the 'remoteAccess' element is not correctly defined."
+                )
+            elif not self.remote_access.host:
+                logger.error(
+                    f"component {self.name}: 'remoteAccess' element is defined, but host is not specified."
+                )
+            elif not self.remote_access.port:
+                logger.error(
+                    f"component {self.name}: 'remoteAccess' element is defined, but port is not specified."
+                )
+            else:
+                self.fmu = self.fmu.proxify(self.remote_access.host, self.remote_access.port)
+                # self.name = self.fmu.file.stem
+
+    def _write_osp_model_description(self):
+        """writing OspModelDescription.xml
+        """
+        osp_model_description_file = self.fmu.file.parent.absolute(
+        ) / f'{self.name}_OspModelDescription.xml'
+
+        osp_model_description = {
+            'UnitDefinitions': self.fmu.unit_definitions,
+            'VariableGroups': {},
+        }
+
+        variable_groups = {}
+
+        for variable_key, variable_properties in self.fmu.variables.items():
+
+            type_key = ''
+            try:
+                type_identifier = find_type_identifier_in_keys(variable_properties)
+                type_key = find_key(variable_properties, f'{type_identifier}$')
+                if 'quantity' in variable_properties[type_key]['_attributes']:
+                    quantity_name = variable_properties[type_key]['_attributes']['quantity']
+                    quantity_unit = variable_properties[type_key]['_attributes']['unit']
+                else:
+                    quantity_name = 'UNKNOWN'
+                    quantity_unit = 'UNKNOWN'
+
+            except Exception:
+                logger.warning(
+                    f'component {self.name}: no quantity or unit defined for variable {variable_key}'
+                )
+                quantity_name = 'UNKNOWN'
+                quantity_unit = 'UNKNOWN'
+
+            variable_groups[f'{self.counter():06d}_Generic'] = {
+                '_attributes': {
+                    'name': quantity_name
+                },
+                quantity_name: {
+                    '_attributes': {
+                        'name': quantity_name
+                    },
+                    'Variable': {
+                        '_attributes': {
+                            'ref': variable_properties['_attributes']['name'],
+                            'unit': quantity_unit,
+                        }
+                    },
+                },
+            }
+
+        # this is the content of OspModelDescription
+        osp_model_description['VariableGroups'] = variable_groups
+
+        # _xmlOpts
+        osp_model_description['_xmlOpts'] = {
+            '_nameSpaces': {
+                'osp': 'https://opensimulationplatform.com/xsd/OspModelDescription-1.0.0.xsd'
+            },
+            '_rootTag': 'ospModelDescription',
+        }
+
+        DictWriter.write(osp_model_description, osp_model_description_file)
 
 
 '''
