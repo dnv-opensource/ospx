@@ -39,11 +39,11 @@ def shrink_dict(dict: MutableMapping, unique_keys: Union[list[str], None] = None
     seen = set([])
     remove_key = []
 
-    for key in OrderedDict(eval(eval_string)):
-        proove_value = eval(f'value{unique_keys}')
+    for key, value in OrderedDict(eval(eval_string)).items():  # value is necessary here as it is used in the eval statements below. Do not delete it.
+        proove_value = eval(f'value{unique_keys_string}')
         if proove_value in seen:
             remove_key.append(key)
         else:
-            seen.add(eval(f'value{unique_keys}'))
+            seen.add(eval(f'value{unique_keys_string}'))
 
     return {key: dict[key] for key in dict.keys() if key not in remove_key}

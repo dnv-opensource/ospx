@@ -82,7 +82,7 @@ class Component():
                 self.fmu = self.fmu.proxify(self.remote_access.host, self.remote_access.port)
                 # self.name = self.fmu.file.stem
 
-    def _write_osp_model_description(self):
+    def write_osp_model_description(self):
         """writing OspModelDescription.xml
         """
         osp_model_description_file = self.fmu.file.parent.absolute(
