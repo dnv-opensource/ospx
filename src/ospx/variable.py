@@ -20,7 +20,7 @@ class Variable():
         if 'causality' in properties:
             self.causality = properties['causality']
         if 'variability' in properties:
-            self.causality = properties['variability']
+            self.variability = properties['variability']
 
     def _get_fmi_data_type(self, arg):
         """Returns the fmi data type of the passed in argument (best guess)

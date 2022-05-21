@@ -16,7 +16,7 @@ from dictIO.utils.counter import BorgCounter
 
 from ospx.component import Component
 from ospx.fmu import FMU
-from ospx.utils.dict import shrink_dict
+from ospx.utils.dict import shrink_dict, find_key
 
 
 logger = logging.getLogger(__name__)
@@ -137,7 +137,7 @@ class OspSimulationCase():
         self.name: str = self.case_dict['run']['simulation']['name']
         logger.info(f'initalizing simulation case {self.name}')     # 0
 
-        self.baseStepSize: str = self.case_dict['run']['simulation']['baseStepSize']
+        self.baseStepSize: float = self.case_dict['run']['simulation']['baseStepSize']
 
         self.case_folder: Path = Path.cwd()
         for key in self.case_dict['_environment'].keys():
@@ -237,15 +237,15 @@ class OspSimulationCase():
         self.components.clear()
         for component_name, component_properties in components.items():
             component = Component(component_name, component_properties)     # type: ignore
+            component.step_size = self.baseStepSize
             self.components[component_name] = component
 
             if not self.inspect_mode:
                 component.fmu.set_start_values(component.initial_values)
+                component.write_osp_model_description()
                 # self.attributes.update(
                 #     {component.name: model_description['_xmlOpts']['_rootAttributes']}
                 # )
-
-                component._write_osp_model_description()
 
             if self.inspect_mode:
                 # clean up
@@ -324,7 +324,7 @@ class OspSimulationCase():
         logger.info(f'unit{delim}factor{delim}offset\n')                        # 1
 
         for key, item in self.unit_definitions.items():
-            real_key = self._find_numbered_key_by_string(item, 'DisplayUnit$')[0]
+            real_key = find_key(item, 'DisplayUnit$')[0]
             logger.info(
                 f"{item['_attributes']['name']}{delim}{item[real_key]['_attributes']['factor']}{delim}{item[real_key]['_attributes']['offset']}"
             )
@@ -334,7 +334,7 @@ class OspSimulationCase():
 
         for key, item in self.variables.items():
             try:
-                real_key = self._find_numbered_key_by_string(item, 'Real$')[0]
+                real_key = find_key(item, 'Real$')[0]
                 string = f"{item['_origin']}{delim}{item['_attributes']['name']}{delim}{item[real_key]['_attributes']['unit']}"
 
             except Exception:
@@ -369,20 +369,27 @@ class OspSimulationCase():
         for index, (_, component) in enumerate(self.components.items()):
             simulator_key = f'{index:06d}_Simulator'
             simulator_properties = {
-                'name': component.name,
-                'source': component.fmu.file.name,
-                'stepSize': component.step_size
+                '_attributes': {
+                    'name': component.name,
+                    'source': component.fmu.file.name,
+                    'stepSize': component.step_size
+                }
             }
             if component.initial_values:
                 simulator_properties['InitialValues'] = {}
                 for index, (_, variable) in enumerate(component.initial_values.items()):
                     initial_value_key = f'{index:06d}_InitialValue'
                     initial_value_properties: dict = {
-                        'variable': variable.name,
+                        '_attributes': {
+                            'variable': variable.name
+                        },
                         variable.fmi_data_type: {
-                            'value': variable.initial_value
+                            '_attributes': {
+                                'value': variable.initial_value
+                            },
                         },
                     }
+
                     simulator_properties['InitialValues'][initial_value_key
                                                           ] = initial_value_properties
             simulators[simulator_key] = simulator_properties
@@ -452,7 +459,7 @@ class OspSimulationCase():
             elements[f'{self.counter():06d}_Component'] = {
                 '_attributes': {
                     'name': component.name,
-                    'source': component.fmu,
+                    'source': component.fmu.file.name,
                 },
                 'Connectors': connectors,
             }
@@ -559,7 +566,7 @@ class OspSimulationCase():
         factors_list = []
         offsets_list = []
         for _, item in self.unit_definitions.items():
-            display_unit_key = self._find_numbered_key_by_string(item, 'DisplayUnit$')[0]
+            display_unit_key = find_key(item, 'DisplayUnit$')[0]
             unit_list.append(item['_attributes']['name'])
             display_unit_list.append(item[display_unit_key]['_attributes']['name'])
             factors_list.append(item[display_unit_key]['_attributes']['factor'])
@@ -637,7 +644,7 @@ class OspSimulationCase():
         for _, component in self.components.items():
 
             label_key, label = self._set_node_label(component.name, component)
-            # var_keys = self._find_numbered_key_by_string(self.models[key]['InitialValues'], 'InitialValue')
+            # var_keys = find_key(self.models[key]['InitialValues'], 'InitialValue')
             # variables = {}
             label = self._create_table(
                 label_key,
@@ -769,16 +776,6 @@ class OspSimulationCase():
             f.write(buffer)
 
         return
-
-    def _find_numbered_key_by_string(self, dd, search_string):
-        """find the element name for an (anyways unique) element
-        after it was preceeded by a number to keep the sequence of xml elements
-        as this is not the "nature" of dicts
-        """
-        try:
-            return [k for k in dd.keys() if re.search(search_string, k)]
-        except Exception:
-            return ['ELEMENTNOTFOUND']
 
     def _apply_styles(self, digraph, styles):
         digraph.graph_attr.update(('graph' in styles and styles['graph']) or {})

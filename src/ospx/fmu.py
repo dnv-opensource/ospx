@@ -1,3 +1,4 @@
+from copy import deepcopy
 import logging
 import os
 import platform
@@ -5,7 +6,7 @@ import re
 from datetime import date, datetime
 from pathlib import Path
 from shutil import copyfile
-from typing import MutableMapping, Union
+from typing import Union
 from zipfile import ZipFile
 
 from dictIO.cppDict import CppDict
@@ -36,16 +37,16 @@ class FMU():
             raise FileNotFoundError(file)
 
         self.file: Path = file
+        self.model_description: CppDict = self.read_model_description()
         self.counter = BorgCounter()
 
     @property
     def unit_definitions(self) -> dict:
         # give add. index for distinguishing between modelDescription.xml's containing one single ScalarVariable, otherwise it will be overwritten here
         unit_definitions: dict = {}
-        model_description: CppDict = self.read_model_description()
-        unit_definitions_key: str = find_key(model_description, 'UnitDefinitions$')
+        unit_definitions_key: str = find_key(self.model_description, 'UnitDefinitions$')
         if unit_definitions_key != 'ELEMENTNOTFOUND':
-            unit_definitions = dict(model_description[unit_definitions_key].items())
+            unit_definitions = dict(self.model_description[unit_definitions_key].items())
             # make always unique units list and keep xml files clean
             unit_definitions = shrink_dict(unit_definitions, unique_keys=['_attributes', 'name'])
         return unit_definitions
@@ -59,23 +60,33 @@ class FMU():
         if file_content := read_file_content_from_zip(self.file, 'modelDescription.xml'):
             model_description = xml_parser.parse_string(file_content, model_description)
 
+        self.model_description = model_description
+
         return model_description
 
-    def write_model_description(self, model_description: CppDict):
+    def write_model_description(
+        self, model_description: Union[CppDict, None] = None, write_inside_fmu: bool = False
+    ):
         """Save updated model_description both inside FMU as well as separate file in the FMUs directory
         """
-        model_description['_xmlOpts']['_nameSpaces'] = {
+        if model_description:
+            self.model_description = model_description
+
+        self.model_description['_xmlOpts']['_nameSpaces'] = {
             'xs': 'file:///C:/Software/OSP/xsd/fmi3ModelDescription.xsd'
         }
 
         formatter = XmlFormatter()
-        formatted_xml = formatter.to_string(model_description)
+        formatted_xml = formatter.to_string(self.model_description)
 
         logger.info(f'{self.file.name}: write modelDescription.xml')
 
-        remove_files_from_zip(self.file, 'modelDescription.xml')
-        add_file_content_to_zip(self.file, 'modelDescription.xml', formatted_xml)
+        # Write internal modelDescription.xml (inside FMU)
+        if write_inside_fmu:
+            remove_files_from_zip(self.file, 'modelDescription.xml')
+            add_file_content_to_zip(self.file, 'modelDescription.xml', formatted_xml)
 
+        # Write external modelDescription.xml (separate file, beside FMU)
         external_file = self.file.parent.absolute() / f'{self.file.stem}_ModelDescription.xml'
         with open(external_file, 'w') as f:
             f.write(formatted_xml)
@@ -85,19 +96,18 @@ class FMU():
     def clean_solver_internal_variables(self):
         """Clean solver internal variables, such as '_iti_...'
         """
-        model_description: CppDict = self.read_model_description()
-        model_variables: dict = model_description[find_key(model_description, 'ModelVariables$')]
-        model_name = model_description['_xmlOpts']['_rootAttributes']['modelName']
+        model_variables: dict = self.model_description[
+            find_key(self.model_description, 'ModelVariables$')]
+        model_name = self.model_description['_xmlOpts']['_rootAttributes']['modelName']
         for model_variable_key in model_variables:
             if '_origin' in model_variables[model_variable_key]:
                 model_variables[model_variable_key]['_origin'] = model_name
-        self.write_model_description(model_description)
 
     @property
     def variables(self) -> dict:
         # note: "_" and "settings" are proprietary variables from iti and get removed
-        model_description: CppDict = self.read_model_description()
-        model_variables: dict = model_description[find_key(model_description, 'ModelVariables$')]
+        model_variables: dict = self.model_description[
+            find_key(self.model_description, 'ModelVariables$')]
         return {
             f"{self.counter():06d}_" + re.sub(r'^\d{6}_', '', k): v
             for k,
@@ -115,8 +125,8 @@ class FMU():
             f'{self.file.name}: update start values of variables in modelDescription.xml'
         )                                                                                   # 2
 
-        model_description: CppDict = self.read_model_description()
-        model_variables: dict = model_description[find_key(model_description, 'ModelVariables$')]
+        model_variables: dict = self.model_description[
+            find_key(self.model_description, 'ModelVariables$')]
 
         names_of_variables_with_start_values: list[str] = [
             variable.name for _, variable in variables_with_start_values.items()
@@ -134,19 +144,18 @@ class FMU():
                 logger.info(
                     f'{self.file.name}: update start values for variable {model_variable_name}:\n'
                     f'\tstart:\t\t{variable_with_start_values.initial_value}\n'
-                    f'\tvariability:\t{variable_with_start_values.variability}\n'
-                    f'\tcausality:\t {variable_with_start_values.causality}'
+                    f'\tcausality:\t {variable_with_start_values.causality}\n'
+                    f'\tvariability:\t{variable_with_start_values.variability}'
                 )
 
                 model_variables[model_variable_key][type_key]['_attributes'][
                     'start'] = variable_with_start_values.initial_value
                 model_variables[model_variable_key]['_attributes'][
-                    'variability'] = variable_with_start_values.variability
-                model_variables[model_variable_key]['_attributes'][
                     'causality'] = variable_with_start_values.causality
+                model_variables[model_variable_key]['_attributes'][
+                    'variability'] = variable_with_start_values.variability
 
-        self._log_update_in_model_description(model_description)
-        self.write_model_description(model_description)
+        self._log_update_in_model_description()
 
     def copy(self, new_name: str):
         """Creates a copy of the FMU with a new name
@@ -158,7 +167,7 @@ class FMU():
             logger.error(
                 f'{self.file.name} copy: new name {new_name} is identical with existing name. copy() aborted.'
             )
-        model_description: CppDict = self.read_model_description()
+        new_model_description: CppDict = deepcopy(self.model_description)
         new_file = self.file.parent.absolute() / f'{new_name}.fmu'
 
         # Copy FMU
@@ -181,19 +190,20 @@ class FMU():
             rename_file_in_zip(new_file, dll_file_name, new_dll_file_name)
 
         # Rename <fmiModelDescription modelName> in modelDescription.xml
-        model_description['_xmlOpts']['_rootAttributes']['modelName'] = new_name
+        new_model_description['_xmlOpts']['_rootAttributes']['modelName'] = new_name
 
         # Rename <CoSimulation modelIdentifier> in modelDescription.xml
         # (STC requires consistency between <fmiModelDescription modelName> and <CoSimulation modelIdentifier>)
-        co_simulation: dict = model_description[find_key(model_description, 'CoSimulation$')]
+        co_simulation: dict = new_model_description[
+            find_key(new_model_description, 'CoSimulation$')]
         co_simulation['_attributes']['modelIdentifier'] = new_name
 
         # Log the update in modelDescription.xml
-        self._log_update_in_model_description(model_description)
+        self._log_update_in_model_description(new_model_description)
 
         # Write updated modelDescription.xml into new FMU
         new_fmu = FMU(new_file)
-        new_fmu.write_model_description(model_description)
+        new_fmu.write_model_description(new_model_description)
 
         return new_fmu
 
@@ -213,7 +223,10 @@ class FMU():
         proxy_fmu_file = self.file.parent.absolute() / f'{self.file.stem}-proxy.fmu'
         return FMU(proxy_fmu_file)
 
-    def _log_update_in_model_description(self, model_description: MutableMapping):
+    def _log_update_in_model_description(self, model_description: Union[CppDict, None] = None):
+
+        model_description = model_description or self.model_description
+
         logger.info(f'{self.file.name}: update <fmiModelDescription description>')  # 2
                                                                                     # Author
         old_author = model_description['_xmlOpts']['_rootAttributes']['author']
