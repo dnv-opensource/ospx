@@ -91,10 +91,10 @@ class OspCaseBuilder():
 
         # this dict is to put into every NAME_OspModelDescription.xml
         case.unit_definitions = shrink_dict(
-            case.unit_definitions, unique_keys=['_attributes', 'name']
+            case.unit_definitions, unique_key=['_attributes', 'name']
         )
 
-        case.variables = shrink_dict(case.variables, unique_keys=['_attributes', 'name'])
+        case.variables = shrink_dict(case.variables, unique_key=['_attributes', 'name'])
 
         case.get_connectors()   # useful to sort connections later
 
@@ -241,11 +241,12 @@ class OspSimulationCase():
             self.components[component_name] = component
 
             if not self.inspect_mode:
-                component.fmu.set_start_values(component.initial_values)
-                component.write_osp_model_description()
+                # component.fmu.set_start_values(component.initial_values)
+                # component.write_osp_model_description()
                 # self.attributes.update(
                 #     {component.name: model_description['_xmlOpts']['_rootAttributes']}
                 # )
+                pass
 
             if self.inspect_mode:
                 # clean up
@@ -324,7 +325,7 @@ class OspSimulationCase():
         logger.info(f'unit{delim}factor{delim}offset\n')                        # 1
 
         for key, item in self.unit_definitions.items():
-            real_key = find_key(item, 'DisplayUnit$')[0]
+            real_key = find_key(item, 'DisplayUnit$')
             logger.info(
                 f"{item['_attributes']['name']}{delim}{item[real_key]['_attributes']['factor']}{delim}{item[real_key]['_attributes']['offset']}"
             )
@@ -334,7 +335,7 @@ class OspSimulationCase():
 
         for key, item in self.variables.items():
             try:
-                real_key = find_key(item, 'Real$')[0]
+                real_key = find_key(item, 'Real$')
                 string = f"{item['_origin']}{delim}{item['_attributes']['name']}{delim}{item[real_key]['_attributes']['unit']}"
 
             except Exception:
@@ -566,7 +567,7 @@ class OspSimulationCase():
         factors_list = []
         offsets_list = []
         for _, item in self.unit_definitions.items():
-            display_unit_key = find_key(item, 'DisplayUnit$')[0]
+            display_unit_key = find_key(item, 'DisplayUnit$')
             unit_list.append(item['_attributes']['name'])
             display_unit_list.append(item[display_unit_key]['_attributes']['name'])
             factors_list.append(item[display_unit_key]['_attributes']['factor'])

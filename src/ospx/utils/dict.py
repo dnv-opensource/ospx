@@ -3,16 +3,16 @@ from collections import OrderedDict
 from typing import MutableMapping, Union
 
 
-def find_key(dict: MutableMapping, pattern: str) -> str:
+def find_key(dict: MutableMapping, pattern: str) -> Union[str, None]:
     """Finds the first key name in dict that matches the given pattern
     """
     try:
         return [k for k in dict.keys() if re.search(pattern, k)][0]
     except Exception:
-        return 'ELEMENTNOTFOUND'
+        return None
 
 
-def find_type_identifier_in_keys(dict: MutableMapping) -> str:
+def find_type_identifier_in_keys(dict: MutableMapping) -> Union[str, None]:
     """Finds the first key name in dict that contains one of the following type identifier strings:
     [Unknown|Real|Integer|String|Boolean]
     """
@@ -24,14 +24,14 @@ def find_type_identifier_in_keys(dict: MutableMapping) -> str:
         if key_without_index in key_list:
             type_identifier.append(key_without_index)
 
-    return type_identifier[0] if type_identifier else 'ELEMENTNOTFOUND'
+    return type_identifier[0] if type_identifier else None
 
 
-def shrink_dict(dict: MutableMapping, unique_keys: Union[list[str], None] = None) -> dict:
+def shrink_dict(dict: MutableMapping, unique_key: Union[list[str], None] = None) -> dict:
     """Identifies doubled entries in the passed in dict and returns a new dict with doubled entries removed.
     """
-    unique_keys = unique_keys or []
-    unique_keys_string: str = "['" + "']['".join(unique_keys) + "']"
+    unique_key = unique_key or []
+    unique_keys_string: str = "['" + "']['".join(unique_key) + "']"
     # sort an ordered dict for attribute (child) where the dict is to make unique for
     eval_string = f'sorted(dict.items(), key=lambda x: x[1]{unique_keys_string})'
 

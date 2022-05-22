@@ -1,3 +1,4 @@
+from copy import deepcopy
 import logging
 from dataclasses import dataclass
 from pathlib import Path
@@ -8,6 +9,7 @@ from dictIO.utils.counter import BorgCounter
 
 from ospx.fmu import FMU
 from ospx.utils.dict import find_key, find_type_identifier_in_keys
+from ospx.utils.fmi import get_fmi_data_type
 from ospx.variable import Variable
 
 
@@ -28,10 +30,11 @@ class Component():
         self.generate_proxy = False
         self.fmu: FMU
         self.step_size: float = 1.
-        self.initial_values: dict[str, Variable] = {}
+        self._initial_values: dict[str, Variable] = {}
         self.generate_proxy: bool = False
         self.remote_access: Union[RemoteAccess, None] = None
         self.counter = BorgCounter()
+        self._variables: dict[str, Variable]
 
         if 'fmu' in properties:
             fmu_file_name = properties['fmu']
@@ -47,13 +50,17 @@ class Component():
             return
 
         if 'initialize' in properties:
-            self.initial_values.update(
-                {
-                    name: Variable(name, properties)
-                    for name,
-                    properties in properties['initialize'].items()
-                }
-            )
+            for variable_name, variable_properties in properties['initialize'].items():
+                variable = Variable(name=variable_name)
+                if 'causality' in variable_properties:
+                    variable.causality = variable_properties['causality']
+                if 'variability' in variable_properties:
+                    variable.variability = variable_properties['variability']
+                if 'start' in variable_properties:
+                    variable.initial_value = variable_properties['start']
+                if not variable.fmi_data_type and variable.initial_value:
+                    variable.fmi_data_type = get_fmi_data_type(variable.initial_value)
+                self._initial_values[variable.name] = variable
 
         if 'generate_proxy' in properties:
             self.generate_proxy = properties['generate_proxy']
@@ -82,6 +89,26 @@ class Component():
                 self.fmu = self.fmu.proxify(self.remote_access.host, self.remote_access.port)
                 # self.name = self.fmu.file.stem
 
+        self._init_variables()
+
+    def _init_variables(self):
+        self._variables = deepcopy(self.fmu.variables)
+        for variable_name, variable in self._initial_values.items():
+            if variable.causality:
+                self._variables[variable_name].causality = variable.causality
+            if variable.variability:
+                self._variables[variable_name].variability = variable.variability
+            if variable.initial_value:
+                self._variables[variable_name].initial_value = variable.initial_value
+
+    @property
+    def initial_values(self) -> dict[str, Variable]:
+        return self._initial_values
+
+    @property
+    def variables(self) -> dict[str, Variable]:
+        return self._variables
+
     def write_osp_model_description(self):
         """writing OspModelDescription.xml
         """
@@ -95,25 +122,18 @@ class Component():
 
         variable_groups = {}
 
-        for variable_key, variable_properties in self.fmu.variables.items():
+        for variable_name, variable in self.variables.items():
 
-            type_key = ''
-            try:
-                type_identifier = find_type_identifier_in_keys(variable_properties)
-                type_key = find_key(variable_properties, f'{type_identifier}$')
-                if 'quantity' in variable_properties[type_key]['_attributes']:
-                    quantity_name = variable_properties[type_key]['_attributes']['quantity']
-                    quantity_unit = variable_properties[type_key]['_attributes']['unit']
-                else:
-                    quantity_name = 'UNKNOWN'
-                    quantity_unit = 'UNKNOWN'
-
-            except Exception:
+            if not variable.quantity:
                 logger.warning(
-                    f'component {self.name}: no quantity or unit defined for variable {variable_key}'
+                    f'component {self.name}: no quantity defined for variable {variable_name}'
                 )
-                quantity_name = 'UNKNOWN'
-                quantity_unit = 'UNKNOWN'
+            if not variable.unit:
+                logger.warning(
+                    f'component {self.name}: no unit defined for variable {variable_name}'
+                )
+            quantity_name = variable.quantity or 'UNKNOWN'
+            quantity_unit = variable.unit or 'UNKNOWN'
 
             variable_groups[f'{self.counter():06d}_Generic'] = {
                 '_attributes': {
@@ -125,7 +145,7 @@ class Component():
                     },
                     'Variable': {
                         '_attributes': {
-                            'ref': variable_properties['_attributes']['name'],
+                            'ref': variable_name,
                             'unit': quantity_unit,
                         }
                     },
