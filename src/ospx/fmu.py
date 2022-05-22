@@ -13,6 +13,7 @@ from dictIO.cppDict import CppDict
 from dictIO.formatter import XmlFormatter
 from dictIO.parser import XmlParser
 from dictIO.utils.counter import BorgCounter
+from ospx.utils.fmi import get_fmi_data_type
 
 from ospx.utils.dict import find_key, find_type_identifier_in_keys, shrink_dict
 from ospx.utils.zip import (
@@ -39,17 +40,6 @@ class FMU():
         self.file: Path = file
         self.model_description: CppDict = self.read_model_description()
         self.counter = BorgCounter()
-
-    @property
-    def unit_definitions(self) -> dict:
-        # give add. index for distinguishing between modelDescription.xml's containing one single ScalarVariable, otherwise it will be overwritten here
-        unit_definitions: dict = {}
-        unit_definitions_key: str = find_key(self.model_description, 'UnitDefinitions$')
-        if unit_definitions_key != 'ELEMENTNOTFOUND':
-            unit_definitions = dict(self.model_description[unit_definitions_key].items())
-            # make always unique units list and keep xml files clean
-            unit_definitions = shrink_dict(unit_definitions, unique_keys=['_attributes', 'name'])
-        return unit_definitions
 
     def read_model_description(self) -> CppDict:
         model_description = CppDict(Path('modelDescription.xml'))
@@ -104,16 +94,55 @@ class FMU():
                 model_variables[model_variable_key]['_origin'] = model_name
 
     @property
-    def variables(self) -> dict:
-        # note: "_" and "settings" are proprietary variables from iti and get removed
-        model_variables: dict = self.model_description[
-            find_key(self.model_description, 'ModelVariables$')]
-        return {
-            f"{self.counter():06d}_" + re.sub(r'^\d{6}_', '', k): v
+    def unit_definitions(self) -> dict:
+        unit_definitions: dict = {}
+        if unit_definitions_key := find_key(self.model_description, 'UnitDefinitions$'):
+            unit_definitions = self.model_description[unit_definitions_key]
+            # make sure unit definitions are unique (e.g. to keep XML files clean)
+            unit_definitions = shrink_dict(unit_definitions, unique_key=['_attributes', 'name'])
+        return unit_definitions
+
+    @property
+    def variables(self) -> dict[str, Variable]:
+        model_variables_key = find_key(self.model_description, 'ModelVariables$')
+        if not model_variables_key:
+            return {}
+        # Read model variables from model description
+        # (without "_" and "settings" as these are proprietary variables from iti)
+        model_variables = {
+            k: v
             for k,
-            v in model_variables.items()
+            v in self.model_description[model_variables_key].items()
             if not re.match('^(_|settings)', v['_attributes']['name'])
         }
+        # Translate variable attributes from model description into Variable objects
+        variables: dict[str, Variable] = {}
+        for v in model_variables.values():
+            variable = Variable(name=v['_attributes']['name'])
+            if 'valueReference' in v['_attributes']:
+                variable.value_reference = v['_attributes']['valueReference']
+            if 'description' in v['_attributes']:
+                variable.description = v['_attributes']['description']
+            if 'causality' in v['_attributes']:
+                variable.causality = v['_attributes']['causality']
+            if 'variability' in v['_attributes']:
+                variable.variability = v['_attributes']['variability']
+            if type_identifier := find_type_identifier_in_keys(v):
+                variable.fmi_data_type = type_identifier
+                type_key = find_key(v, f'{type_identifier}$')
+                if 'quantity' in v[type_key]['_attributes']:
+                    variable.quantity = v[type_key]['_attributes']['quantity']
+                if 'unit' in v[type_key]['_attributes']:
+                    variable.unit = v[type_key]['_attributes']['unit']
+                if 'display_unit' in v[type_key]['_attributes']:
+                    variable.display_unit = v[type_key]['_attributes']['display_unit']
+                if 'initial_value' in v[type_key]['_attributes']:
+                    variable.initial_value = v[type_key]['_attributes']['initial_value']
+            if not variable.fmi_data_type and variable.initial_value:
+                variable.fmi_data_type = get_fmi_data_type(variable.initial_value)
+            variables[variable.name] = variable
+
+        return variables
 
     def set_start_values(self, variables_with_start_values: Union[dict[str, Variable], None]):
         """sets the start values of variables in the FMUs modelDescription.xml

@@ -12,6 +12,7 @@ from dictIO.dictReader import DictReader
 from dictIO.dictWriter import DictWriter
 from dictIO.utils.counter import BorgCounter
 from ospx.utils.logging import configure_logging
+from ospx.utils.dict import find_key
 
 
 logger = logging.getLogger(__name__)
@@ -78,17 +79,6 @@ def _argparser() -> argparse.ArgumentParser:
     return parser
 
 
-def _find_numbered_key_by_string(dd, search_string):
-    """find the element name for an (anyways unique) element
-    after it was preceeded by a number to keep the sequence of xml elements
-    as this is not the "nature" of dicts
-    """
-    try:
-        return [k for k in dd.keys() if re.search(search_string, k)][0]
-    except Exception:
-        return 'ELEMENTNOTFOUND'
-
-
 def main():
     """Entry point for console script as configured in setup.cfg
 
@@ -148,7 +138,7 @@ def _main(system_structure_file: Path, ):
     # iterate over the connections first,
     # because they contain the var names and the component name
     # collecting and naming the ports
-    numbered_connections_dict_key = _find_numbered_key_by_string(source_dict, 'Connections')
+    numbered_connections_dict_key = find_key(source_dict, 'Connections')
     for key, item in source_dict[numbered_connections_dict_key].items():
 
         connection_name = []
@@ -182,7 +172,7 @@ def _main(system_structure_file: Path, ):
         connections_dict[connection_name] = temp_connections_dict
 
     # iterate over "Simulators"
-    numbered_components_dict_key = _find_numbered_key_by_string(source_dict, 'Simulator')
+    numbered_components_dict_key = find_key(source_dict, 'Simulator')
     for key, item in source_dict[numbered_components_dict_key].items():
 
         named_key = item['_attributes']['name']
@@ -197,14 +187,14 @@ def _main(system_structure_file: Path, ):
         components_dict[named_key] = {'connectors': temp_connectors_dict, 'fmu': source_fmu_name}
 
         # if there is a InitialValues in numberedComponentDictKey
-        numbered_initial_values_key = _find_numbered_key_by_string(item, 'InitialValues')
+        numbered_initial_values_key = find_key(item, 'InitialValues')
         if 'InitialValues' in numbered_initial_values_key:
 
             # find numbered key names
-            numbered_initial_value_key = _find_numbered_key_by_string(
+            numbered_initial_value_key = find_key(
                 item[numbered_initial_values_key], 'InitialValue'
             )
-            numbered_real_key = _find_numbered_key_by_string(
+            numbered_real_key = find_key(
                 item[numbered_initial_values_key][numbered_initial_value_key], 'Real'
             )
 
