@@ -22,7 +22,7 @@ from ospx.utils.zip import (
     rename_file_in_zip,
 )
 from ospx.fmi.unit import BaseUnit, DisplayUnit, Unit
-from ospx.fmi.variable import Variable
+from ospx.fmi.variable import ScalarVariable
 
 
 logger = logging.getLogger(__name__)
@@ -136,7 +136,7 @@ class FMU():
         return unit_definitions
 
     @property
-    def variables(self) -> dict[str, Variable]:
+    def variables(self) -> dict[str, ScalarVariable]:
         model_variables_key = find_key(self.model_description, 'ModelVariables$')
         if not model_variables_key:
             return {}
@@ -149,33 +149,37 @@ class FMU():
             if not re.match('^(_|settings)', v['_attributes']['name'])
         }
         # Translate variable attributes from model description into Variable objects
-        variables: dict[str, Variable] = {}
-        for v in model_variables.values():
-            variable = Variable(name=v['_attributes']['name'])
-            if 'valueReference' in v['_attributes']:
-                variable.value_reference = v['_attributes']['valueReference']
-            if 'description' in v['_attributes']:
-                variable.description = v['_attributes']['description']
-            if 'causality' in v['_attributes']:
-                variable.causality = v['_attributes']['causality']
-            if 'variability' in v['_attributes']:
-                variable.variability = v['_attributes']['variability']
-            if type_identifier := find_type_identifier_in_keys(v):
-                variable.fmi_data_type = type_identifier
-                type_key = find_key(v, f'{type_identifier}$')
-                if 'quantity' in v[type_key]['_attributes']:
-                    variable.quantity = v[type_key]['_attributes']['quantity']
-                if 'unit' in v[type_key]['_attributes']:
-                    variable.unit = v[type_key]['_attributes']['unit']
-                if 'display_unit' in v[type_key]['_attributes']:
-                    variable.display_unit = v[type_key]['_attributes']['display_unit']
-                if 'initial_value' in v[type_key]['_attributes']:
-                    variable.initial_value = v[type_key]['_attributes']['initial_value']
-            variables[variable.name] = variable
+        variables: dict[str, ScalarVariable] = {}
+        for k, v in model_variables.items():
+            variable_type: str = re.sub(r'^\d{6}_', '', k)
+            if variable_type == 'ScalarVariable':
+                variable = ScalarVariable(name=v['_attributes']['name'])
+                if 'valueReference' in v['_attributes']:
+                    variable.value_reference = v['_attributes']['valueReference']
+                if 'description' in v['_attributes']:
+                    variable.description = v['_attributes']['description']
+                if 'causality' in v['_attributes']:
+                    variable.causality = v['_attributes']['causality']
+                if 'variability' in v['_attributes']:
+                    variable.variability = v['_attributes']['variability']
+                if type_identifier := find_type_identifier_in_keys(v):
+                    variable.data_type = type_identifier
+                    type_key = find_key(v, f'{type_identifier}$')
+                    if 'quantity' in v[type_key]['_attributes']:
+                        variable.quantity = v[type_key]['_attributes']['quantity']
+                    if 'unit' in v[type_key]['_attributes']:
+                        variable.unit = v[type_key]['_attributes']['unit']
+                    if 'display_unit' in v[type_key]['_attributes']:
+                        variable.display_unit = v[type_key]['_attributes']['display_unit']
+                    if 'initial_value' in v[type_key]['_attributes']:
+                        variable.initial_value = v[type_key]['_attributes']['initial_value']
+                variables[variable.name] = variable
 
         return variables
 
-    def set_start_values(self, variables_with_start_values: Union[dict[str, Variable], None]):
+    def set_start_values(
+        self, variables_with_start_values: Union[dict[str, ScalarVariable], None]
+    ):
         """sets the start values of variables in the FMUs modelDescription.xml
         """
 

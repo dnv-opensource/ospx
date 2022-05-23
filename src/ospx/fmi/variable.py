@@ -20,7 +20,7 @@ def get_fmi_data_type(arg):
 
 
 @dataclass()
-class Variable():
+class ScalarVariable():
     name: str
     value_reference: int = 0
     description: Union[str, None] = None
@@ -30,7 +30,7 @@ class Variable():
     unit: Union[str, None] = None
     display_unit: Union[str, None] = None
     _initial_value: Union[int, float, bool, str, None] = None
-    fmi_data_type: Union[str, None] = None
+    _data_type: Union[str, None] = None
 
     @property
     def causality(self) -> str:
@@ -48,7 +48,7 @@ class Variable():
             'structuralParameter',
         ]
         if value not in permissable_values:
-            logger.error(f"variable {self.name}: value for causality '{value}' is invalid.")
+            logger.error(f"variable {self.name}: causality value '{value}' is invalid.")
             return
         self._causality = value
         return
@@ -67,9 +67,30 @@ class Variable():
             'continuous',
         ]
         if value not in permissable_values:
-            logger.error(f"variable {self.name}: value for variability '{value}' is invalid.")
+            logger.error(
+                f"variable {self.name}: value for variability '{value}' is invalid."
+            )
             return
         self._variability = value
+        return
+
+    @property
+    def data_type(self) -> Union[str, None]:
+        return self._data_type
+
+    @data_type.setter
+    def data_type(self, type: str):
+        permissable_types: list[str] = [
+            'Real',
+            'Integer',
+            'Boolean',
+            'String',
+            'Enumeration',
+        ]
+        if type not in permissable_types:
+            logger.error(f"variable {self.name}: value for data_type '{type}' is invalid.")
+            return
+        self._data_type = type
         return
 
     @property
@@ -79,5 +100,5 @@ class Variable():
     @initial_value.setter
     def initial_value(self, value: Union[int, float, bool, str, None]):
         self._initial_value = value
-        if not self.fmi_data_type and self.initial_value:
-            self.fmi_data_type = get_fmi_data_type(self.initial_value)
+        if not self.data_type and self.initial_value:
+            self.data_type = get_fmi_data_type(self.initial_value)
