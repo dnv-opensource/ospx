@@ -379,7 +379,7 @@ class OspSimulationCase():
             if component.initial_values:
                 simulator_properties['InitialValues'] = {}
                 for index, (_, variable) in enumerate(component.initial_values.items()):
-                    if variable.initial_value is not None and variable.fmi_data_type is None:
+                    if variable.initial_value is not None and variable.data_type is None:
                         logger.error(
                             f"component {component.name}: An initial value is defined for variable {variable.name}, but its data type is not defined.\n"
                             f"The initial value for variable {variable.name} will not be written into OspSystemStructure.xml.\n"
@@ -391,7 +391,7 @@ class OspSimulationCase():
                             '_attributes': {
                                 'variable': variable.name
                             },
-                            variable.fmi_data_type: {
+                            variable.data_type: {
                                 '_attributes': {
                                     'value': variable.initial_value
                                 },

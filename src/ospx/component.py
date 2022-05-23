@@ -9,7 +9,7 @@ from dictIO.utils.counter import BorgCounter
 
 from ospx.fmi.fmu import FMU
 from ospx.fmi.unit import Unit
-from ospx.fmi.variable import Variable
+from ospx.fmi.variable import ScalarVariable
 
 
 logger = logging.getLogger(__name__)
@@ -29,12 +29,12 @@ class Component():
         self.generate_proxy = False
         self.fmu: FMU
         self.step_size: float = 1.
-        self._initial_values: dict[str, Variable] = {}
+        self._initial_values: dict[str, ScalarVariable] = {}
         self.generate_proxy: bool = False
         self.remote_access: Union[RemoteAccess, None] = None
         self.counter = BorgCounter()
         self._units: dict[str, Unit]
-        self._variables: dict[str, Variable]
+        self._variables: dict[str, ScalarVariable]
 
         if 'fmu' in properties:
             fmu_file_name = properties['fmu']
@@ -51,7 +51,7 @@ class Component():
 
         if 'initialize' in properties:
             for variable_name, variable_properties in properties['initialize'].items():
-                variable = Variable(name=variable_name)
+                variable = ScalarVariable(name=variable_name)
                 if 'causality' in variable_properties:
                     variable.causality = variable_properties['causality']
                 if 'variability' in variable_properties:
@@ -104,7 +104,7 @@ class Component():
                 self._variables[variable_name].initial_value = variable.initial_value
 
     @property
-    def initial_values(self) -> dict[str, Variable]:
+    def initial_values(self) -> dict[str, ScalarVariable]:
         return self._initial_values
 
     @property
@@ -112,7 +112,7 @@ class Component():
         return self._units
 
     @property
-    def variables(self) -> dict[str, Variable]:
+    def variables(self) -> dict[str, ScalarVariable]:
         return self._variables
 
     def write_osp_model_description(self):                              # sourcery skip: merge-dict-assign
