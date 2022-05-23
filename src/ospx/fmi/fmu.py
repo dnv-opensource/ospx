@@ -13,7 +13,6 @@ from dictIO.cppDict import CppDict
 from dictIO.formatter import XmlFormatter
 from dictIO.parser import XmlParser
 from dictIO.utils.counter import BorgCounter
-from ospx.utils.fmi import get_fmi_data_type
 
 from ospx.utils.dict import find_key, find_type_identifier_in_keys, shrink_dict
 from ospx.utils.zip import (
@@ -22,7 +21,8 @@ from ospx.utils.zip import (
     remove_files_from_zip,
     rename_file_in_zip,
 )
-from ospx.variable import BaseUnit, DisplayUnit, Unit, Variable
+from ospx.fmi.unit import BaseUnit, DisplayUnit, Unit
+from ospx.fmi.variable import Variable
 
 
 logger = logging.getLogger(__name__)
