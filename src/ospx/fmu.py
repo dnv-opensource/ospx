@@ -6,7 +6,7 @@ import re
 from datetime import date, datetime
 from pathlib import Path
 from shutil import copyfile
-from typing import Union
+from typing import MutableMapping, Union
 from zipfile import ZipFile
 
 from dictIO.cppDict import CppDict
@@ -22,7 +22,7 @@ from ospx.utils.zip import (
     remove_files_from_zip,
     rename_file_in_zip,
 )
-from ospx.variable import Variable
+from ospx.variable import BaseUnit, DisplayUnit, Unit, Variable
 
 
 logger = logging.getLogger(__name__)
@@ -38,10 +38,10 @@ class FMU():
             raise FileNotFoundError(file)
 
         self.file: Path = file
-        self.model_description: CppDict = self.read_model_description()
+        self.model_description: CppDict = self._read_model_description()
         self.counter = BorgCounter()
 
-    def read_model_description(self) -> CppDict:
+    def _read_model_description(self) -> CppDict:
         model_description = CppDict(Path('modelDescription.xml'))
         xml_parser = XmlParser()
 
@@ -50,11 +50,13 @@ class FMU():
         if file_content := read_file_content_from_zip(self.file, 'modelDescription.xml'):
             model_description = xml_parser.parse_string(file_content, model_description)
 
+        self._clean_solver_internal_variables(model_description)
+
         self.model_description = model_description
 
         return model_description
 
-    def write_model_description(
+    def _write_model_description(
         self, model_description: Union[CppDict, None] = None, write_inside_fmu: bool = False
     ):
         """Save updated model_description both inside FMU as well as separate file in the FMUs directory
@@ -83,23 +85,54 @@ class FMU():
 
         return
 
-    def clean_solver_internal_variables(self):
-        """Clean solver internal variables, such as '_iti_...'
-        """
-        model_variables: dict = self.model_description[
-            find_key(self.model_description, 'ModelVariables$')]
-        model_name = self.model_description['_xmlOpts']['_rootAttributes']['modelName']
-        for model_variable_key in model_variables:
-            if '_origin' in model_variables[model_variable_key]:
-                model_variables[model_variable_key]['_origin'] = model_name
-
     @property
-    def unit_definitions(self) -> dict:
-        unit_definitions: dict = {}
+    def unit_definitions(self) -> dict[str, Unit]:
+        model_unit_definitions: dict = {}
         if unit_definitions_key := find_key(self.model_description, 'UnitDefinitions$'):
-            unit_definitions = self.model_description[unit_definitions_key]
+            model_unit_definitions = self.model_description[unit_definitions_key]
             # make sure unit definitions are unique (e.g. to keep XML files clean)
-            unit_definitions = shrink_dict(unit_definitions, unique_key=['_attributes', 'name'])
+            model_unit_definitions = shrink_dict(
+                model_unit_definitions, unique_key=['_attributes', 'name']
+            )
+        unit_definitions: dict[str, Unit] = {}
+        for u in model_unit_definitions.values():
+            unit = Unit()
+            unit.name = u['_attributes']['name']
+            # BaseUnit
+            if base_unit_key := find_key(u, 'BaseUnit$'):
+                unit.base_unit = BaseUnit()
+                if 'kg' in u[base_unit_key]['_attributes']:
+                    unit.base_unit.kg = u[base_unit_key]['_attributes']['kg']
+                if 'm' in u[base_unit_key]['_attributes']:
+                    unit.base_unit.m = u[base_unit_key]['_attributes']['m']
+                if 's' in u[base_unit_key]['_attributes']:
+                    unit.base_unit.s = u[base_unit_key]['_attributes']['s']
+                if 'A' in u[base_unit_key]['_attributes']:
+                    unit.base_unit.A = u[base_unit_key]['_attributes']['A']
+                if 'K' in u[base_unit_key]['_attributes']:
+                    unit.base_unit.K = u[base_unit_key]['_attributes']['K']
+                if 'mol' in u[base_unit_key]['_attributes']:
+                    unit.base_unit.mol = u[base_unit_key]['_attributes']['mol']
+                if 'cd' in u[base_unit_key]['_attributes']:
+                    unit.base_unit.cd = u[base_unit_key]['_attributes']['cd']
+                if 'rad' in u[base_unit_key]['_attributes']:
+                    unit.base_unit.rad = u[base_unit_key]['_attributes']['rad']
+                if 'factor' in u[base_unit_key]['_attributes']:
+                    unit.base_unit.factor = u[base_unit_key]['_attributes']['factor']
+                if 'offset' in u[base_unit_key]['_attributes']:
+                    unit.base_unit.offset = u[base_unit_key]['_attributes']['offset']
+            # DisplayUnit
+            if display_unit_key := find_key(u, 'DisplayUnit$'):
+                unit.display_unit = DisplayUnit()
+                if 'name' in u[display_unit_key]['_attributes']:
+                    unit.display_unit.name = u[display_unit_key]['_attributes']['name']
+                if 'factor' in u[display_unit_key]['_attributes']:
+                    unit.display_unit.factor = u[display_unit_key]['_attributes']['factor']
+                if 'offset' in u[display_unit_key]['_attributes']:
+                    unit.display_unit.offset = u[display_unit_key]['_attributes']['offset']
+                if 'inverse' in u[display_unit_key]['_attributes']:
+                    unit.display_unit.inverse = u[display_unit_key]['_attributes']['inverse']
+            unit_definitions[unit.name] = unit
         return unit_definitions
 
     @property
@@ -138,8 +171,6 @@ class FMU():
                     variable.display_unit = v[type_key]['_attributes']['display_unit']
                 if 'initial_value' in v[type_key]['_attributes']:
                     variable.initial_value = v[type_key]['_attributes']['initial_value']
-            if not variable.fmi_data_type and variable.initial_value:
-                variable.fmi_data_type = get_fmi_data_type(variable.initial_value)
             variables[variable.name] = variable
 
         return variables
@@ -232,7 +263,7 @@ class FMU():
 
         # Write updated modelDescription.xml into new FMU
         new_fmu = FMU(new_file)
-        new_fmu.write_model_description(new_model_description)
+        new_fmu._write_model_description(new_model_description)
 
         return new_fmu
 
@@ -275,3 +306,12 @@ class FMU():
             f'\tgenerationDateAndTime {old_date} to {new_date}\n'
         )
         model_description['_xmlOpts']['_rootAttributes']['description'] += add_description_string
+
+    def _clean_solver_internal_variables(self, model_description: MutableMapping):
+        """Clean solver internal variables, such as '_iti_...'
+        """
+        model_variables: dict = model_description[find_key(model_description, 'ModelVariables$')]
+        model_name = model_description['_xmlOpts']['_rootAttributes']['modelName']
+        for model_variable_key in model_variables:
+            if '_origin' in model_variables[model_variable_key]:
+                model_variables[model_variable_key]['_origin'] = model_name
