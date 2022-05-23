@@ -242,11 +242,11 @@ class OspSimulationCase():
 
             if not self.inspect_mode:
                 # component.fmu.set_start_values(component.initial_values)
-                # component.write_osp_model_description()
+                component.write_osp_model_description()
                 # self.attributes.update(
                 #     {component.name: model_description['_xmlOpts']['_rootAttributes']}
                 # )
-                pass
+                # pass
 
             if self.inspect_mode:
                 # clean up
@@ -379,20 +379,26 @@ class OspSimulationCase():
             if component.initial_values:
                 simulator_properties['InitialValues'] = {}
                 for index, (_, variable) in enumerate(component.initial_values.items()):
-                    initial_value_key = f'{index:06d}_InitialValue'
-                    initial_value_properties: dict = {
-                        '_attributes': {
-                            'variable': variable.name
-                        },
-                        variable.fmi_data_type: {
+                    if variable.initial_value is not None and variable.fmi_data_type is None:
+                        logger.error(
+                            f"component {component.name}: An initial value is defined for variable {variable.name}, but its data type is not defined.\n"
+                            f"The initial value for variable {variable.name} will not be written into OspSystemStructure.xml.\n"
+                            "OspSystemStructure.xml will be potentially wrong or incomplete."
+                        )
+                    else:
+                        initial_value_key = f'{index:06d}_InitialValue'
+                        initial_value_properties: dict = {
                             '_attributes': {
-                                'value': variable.initial_value
+                                'variable': variable.name
                             },
-                        },
-                    }
-
-                    simulator_properties['InitialValues'][initial_value_key
-                                                          ] = initial_value_properties
+                            variable.fmi_data_type: {
+                                '_attributes': {
+                                    'value': variable.initial_value
+                                },
+                            },
+                        }
+                        simulator_properties['InitialValues'][initial_value_key
+                                                              ] = initial_value_properties
             simulators[simulator_key] = simulator_properties
 
         osp_system_structure['Simulators'] = simulators

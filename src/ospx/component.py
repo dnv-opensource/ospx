@@ -8,9 +8,7 @@ from dictIO.dictWriter import DictWriter
 from dictIO.utils.counter import BorgCounter
 
 from ospx.fmu import FMU
-from ospx.utils.dict import find_key, find_type_identifier_in_keys
-from ospx.utils.fmi import get_fmi_data_type
-from ospx.variable import Variable
+from ospx.variable import Unit, Variable
 
 
 logger = logging.getLogger(__name__)
@@ -34,6 +32,7 @@ class Component():
         self.generate_proxy: bool = False
         self.remote_access: Union[RemoteAccess, None] = None
         self.counter = BorgCounter()
+        self._units: dict[str, Unit]
         self._variables: dict[str, Variable]
 
         if 'fmu' in properties:
@@ -58,8 +57,6 @@ class Component():
                     variable.variability = variable_properties['variability']
                 if 'start' in variable_properties:
                     variable.initial_value = variable_properties['start']
-                if not variable.fmi_data_type and variable.initial_value:
-                    variable.fmi_data_type = get_fmi_data_type(variable.initial_value)
                 self._initial_values[variable.name] = variable
 
         if 'generate_proxy' in properties:
@@ -89,7 +86,11 @@ class Component():
                 self.fmu = self.fmu.proxify(self.remote_access.host, self.remote_access.port)
                 # self.name = self.fmu.file.stem
 
+        self._init_units()
         self._init_variables()
+
+    def _init_units(self):
+        self._units = deepcopy(self.fmu.unit_definitions)
 
     def _init_variables(self):
         self._variables = deepcopy(self.fmu.variables)
@@ -106,24 +107,62 @@ class Component():
         return self._initial_values
 
     @property
+    def units(self) -> dict[str, Unit]:
+        return self._units
+
+    @property
     def variables(self) -> dict[str, Variable]:
         return self._variables
 
-    def write_osp_model_description(self):
+    def write_osp_model_description(self):                              # sourcery skip: merge-dict-assign
         """writing OspModelDescription.xml
         """
         osp_model_description_file = self.fmu.file.parent.absolute(
         ) / f'{self.name}_OspModelDescription.xml'
 
-        osp_model_description = {
-            'UnitDefinitions': self.fmu.unit_definitions,
-            'VariableGroups': {},
-        }
+        osp_model_description = {}
 
+        # Unit Definitions
+        unit_definitions = {}
+        for unit in self.units.values():
+            unit_definition = {'_attributes': {}}
+            unit_definition['_attributes']['name'] = unit.name
+            if unit.base_unit:
+                unit_definition['BaseUnit'] = {'_attributes': {}}
+                if unit.base_unit.kg:
+                    unit_definition['BaseUnit']['_attributes']['kg'] = unit.base_unit.kg
+                if unit.base_unit.m:
+                    unit_definition['BaseUnit']['_attributes']['m'] = unit.base_unit.m
+                if unit.base_unit.s:
+                    unit_definition['BaseUnit']['_attributes']['s'] = unit.base_unit.s
+                if unit.base_unit.A:
+                    unit_definition['BaseUnit']['_attributes']['A'] = unit.base_unit.A
+                if unit.base_unit.K:
+                    unit_definition['BaseUnit']['_attributes']['K'] = unit.base_unit.K
+                if unit.base_unit.mol:
+                    unit_definition['BaseUnit']['_attributes']['mol'] = unit.base_unit.mol
+                if unit.base_unit.cd:
+                    unit_definition['BaseUnit']['_attributes']['cd'] = unit.base_unit.cd
+                if unit.base_unit.rad:
+                    unit_definition['BaseUnit']['_attributes']['rad'] = unit.base_unit.rad
+                if unit.base_unit.factor:
+                    unit_definition['BaseUnit']['_attributes']['factor'] = unit.base_unit.factor
+                if unit.base_unit.offset:
+                    unit_definition['BaseUnit']['_attributes']['offset'] = unit.base_unit.offset
+            if unit.display_unit:
+                unit_definition['DisplayUnit'] = {'_attributes': {}}
+                unit_definition['DisplayUnit']['_attributes']['name'] = unit.display_unit.name
+                unit_definition['DisplayUnit']['_attributes']['factor'] = unit.display_unit.factor
+                unit_definition['DisplayUnit']['_attributes']['offset'] = unit.display_unit.offset
+                if unit.display_unit.inverse:
+                    unit_definition['DisplayUnit']['_attributes']['inverse'
+                                                                  ] = unit.display_unit.inverse
+            unit_definitions[f'{self.counter():06d}_Unit'] = unit_definition
+        osp_model_description['UnitDefinitions'] = unit_definitions
+
+        # Variable Groups
         variable_groups = {}
-
         for variable_name, variable in self.variables.items():
-
             if not variable.quantity:
                 logger.warning(
                     f'component {self.name}: no quantity defined for variable {variable_name}'
@@ -134,7 +173,6 @@ class Component():
                 )
             quantity_name = variable.quantity or 'UNKNOWN'
             quantity_unit = variable.unit or 'UNKNOWN'
-
             variable_groups[f'{self.counter():06d}_Generic'] = {
                 '_attributes': {
                     'name': quantity_name
@@ -151,8 +189,6 @@ class Component():
                     },
                 },
             }
-
-        # this is the content of OspModelDescription
         osp_model_description['VariableGroups'] = variable_groups
 
         # _xmlOpts
@@ -164,37 +200,3 @@ class Component():
         }
 
         DictWriter.write(osp_model_description, osp_model_description_file)
-
-
-'''
-def temp_write_osp_system_structure_xml():
-
-    # Attributes
-    self.components[component_name] = {
-        '_attributes': {
-            'name': component_name,
-            'source': component_properties['fmu'],
-            'stepSize': self.baseStepSize
-        }
-    }
-
-    if 'initialize' in properties:
-        initial_values = {}
-        for variable_index, (variable_name,
-                             variable_properties) in enumerate(properties['initialize'].items()):
-            variable_id = f'{variable_index:06d}_InitialValue'
-            fmi_data_type = self._get_fmi_data_type(variable_properties['start'])
-            initial_values[variable_id] = {
-                fmi_data_type: {
-                    '_attributes': {
-                        'value': variable_properties['start']
-                    }
-                },
-                '_attributes': {
-                    'variable': variable_name
-                }
-            }
-        self.components[component_id]['InitialValues'] = initial_values
-
-
-'''
