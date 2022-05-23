@@ -15,7 +15,7 @@ from dictIO.formatter import XmlFormatter
 from dictIO.utils.counter import BorgCounter
 
 from ospx.component import Component
-from ospx.fmu import FMU
+from ospx.fmi.fmu import FMU
 from ospx.utils.dict import shrink_dict, find_key
 
 

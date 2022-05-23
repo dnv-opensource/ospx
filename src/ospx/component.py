@@ -7,8 +7,9 @@ from typing import MutableMapping, Union
 from dictIO.dictWriter import DictWriter
 from dictIO.utils.counter import BorgCounter
 
-from ospx.fmu import FMU
-from ospx.variable import Unit, Variable
+from ospx.fmi.fmu import FMU
+from ospx.fmi.unit import Unit
+from ospx.fmi.variable import Variable
 
 
 logger = logging.getLogger(__name__)
