@@ -1,20 +1,22 @@
 from dataclasses import dataclass
 import logging
-from typing import Union
+from typing import Sequence, Union
 
 
 logger = logging.getLogger(__name__)
 
 
 def get_fmi_data_type(arg):
-    """Returns the fmi data type of the passed in argument (best guess)
+    """Returns the fmi 2.0 data type of the passed in argument
     """
     if isinstance(arg, int):
         return 'Integer'
     elif isinstance(arg, float):
         return 'Real'
     elif isinstance(arg, bool):
-        return 'Bool'
+        return 'Boolean'
+    elif isinstance(arg, Sequence):
+        return 'Enumeration'
     else:
         return 'String'
 
@@ -38,7 +40,7 @@ class ScalarVariable():
 
     @causality.setter
     def causality(self, value: str):
-        permissable_values: list[str] = [
+        valid_values: list[str] = [
             'parameter',
             'calculatedParameter',
             'input',
@@ -47,7 +49,7 @@ class ScalarVariable():
             'independent',
             'structuralParameter',
         ]
-        if value not in permissable_values:
+        if value not in valid_values:
             logger.error(f"variable {self.name}: causality value '{value}' is invalid.")
             return
         self._causality = value
@@ -59,17 +61,15 @@ class ScalarVariable():
 
     @variability.setter
     def variability(self, value: str):
-        permissable_values: list[str] = [
+        valid_values: list[str] = [
             'constant',
             'fixed',
             'tunable',
             'discrete',
             'continuous',
         ]
-        if value not in permissable_values:
-            logger.error(
-                f"variable {self.name}: value for variability '{value}' is invalid."
-            )
+        if value not in valid_values:
+            logger.error(f"variable {self.name}: value for variability '{value}' is invalid.")
             return
         self._variability = value
         return
@@ -80,14 +80,14 @@ class ScalarVariable():
 
     @data_type.setter
     def data_type(self, type: str):
-        permissable_types: list[str] = [
+        valid_types: list[str] = [
             'Real',
             'Integer',
             'Boolean',
             'String',
             'Enumeration',
         ]
-        if type not in permissable_types:
+        if type not in valid_types:
             logger.error(f"variable {self.name}: value for data_type '{type}' is invalid.")
             return
         self._data_type = type
