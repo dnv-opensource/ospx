@@ -16,6 +16,7 @@ from dictIO.utils.counter import BorgCounter
 
 from ospx.component import Component
 from ospx.fmi.fmu import FMU
+from ospx.fmi.unit import Unit
 from ospx.utils.dict import shrink_dict, find_key
 
 
@@ -87,6 +88,9 @@ class OspCaseBuilder():
         if inspect:
             # inspect and stop
             case.inspect()
+            # clean up
+            # logger.info(f'inspect mode: delete {component.fmu.file.name}')
+            # component.fmu.file.unlink()
             return
 
         # this dict is to put into every NAME_OspModelDescription.xml
@@ -248,11 +252,6 @@ class OspSimulationCase():
                 # )
                 # pass
 
-            if self.inspect_mode:
-                # clean up
-                logger.info(f'inspect mode: delete {component.fmu.file.name}')
-                component.fmu.file.unlink()
-
         return
 
     def get_connectors(self):
@@ -304,49 +303,58 @@ class OspSimulationCase():
         return
 
     def inspect(self):
-        """Inspects all FMUs for the public variable names and units they declare (as documented in their modelDescription.xml's)
+        """Inspects all components and all FMUs for the public variable names and units they declare, as documented in their modelDescription.xml's
         """
         delim = '\t' * 3
-        logger.info("Main attributes collected from modelDescription.xml's")    # 0
-        logger.info(f'name{delim}attributes{delim}\n')                          # 1
 
-        uuid_set = set([])
-        suspect_names = set([])
-        for old_len, (key, item) in enumerate(self.attributes.items(), start=1):
-            substring = '\n'.join(f'{delim}{k}{delim}{v}' for k, v in item.items())
+        log_string = (
+            f"Components and the fmu they reference (and are instantiated from), as defined in {self.case_dict.name}\n"
+            f"\tcomponent{delim}fmu{delim}\n\n"
+        )
+        for component_name, component in self.components.items():
+            log_string += f'\t{component_name}{delim}{component.fmu.file.name}\n'
+        logger.info(log_string + '\n')
 
-            logger.info(key)        # 1
-            logger.info(substring)  # 1
-            uuid_set.add(item['guid'])
-            if old_len != len(uuid_set):
-                suspect_names.add(key)
-
-        logger.info("Unit definitions collected from modelDescription.xml's")   # 0
-        logger.info(f'unit{delim}factor{delim}offset\n')                        # 1
-
-        for key, item in self.unit_definitions.items():
-            real_key = find_key(item, 'DisplayUnit$')
-            logger.info(
-                f"{item['_attributes']['name']}{delim}{item[real_key]['_attributes']['factor']}{delim}{item[real_key]['_attributes']['offset']}"
+        log_string = (
+            f"fmus and their main attributes, as defined in the fmu's modelDescription.xml\n"
+            f"\tfmu{delim}attributes{delim}"
+        )
+        for fmu_name, fmu in self.fmus.items():
+            log_string += f'\n\n\t{fmu_name}\n'
+            fmu_attributes = '\n'.join(
+                f'\t{delim}{k}{delim}{v}' for k,
+                v in fmu.model_description['_xmlOpts']['_rootAttributes'].items()
             )
+            log_string += fmu_attributes
+        logger.info(log_string + '\n')
 
-        logger.info("Exposed variables (connectors) collected from modelDescription.xml's")     # 0
-        logger.info(f'origin\t{delim}connector{delim}unit\n')                                   # 1
-
-        for key, item in self.variables.items():
-            try:
-                real_key = find_key(item, 'Real$')
-                string = f"{item['_origin']}{delim}{item['_attributes']['name']}{delim}{item[real_key]['_attributes']['unit']}"
-
-            except Exception:
-                string = f"{item['_origin']}{delim}{item['_attributes']['name']}"
-            logger.info(string)     # 1
-        logger.info('')
-
-        if len(uuid_set) != len(self.attributes):
-            logger.warning(
-                f"there are fmu's with the same guid, apply generate_proxy=True -- at least to {(', '.join(suspect_names))} -- to avoid related errors"
+        log_string = (
+            f"fmus and their unit definitions, as defined in the fmu's modelDescription.xml\n"
+            f"\tfmu{delim}unit{delim}display unit{delim}factor{delim}offset"
+        )
+        for fmu_name, fmu in self.fmus.items():
+            log_string += f'\n\n\t{fmu_name}\n'
+            unit_definitions = '\n'.join(
+                f'\t{delim}{unit_name}{delim}{unit.display_unit.name}\t{delim}{unit.display_unit.factor}{delim}{unit.display_unit.offset}'
+                for unit_name,
+                unit in fmu.unit_definitions.items()
             )
+            log_string += unit_definitions
+        logger.info(log_string + '\n')
+
+        log_string = (
+            f"fmus and their exposed variables, as defined in the fmu's modelDescription.xml\n"
+            f"\tfmu{delim}variable{delim}type{delim}unit"
+        )
+        for fmu_name, fmu in self.fmus.items():
+            log_string += f'\n\n\t{fmu_name}\n'
+            variable_definitions = '\n'.join(
+                f'\t{delim}{variable_name}{delim}{variable.data_type}{delim}{variable.unit}'
+                for variable_name,
+                variable in fmu.variables.items()
+            )
+            log_string += variable_definitions
+        logger.info(log_string + '\n')
 
         logger.info(
             f'inspect mode: Stopped after 1 case. You can now detail out the connector and connection elements in {self.case_dict.name} and then continue without --inspect'
