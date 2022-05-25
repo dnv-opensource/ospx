@@ -160,7 +160,7 @@ def _main(system_structure_file: Path, ):
 
             connectors_dict['%06i_%s' % (counter(), s_item['_attributes']['simulator'])] = {
                 connector_name: {
-                    'reference': s_item['_attributes']['name'],
+                    'variable': s_item['_attributes']['name'],
                     'type': type,
                 }
             }

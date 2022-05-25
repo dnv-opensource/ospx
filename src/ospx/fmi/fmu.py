@@ -1,8 +1,8 @@
-from copy import deepcopy
 import logging
 import os
 import platform
 import re
+from copy import deepcopy
 from datetime import date, datetime
 from pathlib import Path
 from shutil import copyfile
@@ -13,7 +13,9 @@ from dictIO.cppDict import CppDict
 from dictIO.formatter import XmlFormatter
 from dictIO.parser import XmlParser
 from dictIO.utils.counter import BorgCounter
-
+from ospx.fmi.experiment import Experiment
+from ospx.fmi.unit import BaseUnit, DisplayUnit, Unit
+from ospx.fmi.variable import ScalarVariable
 from ospx.utils.dict import find_key, find_type_identifier_in_keys, shrink_dict
 from ospx.utils.zip import (
     add_file_content_to_zip,
@@ -21,8 +23,6 @@ from ospx.utils.zip import (
     remove_files_from_zip,
     rename_file_in_zip,
 )
-from ospx.fmi.unit import BaseUnit, DisplayUnit, Unit
-from ospx.fmi.variable import ScalarVariable
 
 
 logger = logging.getLogger(__name__)
@@ -177,6 +177,23 @@ class FMU():
 
         return variables
 
+    @property
+    def default_experiment(self) -> Union[Experiment, None]:
+        default_experiment_key = find_key(self.model_description, 'DefaultExperiment$')
+        if not default_experiment_key:
+            return None
+        default_experiment = Experiment()
+        default_experiment_properties = self.model_description[default_experiment_key]
+        if 'startTime' in default_experiment_properties:
+            default_experiment.start_time = default_experiment_properties['startTime']
+        if 'stopTime' in default_experiment_properties:
+            default_experiment.stop_time = default_experiment_properties['stopTime']
+        if 'tolerance' in default_experiment_properties:
+            default_experiment.tolerance = default_experiment_properties['tolerance']
+        if 'stepSize' in default_experiment_properties:
+            default_experiment.step_size = default_experiment_properties['stepSize']
+        return default_experiment
+
     def set_start_values(
         self, variables_with_start_values: Union[dict[str, ScalarVariable], None]
     ):
@@ -311,6 +328,8 @@ class FMU():
         )
         model_description['_xmlOpts']['_rootAttributes']['description'] += add_description_string
 
+    # @TODO: Check when and where this method needs to be called.
+    #        CLAROS, 2022-05-24
     def _clean_solver_internal_variables(self, model_description: MutableMapping):
         """Clean solver internal variables, such as '_iti_...'
         """

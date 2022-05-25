@@ -42,5 +42,20 @@
                 "enable": true
             }
         },
+        {
+            "name": "ospCaseBuilder test_caseDict_minimal_inspect --inspect",
+            "type": "python",
+            "request": "launch",
+            "cwd": "${workspaceFolder}\\tests\\test_dicts",
+            "program": "${workspaceFolder}\\src\\ospx\\cli\\ospCaseBuilder.py",
+            "args": [
+                "test_caseDict_minimal_inspect",
+                "--inspect",
+            ],
+            "console": "integratedTerminal",
+            "autoReload": {
+                "enable": true
+            }
+        },
     ]
 }
