@@ -1,0 +1,41 @@
+/*---------------------------------*- C++ -*----------------------------------*\
+filetype dictionary; coding utf-8; version 0.1; local --; purpose --;
+\*----------------------------------------------------------------------------*/
+_environment
+{
+    libSource                           'C:\Dev\farn-demo\library';  //adjust this path to point to the library folder containing the fmu's
+    root                                .;
+}
+systemStructure
+{
+    components
+    {
+        difference
+        {
+            fmu                         difference.fmu;
+        }
+        quotient
+        {
+            fmu                         quotient.fmu;
+        }
+        minuend
+        {
+            fmu                         constantVal.fmu;
+        }
+        subtrahend
+        {
+            fmu                         constantVal.fmu;
+        }
+        dividend
+        {
+            fmu                         constantVal.fmu;
+        }
+    }
+}
+run
+{
+    simulation
+    {
+        name                            demoCase;
+    }
+}

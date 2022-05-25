@@ -1,5 +1,4 @@
-import os
-from pathlib import Path, PurePath
+from pathlib import Path
 
 import pytest
 from ospx.watch.watchCosim import CosimWatcher
@@ -21,11 +20,11 @@ def test_read_watch_dict():
     # Prepare
     source_file = Path('test_watchDict')
     csv_file_names = [
-        'difference_20220201_235959_999999.csv',
-        'divident_20220201_235959_999999.csv',
-        'minuend_20220201_235959_999999.csv',
-        'quotient_20220201_235959_999999.csv',
-        'subtrahend_20220201_235959_999999.csv',
+        'test_result_file_difference.csv',
+        'test_result_file_divident.csv',
+        'test_result_file_minuend.csv',
+        'test_result_file_quotient.csv',
+        'test_result_file_subtrahend.csv',
     ]
     skip_values = 0
     latest_values = 0

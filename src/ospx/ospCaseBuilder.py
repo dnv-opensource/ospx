@@ -1,6 +1,5 @@
 import functools
 import logging
-# from msilib.schema import Component
 import os
 import re
 from pathlib import Path
@@ -15,9 +14,9 @@ from dictIO.formatter import XmlFormatter
 from dictIO.utils.counter import BorgCounter
 
 from ospx.component import Component
-from ospx.fmi.fmu import FMU
-from ospx.fmi.unit import Unit
-from ospx.utils.dict import shrink_dict, find_key
+from ospx.connection import Connection
+from ospx.simulation import Simulation
+from ospx.systemStructure import SystemStructure
 
 
 logger = logging.getLogger(__name__)
@@ -72,18 +71,8 @@ class OspCaseBuilder():
         case_dict = DictReader.read(case_dict_file, comments=False)
 
         # first leave empty, may read defaults later
-        case = OspSimulationCase(case_dict, inspect)
-
-        case.clean()
-
-        # general properties
-        case.read_simulation_properties()
-
-        # register and copy to local case folder all FMUs referenced by components in the case dict
-        case.copy_fmus_from_library()
-
-        # get models, get simulators
-        case.read_components()
+        case = OspSimulationCase(case_dict)
+        case.initialize()
 
         if inspect:
             # inspect and stop
@@ -93,19 +82,8 @@ class OspCaseBuilder():
             # component.fmu.file.unlink()
             return
 
-        # this dict is to put into every NAME_OspModelDescription.xml
-        case.unit_definitions = shrink_dict(
-            case.unit_definitions, unique_key=['_attributes', 'name']
-        )
-
-        case.variables = shrink_dict(case.variables, unique_key=['_attributes', 'name'])
-
-        case.get_connectors()   # useful to sort connections later
-
-        case.get_connections()  # taken from manual config in parsed dict
-
+        case.write_osp_model_descriptions()
         case.write_osp_system_structure_xml()
-
         case.write_system_structure_ssd()
 
         if 'postProcessing' in case_dict.keys():
@@ -131,17 +109,17 @@ class OspSimulationCase():
     def __init__(
         self,
         case_dict: CppDict,
-        inspect: bool = False,
     ):
 
         self.counter = BorgCounter()
         self.case_dict: CppDict = case_dict
-        self.inspect_mode: bool = inspect
 
         self.name: str = self.case_dict['run']['simulation']['name']
         logger.info(f'initalizing simulation case {self.name}')     # 0
 
-        self.baseStepSize: float = self.case_dict['run']['simulation']['baseStepSize']
+        self.lib_source: Path = Path(self.case_dict['_environment']['libSource'])
+        self.simulation: Simulation     # general properties of the simulation case
+        self.system_structure: SystemStructure
 
         self.case_folder: Path = Path.cwd()
         for key in self.case_dict['_environment'].keys():
@@ -152,19 +130,7 @@ class OspSimulationCase():
             logger.error(f'case folder {self.case_folder} does not exist')
             return
 
-        self.lib_source: Path = Path(self.case_dict['_environment']['libSource'])
-
-        self.unit_definitions: dict = {}            # all unique unit definitions
-        self.variables: dict = {}                   # all ScalarVariables from all fmu's
-        self.attributes: dict = {}                  # all original attributes from all fmu's
-        self.connectors: dict = {}                  # all connectors from all fmu's
-        self.simulation: dict = {}                  # general properties of the simulation case
-        self.components: dict[str, Component] = {
-        }                                           # component = instance of a model. OSP calls this 'simulator'.
-        self.fmus: dict[str, FMU] = {}              # register of FMUs referenced by the components
-        self.connections: dict = {}                 # to be filled with connection data
-
-    def clean(self):
+    def clear(self):
         """Removes all formerly generated case output files, retaining initial case configuration.
         """
 
@@ -194,13 +160,42 @@ class OspSimulationCase():
                     from shutil import rmtree
                     rmtree(file)
 
-    def read_simulation_properties(self):
+    def initialize(self):
+
+        self.clear()
+
+        # general properties
+        self.read_simulation()
+
+        # register and copy to local case folder all FMUs referenced by components in the case dict
+        self.copy_fmus_from_library()
+
+        self.system_structure = SystemStructure(self.case_dict['systemStructure'])
+
+        # set master algorithm step size
+        if self.simulation and self.simulation.base_step_size:
+            self.set_step_size(self.simulation.base_step_size)
+
+    def read_simulation(self):
         """Reads general simulation properties from case dict.
         """
         logger.info('reading simulation properties')    # 0
 
-        # self.simulation_dict = dict({k:str(v) for k, v in self.config['simulation'].items() if re.match('(StartTime|BaseStepSize|Algorithm)', k)})
-        self.simulation = dict(self.case_dict['run']['simulation'].items())
+        if 'run' not in self.case_dict:
+            return
+        if 'simulation' not in self.case_dict['run']:
+            return
+        simulation = Simulation()
+        simulation_properties = self.case_dict['run']['simulation']
+        if 'name' in simulation_properties:
+            simulation.name = simulation_properties['name']
+        if 'startTime' in simulation_properties:
+            simulation.start_time = simulation_properties['startTime']
+        if 'stopTime' in simulation_properties:
+            simulation.stop_time = simulation_properties['stopTime']
+        if 'baseStepSize' in simulation_properties:
+            simulation.base_step_size = simulation_properties['baseStepSize']
+        self.simulation = simulation
 
     def copy_fmus_from_library(self):
         """Copies all referenced FMUs from the library into the case folder.
@@ -208,10 +203,9 @@ class OspSimulationCase():
         Important: In case multiple components reference the same FMU, these are registered and copied only once.
         """
         logger.info('Copy referenced FMUs from library into case folder')   # 0
-
+        file_names_copied: list[str] = []
         components = self.case_dict['systemStructure']['components']
 
-        self.fmus.clear()
         for component_name, component_properties in components.items():
             if 'fmu' not in component_properties:
                 logger.error(f"element 'fmu' missing in component {component_name}")
@@ -220,7 +214,7 @@ class OspSimulationCase():
             fmu_file_name = Path(fmu_file_name_in_case_dict).name
             fmu_file_in_library = self.lib_source / fmu_file_name_in_case_dict
             fmu_file_in_case_folder = self.case_folder / fmu_file_name
-            if fmu_file_name not in self.fmus:
+            if fmu_file_name not in file_names_copied:
                 if not fmu_file_in_library.exists():
                     logger.error(
                         f'FMU file {fmu_file_name} referenced by component {component_name} does not exist in library {self.lib_source.absolute()}'
@@ -229,77 +223,13 @@ class OspSimulationCase():
 
                 logger.info(f'copy {fmu_file_in_library} --> {fmu_file_in_case_folder}')    # 2
                 copyfile(fmu_file_in_library, fmu_file_in_case_folder)
-                self.fmus[fmu_file_name] = FMU(fmu_file_in_case_folder)
+                file_names_copied.append(fmu_file_name)
 
-    def read_components(self):
-        """Read the components from case dict
-        """
-        logger.info('read components from case dict')   # 0
-
-        components = self.case_dict['systemStructure']['components']
-
-        self.components.clear()
-        for component_name, component_properties in components.items():
-            component = Component(component_name, component_properties)     # type: ignore
-            component.step_size = self.baseStepSize
-            self.components[component_name] = component
-
-            if not self.inspect_mode:
-                # component.fmu.set_start_values(component.initial_values)
-                component.write_osp_model_description()
-                # self.attributes.update(
-                #     {component.name: model_description['_xmlOpts']['_rootAttributes']}
-                # )
-                # pass
-
-        return
-
-    def get_connectors(self):
-        """Reads connectors from case_dict into a dict of connectors
-        """
-        components = self.case_dict['systemStructure']['components']
-        for component_name, component in components.items():
-            if 'connectors' in component:
-                for connector_name, connector in component['connectors'].items():
-                    if 'generateProxy' in component:                        # if NTNU-IHB fmu-proxy code is used
-                        connector['component'] = f'{component_name}-proxy'  # use "proxy"-reference
-                    else:
-                        connector['component'] = component_name
-                    self.connectors[connector_name] = connector             # save connector
-
-    def get_connections(self):
-        """Reads connections from case_dict into a dict of connections
-        """
-        connections = self.case_dict['systemStructure']['connections']
-        for _, connection in connections.items():
-
-            # Read 'component' and 'reference' properties of source connector
-            source_connector_name = connection['source']
-            source_connector = self.connectors[source_connector_name]
-            source_component = source_connector['component']
-            source_reference = source_connector['reference']
-            # Read 'component' and 'reference' properties of target connector
-            target_connector_name = connection['target']
-            target_connector = self.connectors[target_connector_name]
-            target_component = target_connector['component']
-            target_reference = target_connector['reference']
-
-            # Save connection
-            # (note: the order 000000, 000001 is essential here!)
-            connection_name = f'{self.counter():06d}_VariableConnection'
-            self.connections[connection_name] = {
-                '000000_Variable': {
-                    '_attributes': {
-                        'simulator': source_component, 'name': source_reference
-                    }
-                },
-                '000001_Variable': {
-                    '_attributes': {
-                        'simulator': target_component, 'name': target_reference
-                    }
-                }
-            }
-
+    def set_step_size(self, step_size: float):
+        if not self.system_structure or not self.system_structure.components:
+            return
+        for component in self.system_structure.components.values():
+            component.step_size = step_size
         return
 
     def inspect(self):
@@ -308,18 +238,18 @@ class OspSimulationCase():
         delim = '\t' * 3
 
         log_string = (
-            f"Components and the fmu they reference (and are instantiated from), as defined in {self.case_dict.name}\n"
+            f"Components and related FMUs as defined in {self.case_dict.name}\n"
             f"\tcomponent{delim}fmu{delim}\n\n"
         )
-        for component_name, component in self.components.items():
+        for component_name, component in self.system_structure.components.items():
             log_string += f'\t{component_name}{delim}{component.fmu.file.name}\n'
         logger.info(log_string + '\n')
 
         log_string = (
-            f"fmus and their main attributes, as defined in the fmu's modelDescription.xml\n"
+            f"FMU attributes defined in the fmu's modelDescription.xml\n"
             f"\tfmu{delim}attributes{delim}"
         )
-        for fmu_name, fmu in self.fmus.items():
+        for fmu_name, fmu in self.system_structure.fmus.items():
             log_string += f'\n\n\t{fmu_name}\n'
             fmu_attributes = '\n'.join(
                 f'\t{delim}{k}{delim}{v}' for k,
@@ -329,10 +259,10 @@ class OspSimulationCase():
         logger.info(log_string + '\n')
 
         log_string = (
-            f"fmus and their unit definitions, as defined in the fmu's modelDescription.xml\n"
+            f"Unit definitions defined in the fmu's modelDescription.xml\n"
             f"\tfmu{delim}unit{delim}display unit{delim}factor{delim}offset"
         )
-        for fmu_name, fmu in self.fmus.items():
+        for fmu_name, fmu in self.system_structure.fmus.items():
             log_string += f'\n\n\t{fmu_name}\n'
             unit_definitions = '\n'.join(
                 f'\t{delim}{unit_name}{delim}{unit.display_unit.name}\t{delim}{unit.display_unit.factor}{delim}{unit.display_unit.offset}'
@@ -343,10 +273,10 @@ class OspSimulationCase():
         logger.info(log_string + '\n')
 
         log_string = (
-            f"fmus and their exposed variables, as defined in the fmu's modelDescription.xml\n"
+            f"Variables defined in the fmu's modelDescription.xml\n"
             f"\tfmu{delim}variable{delim}type{delim}unit"
         )
-        for fmu_name, fmu in self.fmus.items():
+        for fmu_name, fmu in self.system_structure.fmus.items():
             log_string += f'\n\n\t{fmu_name}\n'
             variable_definitions = '\n'.join(
                 f'\t{delim}{variable_name}{delim}{variable.data_type}{delim}{variable.unit}'
@@ -356,26 +286,52 @@ class OspSimulationCase():
             log_string += variable_definitions
         logger.info(log_string + '\n')
 
+        log_string = (
+            f"Connectors defined in {self.case_dict.name}\n"
+            f"\tComponent{delim}Connector{delim}Variable{delim}Type"
+        )
+        for component_name, component in self.system_structure.components.items():
+            if component.connectors:
+                log_string += f'\n\n\t{component_name}\n'
+                connector_definitions = '\n'.join(
+                    f'\t{delim}{connector_name}{delim}{connector.variable}{delim}{connector.type}'
+                    for connector_name,
+                    connector in component.connectors.items()
+                )
+                log_string += connector_definitions
+        logger.info(log_string + '\n')
+
         logger.info(
             f'inspect mode: Stopped after 1 case. You can now detail out the connector and connection elements in {self.case_dict.name} and then continue without --inspect'
         )
+
+    def write_osp_model_descriptions(self):
+        if not self.system_structure or not self.system_structure.components:
+            return
+        for component in self.system_structure.components.values():
+            # component.fmu.set_start_values(component.initial_values)
+            component.write_osp_model_description()
+        return
 
     def write_osp_system_structure_xml(self):
         """Writes OspSystemStructure.xml
         """
 
         # osp_ss meta data
-        osp_system_structure: dict = {
-            k: v
-            for k,
-            v in self.simulation.items()
-            if re.match('(StartTime|BaseStepSize|Algorithm)', k)
-        }
+        osp_system_structure: dict = {}
+
+        if self.simulation:
+            if self.simulation.start_time:
+                osp_system_structure['StartTime'] = self.simulation.start_time
+            if self.simulation.base_step_size:
+                osp_system_structure['BaseStepSize'] = self.simulation.base_step_size
+            # if self.simulation.algorithm:
+            #     osp_system_structure['Algorithm'] = self.simulation.algorithm
 
         # models (simulators)
         # ('simulators' is OSP terminology. Any instance of a model is referred to as a 'simulator' in OSP.)
         simulators: dict = {}
-        for index, (_, component) in enumerate(self.components.items()):
+        for index, (_, component) in enumerate(self.system_structure.components.items()):
             simulator_key = f'{index:06d}_Simulator'
             simulator_properties = {
                 '_attributes': {
@@ -410,7 +366,29 @@ class OspSimulationCase():
             simulators[simulator_key] = simulator_properties
 
         osp_system_structure['Simulators'] = simulators
-        osp_system_structure['Connections'] = self.connections
+
+        # Connections
+        connections: dict = {}
+        for connection in self.system_structure.connections.values():
+            if connection.source and connection.target:
+                connection_key = f'{self.counter():06d}_VariableConnection'
+                # (note: the order 000000, 000001 is essential here!)
+                connections[connection_key] = {
+                    '000000_Variable': {
+                        '_attributes': {
+                            'simulator': connection.source.component,
+                            'name': connection.source.variable,
+                        }
+                    },
+                    '000001_Variable': {
+                        '_attributes': {
+                            'simulator': connection.target.component,
+                            'name': connection.target.variable,
+                        }
+                    }
+                }
+        osp_system_structure['Connections'] = connections
+
         osp_system_structure['_xmlOpts'] = {
             '_nameSpaces': {
                 'osp': 'https://opensimulationplatform.com/xsd/OspModelDescription-1.0.0.xsd'
@@ -445,9 +423,9 @@ class OspSimulationCase():
                     'Algorithm': {
                         'FixedStepAlgorithm': {
                             '_attributes': {
-                                'baseStepSize': str(self.simulation['baseStepSize']),
-                                'startTime': str(self.simulation['startTime']),
-                                'stopTime': str(self.simulation['stopTime'])
+                                'baseStepSize': str(self.simulation.base_step_size),
+                                'startTime': str(self.simulation.start_time),
+                                'stopTime': str(self.simulation.stop_time)
                             }
                         }
                     }
@@ -455,43 +433,44 @@ class OspSimulationCase():
             }
         }
 
-        # elements
-        # (an 'element' in ssd equals what is a 'simulator' in osp_ss: An instance of a model.)
+        # Elements
+        # (an 'element' in ssd equals what is a 'simulator' in osp, or a 'component' in ospx: An instance of a model.)
         elements = {}
-        for component_key, component in self.components.items():
-            connectors = {
-                f'{self.counter():06d}_Connector': {
-                    '_attributes': {
-                        'name': self.connectors[connector_key]['reference'],
-                        'kind': self.connectors[connector_key]['type']
-                    },
-                    'Real': {},
-                }
-                for connector_key in self.connectors
-                if self.connectors[connector_key]['component'] == component.name
-            }
-
-            elements[f'{self.counter():06d}_Component'] = {
+        for component_name, component in self.system_structure.components.items():
+            connectors: dict = {}
+            for connector in component.connectors.values():
+                if connector.variable and connector.type:
+                    connector_key = f'{self.counter():06d}_Connector'
+                    # (note: the order 000000, 000001 is essential here!)
+                    connectors[connector_key] = {
+                        '_attributes': {
+                            'name': connector.variable,
+                            'kind': connector.type,
+                        },
+                        'Real': {},
+                    }
+            element_key = f'{self.counter():06d}_Component'
+            elements[element_key] = {
                 '_attributes': {
-                    'name': component.name,
+                    'name': component_name,
                     'source': component.fmu.file.name,
                 },
                 'Connectors': connectors,
             }
 
-        # connections
-        connections = {
-            f'{self.counter():06d}_Connection': {
-                '_attributes': {
-                    'startElement': connection['000000_Variable']['_attributes']['simulator'],
-                    'startConnector': connection['000000_Variable']['_attributes']['name'],
-                    'endElement': connection['000001_Variable']['_attributes']['simulator'],
-                    'endConnector': connection['000001_Variable']['_attributes']['name'],
+        # Connections
+        connections: dict = {}
+        for connection in self.system_structure.connections.values():
+            if connection.source and connection.target:
+                connection_key = f'{self.counter():06d}_Connection'
+                connections[connection_key] = {
+                    '_attributes': {
+                        'startElement': connection.source.component,
+                        'startConnector': connection.source.variable,
+                        'endElement': connection.target.component,
+                        'endConnector': connection.target.variable,
+                    }
                 }
-            }
-            for _,
-            connection in self.connections.items()
-        }
 
         ssd = {
             'DefaultExperiment': settings,
@@ -526,21 +505,23 @@ class OspSimulationCase():
         e.g. PlotConfig.json
         """
         temp_dict = {'plots': []}
-        if 'plots' in self.case_dict['postproc'].keys():
-            for key, item in self.case_dict['postproc']['plots'].items():
-                variables = [
-                    dict(
+        if 'plots' in self.case_dict['postProcessing'].keys():
+            for plot in self.case_dict['postproc']['plots'].values():
+                variables: list[dict] = []
+                for component_name, component in self.system_structure.components.items():
+                    variables.extend(
                         {
-                            'simulator': self.connectors[key1]['inModel'],
-                            'variable': self.connectors[key1]['reference'],
+                            'simulator': component_name,
+                            'variable': connector.variable,
                         }
-                    ) for key1,
-                    item1 in self.connectors.items() if key1 in item['ySignals']
-                ]
+                        for connector_name,
+                        connector in component.connectors.items()
+                        if connector_name in plot['ySignals']
+                    )
 
                 temp_dict['plots'].append(
                     {
-                        'label': item['title'],
+                        'label': plot['title'],
                         'plotType': 'trend',
                         'variables': variables,
                     }
@@ -559,47 +540,44 @@ class OspSimulationCase():
 
         statistics_dict = {}
 
-        statistics_dict['simulation'] = {'name': self.case_dict['run']['simulation']['name']}
+        statistics_dict['simulation'] = {'name': self.simulation.name}
 
         statistics_dict['components'] = {
-            'count': len(self.case_dict['systemStructure']['components'].keys()),
-            'names': list(self.case_dict['systemStructure']['components'].keys()),
+            'count': len(self.system_structure.components.keys()),
+            'names': list(self.system_structure.components.keys()),
         }
 
         statistics_dict['connections'] = {
-            'count': len(self.case_dict['systemStructure']['connections'].keys()),
-            'names': list(self.case_dict['systemStructure']['connections'].keys()),
+            'count': len(self.system_structure.connections.keys()),
+            'names': list(self.system_structure.connections.keys()),
         }
 
         statistics_dict['connectors'] = {
-            'count': len(self.connectors.keys()),
-            'names': list(self.connectors.keys()),
+            'count': len(self.system_structure.connectors.keys()),
+            'names': list(self.system_structure.connectors.keys()),
         }
 
         unit_list = []
         display_unit_list = []
         factors_list = []
         offsets_list = []
-        for _, item in self.unit_definitions.items():
-            display_unit_key = find_key(item, 'DisplayUnit$')
-            unit_list.append(item['_attributes']['name'])
-            display_unit_list.append(item[display_unit_key]['_attributes']['name'])
-            factors_list.append(item[display_unit_key]['_attributes']['factor'])
-            offsets_list.append(item[display_unit_key]['_attributes']['offset'])
+        for unit in self.system_structure.units.values():
+            unit_list.append(unit.name)
+            display_unit_list.append(unit.display_unit.name)
+            factors_list.append(unit.display_unit.factor)
+            offsets_list.append(unit.display_unit.offset)
 
         statistics_dict['units'] = {
-            'count': len(self.unit_definitions.keys()),
+            'count': len(self.system_structure.units.keys()),
             'unitNames': unit_list,
             'displayUnitNames': display_unit_list,
             'factors': factors_list,
             'offsets': offsets_list,
         }
 
-        variables_list = [item['_attributes']['name'] for key, item in self.variables.items()]
-
         statistics_dict['variables'] = {
-            'count': len(self.variables.keys()),
-            'variableNames': variables_list,
+            'count': len(self.system_structure.variables.keys()),
+            'names': list(self.system_structure.variables.keys()),
         }
 
         target_file_path = Path.cwd() / 'statisticsDict'
@@ -614,7 +592,7 @@ class OspSimulationCase():
         text_size = '11'
         styles = {
             'graph': {
-                'label': f"{self.simulation['name']}",
+                'label': f"{self.simulation.name}",
                 'fontname': 'Verdana',
                 'fontsize': text_size,
                 'fontcolor': 'black',
@@ -647,8 +625,8 @@ class OspSimulationCase():
             }
         }
 
-        basic_op_names = '(power|dot|sum|diff|prod|div|quotient)'
-        input_names = '^(INP|inp)'
+        basic_op_names: str = '(power|dot|sum|diff|prod|div|quotient)'
+        input_names: str = '^(INP|inp)'
 
         digraph = functools.partial(gv.Digraph, format='png')
 
@@ -656,16 +634,16 @@ class OspSimulationCase():
 
         cg = self._apply_styles(cg, styles)
 
-        for _, component in self.components.items():
+        for component in self.system_structure.components.values():
 
-            label_key, label = self._set_node_label(component.name, component)
+            label_key, label = self._set_node_label(component)
             # var_keys = find_key(self.models[key]['InitialValues'], 'InitialValue')
             # variables = {}
             label = self._create_table(
                 label_key,
                 {
-                    'source:': component.fmu,
-                    'variables:': '',           # 'stepsize:':self.models[key]['_attributes']['stepSize'],
+                    'source:': component.fmu.file.name,
+                    'variables:': '',                       # 'stepsize:':self.models[key]['_attributes']['stepSize'],
                 }
             )
 
@@ -674,7 +652,7 @@ class OspSimulationCase():
                 style = 'filled,rounded'
                 fillcolor = '#FFFFFF'
             elif re.search(basic_op_names, component.name, re.I):
-                # label = self._create_table(label_key, {'source:':self.models_dict[key]['_attributes']['source'], 'stepsize:':self.models_dict[key]['_attributes']['stepSize']})
+                # label = self._create_table(label_key, {'source:':component.fmu.file.name, 'stepsize:':component.step_size})
                 label = label
                 shape = 'square'
                 style = 'filled, rounded'
@@ -696,11 +674,14 @@ class OspSimulationCase():
                 fillcolor=fillcolor
             )
 
-        for connection_key, connection in self.connections.items():
-
-            from_key = connection['000000_Variable']['_attributes']['simulator']
-            to_key = connection['000001_Variable']['_attributes']['simulator']
-            label = self._set_edge_label(connection_key, connection)
+        for connection in self.system_structure.connections.values():
+            if not (connection.source and connection.target):
+                return
+            if not (connection.source.component and connection.target.component):
+                return
+            from_key: str = connection.source.component
+            to_key: str = connection.target.component
+            label = self._set_edge_label(connection)
 
             if re.search(input_names, from_key, re.I):
                 label = 'input\n%s' % label
@@ -723,8 +704,8 @@ class OspSimulationCase():
                 style = 'bold'
                 color = 'black'
                 fontcolor = 'black'
-                penwidth = '%i' % int(round((len(connection))**1.5, 0)),
-                weight = '%i' % int(round((len(connection))**1.5, 0)),
+                penwidth = '%i' % int(round((2)**1.5, 0)),
+                weight = '%i' % int(round((2)**1.5, 0)),
 
             cg.edge(
                 from_key,
@@ -742,7 +723,7 @@ class OspSimulationCase():
                 splines='true'
             )
 
-        cg.render(f"{self.simulation['name']}_callGraph", format='pdf')
+        cg.render(f"{self.simulation.name}_callGraph", format='pdf')
 
     def write_watch_dict(self):
         """writing at most possible watchDict
@@ -754,25 +735,23 @@ class OspSimulationCase():
         """
         watch_dict = {
             'datasources': {},
-            'delimiter': ',',                       # 'objects': {},
+            'delimiter': ',',                   # 'objects': {},
             'simulation': {
-                'name': self.simulation['name']
+                'name': self.simulation.name
             }
         }
 
         # append model
-        for _, component in self.components.items():
-            last_index = sum(
-                c_item['component'] == component.name for _, c_item in self.connectors.items()
-            )
+        for component_name, component in self.system_structure.components.items():
+            no_of_connectors = len(component.connectors.keys())
 
-            # Time, StepCount, conn0, conn1, etc from modelDescription.xml ModelVariables
-            # should match connectors in caseDict for respective model
-            # improvement needed
-            # columns = [0, 1]+[x+2 for x in range(last_index)]
-            columns = [0, 1] + [x + 2 for x in range(last_index)]   # f*** StepCount
+            # @TODO: Time, StepCount, conn0, conn1, etc from modelDescription.xml ModelVariables
+            #        should match connectors in caseDict for respective model.Improvement needed.
+            #        FRALUM, 2021-xx-xx
+            # columns = [0, 1]+[x+2 for x in range(no_of_connectors)]
+            columns = [0, 1] + [x + 2 for x in range(no_of_connectors)]     # f*** StepCount
 
-            watch_dict['datasources'].update({component.name: {'columns': columns}})
+            watch_dict['datasources'].update({component_name: {'columns': columns}})
 
         target_file_path = Path.cwd() / 'watchDict'
         DictWriter.write(watch_dict, target_file_path, mode='a')
@@ -798,25 +777,25 @@ class OspSimulationCase():
         digraph.edge_attr.update(('edges' in styles and styles['edges']) or {})
         return digraph
 
-    def _set_node_label(self, key, sub_dict):
-        label = f"{sub_dict['_attributes']['name']}\n___________\n\nfmu\n"
-        label += re.sub(r'(^.*/|^.*\\|\.fmu.*$)', '', sub_dict['_attributes']['fmu'])
+    def _set_node_label(self, component: Component):
+        label = f"{component.name}\n___________\n\nfmu\n"
+        label += re.sub(r'(^.*/|^.*\\|\.fmu.*$)', '', component.fmu.file.name)
 
-        label_key = sub_dict['_attributes']['name']
+        label_key = component.name
         return label_key, label
 
-    def _set_edge_label(self, key, sub_dict):
-        return (
-            f"{sub_dict['000000_Variable']['_attributes']['simulator']}"
-            '-->'
-            f"{sub_dict['000001_Variable']['_attributes']['simulator']}"
-        )
+    def _set_edge_label(self, connection: Connection) -> str:
+        if not (connection.source and connection.target):
+            return ''
+        return (f"{connection.source.component}"
+                '-->'
+                f"{connection.target.component}")
 
-    def _create_table(self, name, child=None):
+    def _create_table(self, name, child=None) -> str:
 
         child = child or {' ': ' '}
         n_child = len(child)
-        string = (
+        string: str = (
             f'<\n<TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0">\n<TR>\n<TD COLSPAN="{2 * n_child:d}">{name}</TD>\n</TR>\n'
         )
         for key, item in child.items():

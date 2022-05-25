@@ -37,12 +37,19 @@ A caseDict file contains
 | &numsp;&numsp;&numsp;fmu                          | string    | relative path to the location of the source FMU (relative to libSource) |
 | &numsp;connections                                | dict      | itemization of connections |
 | &numsp;&numsp;\<CONNECTION>                       | dict      | speaking name of the connection |
-| &numsp;&numsp;&numsp;source                       | string    | name of source \<COMPONENT> |
-| &numsp;&numsp;&numsp;target                       | string    | name of target \<COMPONENT> |
+| &numsp;&numsp;&numsp;source                       | dict      | source endpoint of \<CONNECTION> |
+| &numsp;&numsp;&numsp;&numsp;component             | string    | name of source \<COMPONENT> |
+| &numsp;&numsp;&numsp;&numsp;connector             | string    | name of \<CONNECTOR> at source \<COMPONENT> (optional. either connector or variable can be referenced as endpoint) |
+| &numsp;&numsp;&numsp;&numsp;variable              | string    | name of \<VARIABLE> at source \<COMPONENT> (optional. either connector or variable can be referenced as endpoint) |
+| &numsp;&numsp;&numsp;target                       | dict      | target endpoint of \<CONNECTION> |
+| &numsp;&numsp;&numsp;&numsp;component             | string    | name of target \<COMPONENT> |
+| &numsp;&numsp;&numsp;&numsp;connector             | string    | name of \<CONNECTOR> at target \<COMPONENT> (optional. either connector or variable can be referenced as endpoint) |
+| &numsp;&numsp;&numsp;&numsp;variable              | string    | name of \<VARIABLE> at target \<COMPONENT> (optional. either connector or variable can be referenced as endpoint) |
 | run                                               | dict      | settings for simulation run |
 | &numsp;simulation                                 | dict      | additional information about the simulaton. Used for window decoration. |
 | &numsp;&numsp;name                                | string    | name of the simulation |
 | &numsp;&numsp;startTime                           | float     | start time |
+| &numsp;&numsp;stopTime                            | float     | start time |
 | &numsp;&numsp;baseStepSize                        | float     | master algorithm step size |
 
 ## Example
@@ -57,143 +64,175 @@ filetype dictionary; coding utf-8; version 0.1; local --; purpose --;
 
 _environment
 {
-    libSource                 'path/to/a/model/library/on/your/machine';
-    root                     .;
+    libSource                           'path/to/a/model/library/on/your/machine';
+    root                                .;
 }
 systemStructure
 {
     connections
     {
-        in_0_to_diff_0
+        minuend_to_difference
         {
-            source                in_0_tx;
-            target                diff_0_rx_0;
+            source
+            {
+                component               minuend;
+                connector               minuend_output;
+            }
+            target
+            {
+                component               difference;
+                connector               difference_input_minuend;
+            }
         }
-        in_1_to_diff_0
+        subtrahend_to_difference
         {
-            source                in_1_tx;
-            target                diff_0_rx_1;
+            source
+            {
+                component               subtrahend;
+                connector               subtrahend_output;
+            }
+            target
+            {
+                component               difference;
+                connector               difference_input_subtrahend;
+            }
         }
-        in_2_to_div_0
+        dividend_to_quotient
         {
-            source                in_2_tx;
-            target                div_0_rx_0;
+            source
+            {
+                component               dividend;
+                connector               dividend_output;
+            }
+            target
+            {
+                component               quotient;
+                connector               quotient_input_dividend;
+            }
         }
-        diff_0_to_div_0
+        difference_to_divisor
         {
-            source                diff_0_tx;
-            target                div_0_rx_1;
+            source
+            {
+                component               difference;
+                connector               difference_output;
+            }
+            target
+            {
+                component               quotient;
+                connector               quotient_input_divisor;
+            }
         }
     }
     components
     {
-        diff_0
+        difference
         {
             connectors
             {
-                diff_0_rx_0
+                difference_input_minuend
                 {
-                    reference             difference.IN1;
-                    type                  input;
+                    variable            difference.IN1;
+                    type                input;
                 }
-                diff_0_rx_1
+                difference_input_subtrahend
                 {
-                    reference             difference.IN2;
-                    type                  input;
+                    variable            difference.IN2;
+                    type                input;
                 }
-                diff_0_tx
+                difference_output
                 {
-                    reference             difference.OUT;
-                    type                  input;
+                    variable            difference.OUT;
+                    type                output;
                 }
             }
-            prototype             'subfolder/in/your/library/difference.fmu';
+            fmu                         'subfolder/in/your/library/difference.fmu';
         }
-        div_0
+        quotient
         {
             connectors
             {
-                div_0_rx_0
+                quotient_input_dividend
                 {
-                    reference     quotient.IN1;
-                    type          input;
+                    variable            quotient.IN1;
+                    type                input;
                 }
-                div_0_rx_1
+                quotient_input_divisor
                 {
-                    reference     quotient.IN2;
-                    type          input;
+                    variable            quotient.IN2;
+                    type                input;
                 }
-                div_0_tx
+                quotient_output
                 {
-                    reference     quotient.OUT;
-                    type          input;
+                    variable            quotient.OUT;
+                    type                output;
                 }
 
             }
-            prototype             'subfolder/in/your/library/quotient.fmu';
+            fmu                         'subfolder/in/your/library/quotient.fmu';
         }
-        in_0
-        {
+        minuend
+            {
             connectors
             {
-                in_0_tx
+                minuend_output
                 {
-                    reference     constVal.OUT;
-                    type          output;
+                    variable            constVal.OUT;
+                    type                output;
                 }
             }
             initialize
             {
                 constVal.IN
                 {
-                    causality     parameter;
-                    start         $in_0;
-                    variability   fixed;
+                    causality           parameter;
+                    start               $minuend;
+                    variability         fixed;
                 }
             }
-            prototype             'subfolder/in/your/library/constantVal.fmu';
+            fmu                         'subfolder/in/your/library/constantVal.fmu';
         }
-        in_1
+        subtrahend
         {
             connectors
             {
-                in_1_tx
+                subtrahend_output
                 {
-                    reference     constVal.OUT;
-                    type          output;
+                    variable            constVal.OUT;
+                    type                output;
                 }
             }
             initialize
             {
                 constVal.IN
                 {
-                    causality     parameter;
-                    start         $in_1;
-                    variability   fixed;
+                    causality           parameter;
+                    start               $subtrahend;
+                    variability         fixed;
                 }
             }
-            prototype             'subfolder/in/your/library/constantVal.fmu';
+            fmu                         'subfolder/in/your/library/constantVal.fmu';
         }
-        in_2
+        dividend
         {
             connectors
             {
-                in_2_tx
+                dividend_output
                 {
-                    reference     constVal.OUT;
-                    type          output;
+                    variable            constVal.OUT;
+                    type                output;
                 }
             }
             initialize
             {
                 constVal.IN
                 {
-                    causality     parameter;
-                    start         $in_2;
-                    variability   fixed;
+                    causality           parameter;
+                    start               $dividend;
+                    variability         fixed;
                 }
             }
-            prototype             'subfolder/in/your/library/constantVal.fmu';
+            fmu                         'subfolder/in/your/library/constantVal.fmu';
         }
     }
 }
@@ -201,9 +240,10 @@ run
 {
     simulation
     {
-        name                  demoCase;
-        startTime             0;
-        baseStepSize          0.1;
+        name                            demoCase;
+        startTime                       0;
+        stopTime                        10;
+        baseStepSize                    0.01;
     }
 }
 
@@ -227,25 +267,25 @@ systemStructure
 {
     components
     {
-        diff_0
+        difference
         {
-            prototype             'subfolder/in/your/library/difference.fmu';
+            fmu             'subfolder/in/your/library/difference.fmu';
         }
-        div_0
+        quotient
         {
-            prototype             'subfolder/in/your/library/quotient.fmu';
+            fmu             'subfolder/in/your/library/quotient.fmu';
         }
-        in_0
+        minuend
         {
-            prototype             'subfolder/in/your/library/constantVal.fmu';
+            fmu             'subfolder/in/your/library/constantVal.fmu';
         }
-        in_1
+        subtrahend
         {
-            prototype             'subfolder/in/your/library/constantVal.fmu';
+            fmu             'subfolder/in/your/library/constantVal.fmu';
         }
-        in_2
+        dividend
         {
-            prototype             'subfolder/in/your/library/constantVal.fmu';
+            fmu             'subfolder/in/your/library/constantVal.fmu';
         }
     }
 }
