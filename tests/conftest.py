@@ -37,8 +37,9 @@ def _remove_ospx_dirs_and_files():
         rmtree(folder, ignore_errors=True)
     for pattern in ospx_files:
         for file in glob(pattern):
-            file = Path(file)
-            file.unlink(missing_ok=True)
+            if not file.startswith('test_'):
+                file = Path(file)
+                file.unlink(missing_ok=True)
 
 
 @pytest.fixture(autouse=True)

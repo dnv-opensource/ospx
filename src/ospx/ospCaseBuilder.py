@@ -195,6 +195,8 @@ class OspSimulationCase():
             simulation.stop_time = simulation_properties['stopTime']
         if 'baseStepSize' in simulation_properties:
             simulation.base_step_size = simulation_properties['baseStepSize']
+        if 'algorithm' in simulation_properties:
+            simulation.algorithm = simulation_properties['algorithm']
         self.simulation = simulation
 
     def copy_fmus_from_library(self):
@@ -325,11 +327,10 @@ class OspSimulationCase():
                 osp_system_structure['StartTime'] = self.simulation.start_time
             if self.simulation.base_step_size:
                 osp_system_structure['BaseStepSize'] = self.simulation.base_step_size
-            # if self.simulation.algorithm:
-            #     osp_system_structure['Algorithm'] = self.simulation.algorithm
+            if self.simulation.algorithm:
+                osp_system_structure['Algorithm'] = self.simulation.algorithm
 
-        # models (simulators)
-        # ('simulators' is OSP terminology. Any instance of a model is referred to as a 'simulator' in OSP.)
+        # Simulators (=Components)
         simulators: dict = {}
         for index, (_, component) in enumerate(self.system_structure.components.items()):
             simulator_key = f'{index:06d}_Simulator'
@@ -343,7 +344,7 @@ class OspSimulationCase():
             if component.initial_values:
                 simulator_properties['InitialValues'] = {}
                 for index, (_, variable) in enumerate(component.initial_values.items()):
-                    if variable.initial_value is not None and variable.data_type is None:
+                    if variable.start is not None and variable.data_type is None:
                         logger.error(
                             f"component {component.name}: An initial value is defined for variable {variable.name}, but its data type is not defined.\n"
                             f"The initial value for variable {variable.name} will not be written into OspSystemStructure.xml.\n"
@@ -357,7 +358,7 @@ class OspSimulationCase():
                             },
                             variable.data_type: {
                                 '_attributes': {
-                                    'value': variable.initial_value
+                                    'value': variable.start
                                 },
                             },
                         }

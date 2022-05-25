@@ -74,7 +74,7 @@ class Component():
             if 'variability' in variable_properties:
                 variable.variability = variable_properties['variability']
             if 'start' in variable_properties:
-                variable.initial_value = variable_properties['start']
+                variable.start = variable_properties['start']
             self._initial_values[variable_name] = variable
 
     def _read_connectors(self, properties: MutableMapping):
@@ -131,8 +131,8 @@ class Component():
                 self._variables[variable_name].causality = variable.causality
             if variable.variability:
                 self._variables[variable_name].variability = variable.variability
-            if variable.initial_value:
-                self._variables[variable_name].initial_value = variable.initial_value
+            if variable.start:
+                self._variables[variable_name].start = variable.start
 
     @property
     def initial_values(self) -> dict[str, ScalarVariable]:
