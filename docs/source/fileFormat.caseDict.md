@@ -32,8 +32,8 @@ A caseDict file contains
 | &numsp;&numsp;&numsp;initialize                   | dict      | optional initialization, updating the FMU's default settings |
 | &numsp;&numsp;&numsp;&numsp;\<VARIABLE>           | dict      | the variable / parameter to be set. Needs to match the name as defined in the FMU file. |
 | &numsp;&numsp;&numsp;&numsp;&numsp;causality      | string    | causality of the variable. Choices: {input, output, parameter} |
-| &numsp;&numsp;&numsp;&numsp;&numsp;start          | float     | initial value the variable shall be set to. |
 | &numsp;&numsp;&numsp;&numsp;&numsp;variabliity    | string    | variability of the variable. Choices: {fixed, calculated, tunable} |
+| &numsp;&numsp;&numsp;&numsp;&numsp;start          | float     | initial value the variable shall be set to. |
 | &numsp;&numsp;&numsp;fmu                          | string    | relative path to the location of the source FMU (relative to libSource) |
 | &numsp;connections                                | dict      | itemization of connections |
 | &numsp;&numsp;\<CONNECTION>                       | dict      | speaking name of the connection |
@@ -51,6 +51,7 @@ A caseDict file contains
 | &numsp;&numsp;startTime                           | float     | start time |
 | &numsp;&numsp;stopTime                            | float     | start time |
 | &numsp;&numsp;baseStepSize                        | float     | master algorithm step size |
+| &numsp;&numsp;algorithm                           | string    | Co-simulation master algorithm (currently 'fixedStep' is supported by OSP) |
 
 ## Example
 
@@ -186,8 +187,8 @@ systemStructure
                 constVal.IN
                 {
                     causality           parameter;
-                    start               $minuend;
                     variability         fixed;
+                    start               $minuend;
                 }
             }
             fmu                         'subfolder/in/your/library/constantVal.fmu';
@@ -207,8 +208,8 @@ systemStructure
                 constVal.IN
                 {
                     causality           parameter;
-                    start               $subtrahend;
                     variability         fixed;
+                    start               $subtrahend;
                 }
             }
             fmu                         'subfolder/in/your/library/constantVal.fmu';
@@ -228,8 +229,8 @@ systemStructure
                 constVal.IN
                 {
                     causality           parameter;
-                    start               $dividend;
                     variability         fixed;
+                    start               $dividend;
                 }
             }
             fmu                         'subfolder/in/your/library/constantVal.fmu';
@@ -244,6 +245,7 @@ run
         startTime                       0;
         stopTime                        10;
         baseStepSize                    0.01;
+        algorithm                       fixedStep;
     }
 }
 

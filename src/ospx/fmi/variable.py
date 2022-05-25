@@ -24,15 +24,34 @@ def get_fmi_data_type(arg):
 @dataclass()
 class ScalarVariable():
     name: str
-    value_reference: int = 0
-    description: Union[str, None] = None
+    _data_type: Union[str, None] = None
     _causality: str = 'local'
     _variability: Union[str, None] = None
+    _start: Union[int, float, bool, str, None] = None
+    value_reference: int = 0
+    description: Union[str, None] = None
     quantity: Union[str, None] = None
     unit: Union[str, None] = None
     display_unit: Union[str, None] = None
-    _initial_value: Union[int, float, bool, str, None] = None
-    _data_type: Union[str, None] = None
+
+    @property
+    def data_type(self) -> Union[str, None]:
+        return self._data_type
+
+    @data_type.setter
+    def data_type(self, type: str):
+        valid_types: list[str] = [
+            'Real',
+            'Integer',
+            'Boolean',
+            'String',
+            'Enumeration',
+        ]
+        if type not in valid_types:
+            logger.error(f"variable {self.name}: value for data_type '{type}' is invalid.")
+            return
+        self._data_type = type
+        return
 
     @property
     def causality(self) -> str:
@@ -75,30 +94,11 @@ class ScalarVariable():
         return
 
     @property
-    def data_type(self) -> Union[str, None]:
-        return self._data_type
+    def start(self) -> Union[int, float, bool, str, None]:
+        return self._start
 
-    @data_type.setter
-    def data_type(self, type: str):
-        valid_types: list[str] = [
-            'Real',
-            'Integer',
-            'Boolean',
-            'String',
-            'Enumeration',
-        ]
-        if type not in valid_types:
-            logger.error(f"variable {self.name}: value for data_type '{type}' is invalid.")
-            return
-        self._data_type = type
-        return
-
-    @property
-    def initial_value(self) -> Union[int, float, bool, str, None]:
-        return self._initial_value
-
-    @initial_value.setter
-    def initial_value(self, value: Union[int, float, bool, str, None]):
-        self._initial_value = value
-        if not self.data_type and self.initial_value:
-            self.data_type = get_fmi_data_type(self.initial_value)
+    @start.setter
+    def start(self, value: Union[int, float, bool, str, None]):
+        self._start = value
+        if not self.data_type and self.start:
+            self.data_type = get_fmi_data_type(self.start)

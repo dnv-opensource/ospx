@@ -57,5 +57,48 @@
                 "enable": true
             }
         },
+        {
+            "name": "importSystemStructure test_import_OspSystemStructure.xml",
+            "type": "python",
+            "request": "launch",
+            "cwd": "${workspaceFolder}\\tests\\test_dicts",
+            "program": "${workspaceFolder}\\src\\ospx\\importer\\cli\\importSystemStructure.py",
+            "args": [
+                "test_import_OspSystemStructure.xml",
+            ],
+            "console": "integratedTerminal",
+            "autoReload": {
+                "enable": true
+            }
+        },
+        {
+            "name": "ospCaseBuilder test_caseDict_imported_test_graph",
+            "type": "python",
+            "request": "launch",
+            "cwd": "${workspaceFolder}\\tests\\test_dicts",
+            "program": "${workspaceFolder}\\src\\ospx\\cli\\ospCaseBuilder.py",
+            "args": [
+                "test_caseDict_imported_test_graph",
+                "--graph",
+            ],
+            "console": "integratedTerminal",
+            "autoReload": {
+                "enable": true
+            }
+        },
+        {
+            "name": "ospCaseBuilder test_caseDict",
+            "type": "python",
+            "request": "launch",
+            "cwd": "${workspaceFolder}\\tests\\test_dicts",
+            "program": "${workspaceFolder}\\src\\ospx\\cli\\ospCaseBuilder.py",
+            "args": [
+                "test_caseDict",
+            ],
+            "console": "integratedTerminal",
+            "autoReload": {
+                "enable": true
+            }
+        },
     ]
 }

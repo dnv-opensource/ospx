@@ -127,8 +127,8 @@ systemStructure
                 constVal.IN
                 {
                     causality           parameter;
-                    start               $minuend;
                     variability         fixed;
+                    start               $minuend;
                 }
             }
             fmu                         constantVal.fmu;
@@ -148,8 +148,8 @@ systemStructure
                 constVal.IN
                 {
                     causality           parameter;
-                    start               $subtrahend;
                     variability         fixed;
+                    start               $subtrahend;
                 }
             }
             fmu                         constantVal.fmu;
@@ -169,8 +169,8 @@ systemStructure
                 constVal.IN
                 {
                     causality           parameter;
-                    start               $dividend;
                     variability         fixed;
+                    start               $dividend;
                 }
             }
             fmu                         constantVal.fmu;
@@ -185,5 +185,6 @@ run
         startTime                       0;
         stopTime                        10;
         baseStepSize                    0.01;
+        algorithm                       fixedStep;
     }
 }

@@ -165,14 +165,15 @@ class FMU():
                 if type_identifier := find_type_identifier_in_keys(v):
                     variable.data_type = type_identifier
                     type_key = find_key(v, f'{type_identifier}$')
-                    if 'quantity' in v[type_key]['_attributes']:
-                        variable.quantity = v[type_key]['_attributes']['quantity']
-                    if 'unit' in v[type_key]['_attributes']:
-                        variable.unit = v[type_key]['_attributes']['unit']
-                    if 'display_unit' in v[type_key]['_attributes']:
-                        variable.display_unit = v[type_key]['_attributes']['display_unit']
-                    if 'initial_value' in v[type_key]['_attributes']:
-                        variable.initial_value = v[type_key]['_attributes']['initial_value']
+                    if v[type_key] and '_attributes' in v[type_key]:
+                        if 'quantity' in v[type_key]['_attributes']:
+                            variable.quantity = v[type_key]['_attributes']['quantity']
+                        if 'unit' in v[type_key]['_attributes']:
+                            variable.unit = v[type_key]['_attributes']['unit']
+                        if 'display_unit' in v[type_key]['_attributes']:
+                            variable.display_unit = v[type_key]['_attributes']['display_unit']
+                        if 'initial_value' in v[type_key]['_attributes']:
+                            variable.start = v[type_key]['_attributes']['initial_value']
                 variables[variable.name] = variable
 
         return variables
@@ -224,13 +225,13 @@ class FMU():
 
                 logger.info(
                     f'{self.file.name}: update start values for variable {model_variable_name}:\n'
-                    f'\tstart:\t\t{variable_with_start_values.initial_value}\n'
+                    f'\tstart:\t\t{variable_with_start_values.start}\n'
                     f'\tcausality:\t {variable_with_start_values.causality}\n'
                     f'\tvariability:\t{variable_with_start_values.variability}'
                 )
 
                 model_variables[model_variable_key][type_key]['_attributes'][
-                    'start'] = variable_with_start_values.initial_value
+                    'start'] = variable_with_start_values.start
                 model_variables[model_variable_key]['_attributes'][
                     'causality'] = variable_with_start_values.causality
                 model_variables[model_variable_key]['_attributes'][

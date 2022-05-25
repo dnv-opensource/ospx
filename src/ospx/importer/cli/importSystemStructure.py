@@ -12,7 +12,7 @@ from dictIO.dictReader import DictReader
 from dictIO.dictWriter import DictWriter
 from dictIO.utils.counter import BorgCounter
 from ospx.utils.logging import configure_logging
-from ospx.utils.dict import find_key
+from ospx.utils.dict import find_key, find_type_identifier_in_keys
 
 
 logger = logging.getLogger(__name__)
@@ -101,10 +101,10 @@ def main():
     system_structure_file: Path = Path(args.systemStructureFile)
 
     # Dispatch to _main(), which takes care of processing the arguments and invoking the API.
-    _main(system_structure_file=system_structure_file, )
+    _main(system_structure_file=system_structure_file)
 
 
-def _main(system_structure_file: Path, ):
+def _main(system_structure_file: Path):
     """Entry point for unit tests.
 
     Processes the arguments parsed by main() on the console and invokes the API.
@@ -126,108 +126,114 @@ def _main(system_structure_file: Path, ):
 
     counter = BorgCounter()
 
-    # gather the source xml
-    # this is provided from a side path, not the actual folder, otherwise it will be overwritten!
     source_dict = DictReader.read(system_structure_file, comments=False)
 
-    # the to main subdicts contained by systemStructure dict
-    components_dict = {}
-    connectors_dict = {}
-    connections_dict = {}
+    # Main subdicts contained in systemStructure
+    connections: dict[str, dict] = {}
+    components: dict[str, dict] = {}
 
-    # iterate over the connections first,
-    # because they contain the var names and the component name
-    # collecting and naming the ports
-    numbered_connections_dict_key = find_key(source_dict, 'Connections')
-    for key, item in source_dict[numbered_connections_dict_key].items():
-
-        connection_name = []
-        temp_connections_dict = {}
-        # this loop has the range {0,1}
-        for index, (s_key,
-                    s_item) in enumerate(source_dict[numbered_connections_dict_key][key].items()):
-
-            connector_name = 'PORT_' + s_item['_attributes']['simulator'] + '_VAR_' + s_item[
-                '_attributes']['name']
-
-            # alternator for source <--> target (because there are always 2 entries in VariableConnection in always the same sequence)
-            if index % 2 == 0:
-                temp_connections_dict['source'] = connector_name
-                type = 'output'
-            else:
-                temp_connections_dict['target'] = connector_name
-                type = 'input'
-
-            connectors_dict['%06i_%s' % (counter(), s_item['_attributes']['simulator'])] = {
-                connector_name: {
-                    'variable': s_item['_attributes']['name'],
-                    'type': type,
+    # Connections
+    # iterate over the connections first as they contain the variable and component names
+    temp_connectors = {}
+    if connections_key := find_key(source_dict, 'Connections$'):
+        for connection_properties in source_dict[connections_key].values():
+            connection: dict[str, dict] = {}
+            connection_name: str = ''
+            # this loop has the range {0,1}
+            for index, (endpoint_type,
+                        endpoint_properties) in enumerate(connection_properties.items()):
+                component_name = endpoint_properties['_attributes']['simulator']
+                variable_name = endpoint_properties['_attributes']['name']
+                # alternator for source <--> target (because there are always 2 entries in VariableConnection in always the same sequence)
+                endpoint_type: str = 'source' if index % 2 == 0 else 'target'
+                connection[endpoint_type] = {
+                    'component': component_name,
+                    'variable': variable_name,
                 }
-            }
-
-            connection_name.append(s_item['_attributes']['simulator'])
-
-        connection_name = '_TO_'.join(connection_name)
-
-        connections_dict[connection_name] = temp_connections_dict
-
-    # iterate over "Simulators"
-    numbered_components_dict_key = find_key(source_dict, 'Simulator')
-    for key, item in source_dict[numbered_components_dict_key].items():
-
-        named_key = item['_attributes']['name']
-        source_fmu_name = item['_attributes']['source']
-        temp_connectors_dict = {}
-
-        for c_key, c_item in connectors_dict.items():
-
-            if named_key in c_key:
-                temp_connectors_dict.update(c_item)
-
-        components_dict[named_key] = {'connectors': temp_connectors_dict, 'fmu': source_fmu_name}
-
-        # if there is a InitialValues in numberedComponentDictKey
-        numbered_initial_values_key = find_key(item, 'InitialValues')
-        if 'InitialValues' in numbered_initial_values_key:
-
-            # find numbered key names
-            numbered_initial_value_key = find_key(
-                item[numbered_initial_values_key], 'InitialValue'
-            )
-            numbered_real_key = find_key(
-                item[numbered_initial_values_key][numbered_initial_value_key], 'Real'
-            )
-
-            # extract var name, value
-            var_name = item[numbered_initial_values_key][numbered_initial_value_key]['_attributes'
-                                                                                     ]['variable']
-            value = item[numbered_initial_values_key][numbered_initial_value_key][
-                numbered_real_key]['_attributes']['value']
-
-            # sub dict
-            initialize_dict = {
-                'initialize': {
-                    var_name: {
-                        'causality': 'parameter', 'variability': 'fixed', 'start': value
+                # Save connector in temp_connectors dict.
+                # (The variable and component information stored in these connectors
+                #  is later used to complete the component properties)
+                connector_name = f'{component_name}_{variable_name}'
+                connector_type = 'output' if endpoint_type == 'source' else 'input'
+                temp_connectors[f'{counter():06d}_{component_name}'] = {
+                    connector_name: {
+                        'variable': variable_name,
+                        'type': connector_type,
                     }
                 }
-            }
+                if not connection_name:
+                    connection_name = component_name
+                else:
+                    connection_name += f'_to_{component_name}'
 
-            # update
-            components_dict[named_key].update(initialize_dict)
+            connections[connection_name] = connection
 
-    system_structure_dict = {'components': components_dict, 'connections': connections_dict}
+    # Simulators (=Components)
+    if simulators_key := find_key(source_dict, 'Simulators$'):
+        for simulator_properties in source_dict[simulators_key].values():
+            # Component
+            component: dict[str, dict] = {}
+            component_name = simulator_properties['_attributes']['name']
+            # Connectors
+            component_connectors: dict[str, dict] = {}
+            for temp_connector_key, connector in temp_connectors.items():
+                if component_name in temp_connector_key:
+                    component_connectors |= connector
+            component['connectors'] = component_connectors
+            # FMU
+            fmu_name = simulator_properties['_attributes']['source']
+            component['fmu'] = fmu_name
+            # Initial values
+            if initial_values_key := find_key(simulator_properties, 'InitialValues$'):
+                initial_values = simulator_properties[initial_values_key]
+                if initial_value_key := find_key(initial_values, 'InitialValue$'):
+                    initial_value = initial_values[initial_value_key]
+                    if data_type := find_type_identifier_in_keys(initial_value):
+                        type_key = find_key(initial_value, f'{data_type}$')
+                        variable_name = initial_value['_attributes']['variable']
+                        value = initial_value[type_key]['_attributes']['value']
+                        component['initialize'] = {
+                            variable_name: {
+                                'causality': 'parameter',
+                                'variability': 'fixed',
+                                'start': value,
+                            }
+                        }
+            # Save in components dict
+            components[component_name] = component
 
-    # finally assemble all
+    system_structure: dict[str, dict] = {
+        'connections': connections,
+        'components': components,
+    }
+
+    # General simulation attributes
+    # 1: Defaults
+    simulation: dict = {
+        'name': system_structure_file.stem,
+        'startTime': 0.,
+        'baseStepSize': 0.01,
+        'algorithm': 'fixedStep',
+    }
+    # 2: Overwrite defaults with values from source dict, where existing
+    if '_attributes' in source_dict:
+        attributes = source_dict['_attributes']
+        if 'StartTime' in attributes:
+            simulation['startTime'] = attributes['StartTime']
+        if 'BaseStepSize' in attributes:
+            simulation['baseStepSize'] = attributes['BaseStepSize']
+        if 'Algorithm' in attributes:
+            simulation['algorithm'] = attributes['Algorithm']
+
+    # Assemble case dict
     case_dict = {
         '_environment': {
-            'libSource': '.', 'root': Path.cwd()
+            'libSource': '.',
+            'root': Path.cwd(),
         },
-        'systemStructure': system_structure_dict,
+        'systemStructure': system_structure,
         'run': {
-            'simulation': {
-                'name': 'demoCase', 'startTime': 0., 'stopTime': None, 'baseStepSize': 0.01
-            }
+            'simulation': simulation,
         },
     }
 

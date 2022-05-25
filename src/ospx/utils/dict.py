@@ -14,9 +14,9 @@ def find_key(dict: MutableMapping, pattern: str) -> Union[str, None]:
 
 def find_type_identifier_in_keys(dict: MutableMapping) -> Union[str, None]:
     """Finds the first key name in dict that contains one of the following type identifier strings:
-    [Unknown|Real|Integer|String|Boolean]
+    [Integer|Real|Boolean|Enumeration|String|Unknown]
     """
-    key_list = ['Unknown', 'Real', 'Integer', 'String', 'Boolean']
+    key_list = ['Integer', 'Real', 'Boolean', 'Enumeration', 'String', 'Unkown']
     type_identifier = []
     for key in dict:
         key_without_index = re.sub(r'^\d{6}_', '', key)
