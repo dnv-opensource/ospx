@@ -2,6 +2,8 @@ import logging
 from typing import Any, Sequence, Union
 
 
+__ALL__ = ['ScalarVariable', 'get_fmi_data_type']
+
 logger = logging.getLogger(__name__)
 
 

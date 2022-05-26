@@ -8,9 +8,7 @@ from dictIO.dictWriter import DictWriter
 from dictIO.utils.counter import BorgCounter
 
 from ospx.connector import Connector
-from ospx.fmi.fmu import FMU
-from ospx.fmi.unit import Unit
-from ospx.fmi.variable import ScalarVariable
+from ospx.fmi import FMU, ScalarVariable, Unit
 
 
 logger = logging.getLogger(__name__)
