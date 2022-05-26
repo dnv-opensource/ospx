@@ -13,17 +13,14 @@ from dictIO.cppDict import CppDict
 from dictIO.formatter import XmlFormatter
 from dictIO.parser import XmlParser
 from dictIO.utils.counter import BorgCounter
-from ospx.fmi.experiment import Experiment
-from ospx.fmi.unit import BaseUnit, DisplayUnit, Unit
-from ospx.fmi.variable import ScalarVariable
+from ospx.fmi import BaseUnit, DisplayUnit, Experiment, ScalarVariable, Unit
 from ospx.utils.dict import find_key, find_type_identifier_in_keys, shrink_dict
 from ospx.utils.zip import (
-    add_file_content_to_zip,
-    read_file_content_from_zip,
-    remove_files_from_zip,
-    rename_file_in_zip,
+    add_file_content_to_zip, read_file_content_from_zip, remove_files_from_zip, rename_file_in_zip
 )
 
+
+__ALL__ = ['FMU']
 
 logger = logging.getLogger(__name__)
 

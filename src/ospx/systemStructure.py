@@ -4,9 +4,7 @@ from typing import MutableMapping, Union
 from ospx.component import Component
 from ospx.connection import Connection, Endpoint
 from ospx.connector import Connector
-from ospx.fmi.fmu import FMU
-from ospx.fmi.unit import Unit
-from ospx.fmi.variable import ScalarVariable
+from ospx.fmi import FMU, ScalarVariable, Unit
 
 
 logger = logging.getLogger(__name__)
