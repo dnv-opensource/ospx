@@ -1,11 +1,11 @@
 import logging
 from typing import MutableMapping, Union
 
-from ospx.component import Component
-from ospx.connection import Connection, Endpoint
-from ospx.connector import Connector
+from ospx import Component, Connection, Connector, Endpoint
 from ospx.fmi import FMU, ScalarVariable, Unit
 
+
+__ALL__ = ['SystemStructure']
 
 logger = logging.getLogger(__name__)
 

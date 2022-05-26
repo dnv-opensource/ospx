@@ -6,7 +6,7 @@ import logging
 from pathlib import Path
 from typing import Union
 
-from ospx.ospCaseBuilder import OspCaseBuilder
+from ospx import OspCaseBuilder
 from ospx.utils.logging import configure_logging
 
 

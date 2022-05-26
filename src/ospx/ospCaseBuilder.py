@@ -5,6 +5,7 @@ import re
 from pathlib import Path
 from shutil import copyfile
 from typing import Sequence, Union
+from shutil import rmtree
 
 import graphviz as gv
 from dictIO.cppDict import CppDict
@@ -13,11 +14,10 @@ from dictIO.dictWriter import DictWriter
 from dictIO.formatter import XmlFormatter
 from dictIO.utils.counter import BorgCounter
 
-from ospx.component import Component
-from ospx.connection import Connection
-from ospx.simulation import Simulation
-from ospx.systemStructure import SystemStructure
+from ospx import Component, Connection, Simulation, SystemStructure
 
+
+__ALL__ = ['OspCaseBuilder', 'OspSimulationCase']
 
 logger = logging.getLogger(__name__)
 
@@ -135,7 +135,7 @@ class OspSimulationCase():
         """
 
         # specify all files to be deleted (or comment-in / comment-out as needed)
-        file_types = [
+        case_builder_result_files = [
             '*.csv',
             '*.out',
             '*.xml',
@@ -144,20 +144,19 @@ class OspSimulationCase():
             '*.pdf',
             '*.png',
             'watchDict',
-            'statisticsDict',   # 'results',
+            'statisticsDict',           # 'results',
             'zip',
         ]
 
         logger.info(f'clean case folder: {self.case_folder}')
 
-        for file_type in file_types:
-            files = list(Path('.').rglob(file_type))
-
+        for pattern in case_builder_result_files:
+            files = list(Path('.').rglob(pattern))
             for file in files:
-                if Path(file).is_file():
-                    os.remove(file)
+                if file.is_file():
+                    if not file.name.startswith('test_'):
+                        file.unlink(missing_ok=True)
                 else:
-                    from shutil import rmtree
                     rmtree(file)
 
     def initialize(self):
