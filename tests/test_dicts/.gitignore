@@ -1,4 +1,5 @@
 *.xml
+!test_import_OspSystemStructure.xml
 *.fmu
 *.ssd
 statisticsDict
