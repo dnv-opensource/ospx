@@ -3,6 +3,8 @@ from dataclasses import dataclass
 from typing import Union
 
 
+__ALL__ = ['Endpoint', 'Connection']
+
 logger = logging.getLogger(__name__)
 
 

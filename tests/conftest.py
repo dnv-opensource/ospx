@@ -22,6 +22,7 @@ ospx_files = [
     '*.ssd',
     'statisticsDict',
     'watchDict',
+    'caseDict_imported_from_test_import_OspSystemStructure_xml'
 ]
 
 
@@ -29,16 +30,15 @@ ospx_files = [
 def default_setup_and_teardown(caplog):
     _remove_ospx_dirs_and_files()
     yield
-    # _remove_ospx_dirs_and_files()
+    _remove_ospx_dirs_and_files()
 
 
 def _remove_ospx_dirs_and_files():
     for folder in ospx_dirs:
         rmtree(folder, ignore_errors=True)
     for pattern in ospx_files:
-        for file in glob(pattern):
-            if not file.startswith('test_'):
-                file = Path(file)
+        for file in Path('.').rglob(pattern):
+            if not file.name.startswith('test_'):
                 file.unlink(missing_ok=True)
 
 

@@ -1,4 +1,4 @@
-from ospx.ospCaseBuilder import OspCaseBuilder
+from ospx import OspCaseBuilder
 from dictIO.dictParser import DictParser
 from pathlib import Path
 from glob import glob

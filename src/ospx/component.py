@@ -7,17 +7,13 @@ from typing import MutableMapping, Union
 from dictIO.dictWriter import DictWriter
 from dictIO.utils.counter import BorgCounter
 
-from ospx.connector import Connector
+from ospx import Connector
 from ospx.fmi import FMU, ScalarVariable, Unit
 
 
+__ALL__ = ['Component']
+
 logger = logging.getLogger(__name__)
-
-
-@dataclass()
-class RemoteAccess():
-    host: str = ''
-    port: int = 0
 
 
 class Component():
@@ -231,3 +227,9 @@ class Component():
         }
 
         DictWriter.write(osp_model_description, osp_model_description_file)
+
+
+@dataclass()
+class RemoteAccess():
+    host: str = ''
+    port: int = 0
