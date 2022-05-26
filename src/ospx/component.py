@@ -75,7 +75,7 @@ class Component():
                 variable.variability = variable_properties['variability']
             if 'start' in variable_properties:
                 variable.start = variable_properties['start']
-            self._initial_values[variable_name] = variable
+            self._initial_values[variable.name] = variable
 
     def _read_connectors(self, properties: MutableMapping):
         if 'connectors' not in properties:
@@ -86,7 +86,7 @@ class Component():
                 connector.variable = connector_properties['variable']
             if 'type' in connector_properties:
                 connector.type = connector_properties['type']
-            self._connectors[connector_name] = connector
+            self._connectors[connector.name] = connector
 
     def _read_generate_proxy(self, properties: MutableMapping):
         if 'generate_proxy' not in properties:
@@ -190,9 +190,6 @@ class Component():
                 unit_definition['DisplayUnit']['_attributes']['name'] = unit.display_unit.name
                 unit_definition['DisplayUnit']['_attributes']['factor'] = unit.display_unit.factor
                 unit_definition['DisplayUnit']['_attributes']['offset'] = unit.display_unit.offset
-                if unit.display_unit.inverse:
-                    unit_definition['DisplayUnit']['_attributes']['inverse'
-                                                                  ] = unit.display_unit.inverse
             unit_definitions[f'{self.counter():06d}_Unit'] = unit_definition
         osp_model_description['UnitDefinitions'] = unit_definitions
 

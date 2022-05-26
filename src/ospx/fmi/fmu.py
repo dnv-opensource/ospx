@@ -29,6 +29,10 @@ logger = logging.getLogger(__name__)
 
 
 class FMU():
+    """Class to read and interact with an fmi 2.0 Functional Mockup Unit (FMU)
+
+    See also https://github.com/modelica/fmi-standard/blob/v2.0.x/schema/fmi2ModelDescription.xsd
+    """
 
     def __init__(self, file: Union[str, os.PathLike[str]]):
         # Make sure fmu_file argument is of type Path. If not, cast it to Path type.
@@ -130,8 +134,6 @@ class FMU():
                     unit.display_unit.factor = u[display_unit_key]['_attributes']['factor']
                 if 'offset' in u[display_unit_key]['_attributes']:
                     unit.display_unit.offset = u[display_unit_key]['_attributes']['offset']
-                if 'inverse' in u[display_unit_key]['_attributes']:
-                    unit.display_unit.inverse = u[display_unit_key]['_attributes']['inverse']
             unit_definitions[unit.name] = unit
         return unit_definitions
 
@@ -195,13 +197,98 @@ class FMU():
             default_experiment.step_size = default_experiment_properties['stepSize']
         return default_experiment
 
-    def set_start_values(
-        self, variables_with_start_values: Union[dict[str, ScalarVariable], None]
-    ):
-        """sets the start values of variables in the FMUs modelDescription.xml
+    def copy(self, new_name: str):
+        """Creates a copy of the FMU with a new name
+
+        Parameters
+        ----------
+        new_name : str
+            Intended name of the copy. The new name must be different from the existing name.
+
+        Returns
+        -------
+        FMU
+            The new FMU
+        """
+        # Prepare
+        new_name = Path(new_name).stem
+        existing_file_name = self.file.stem
+        if new_name == existing_file_name:
+            logger.error(
+                f'{self.file.name} copy: new name {new_name} is identical with existing name. copy() aborted.'
+            )
+        new_model_description: CppDict = deepcopy(self.model_description)
+        new_file = self.file.parent.absolute() / f'{new_name}.fmu'
+
+        # Copy FMU
+        copyfile(self.file, new_file)
+
+        # Rename *.dll files in FMU to match new fmu name
+        with ZipFile(new_file, 'r') as document:
+            dll_file_names = [
+                file.filename
+                for file in document.infolist()
+                if re.search(r'.*\.dll$', file.filename) and existing_file_name in file.filename
+            ]
+        new_dll_file_names = [
+            re.sub(existing_file_name, new_name, dll_file_name) for dll_file_name in dll_file_names
+        ]
+        for dll_file_name, new_dll_file_name in zip(dll_file_names, new_dll_file_names):
+            logger.info(
+                f'{self.file.name} copy: renaming dll {dll_file_name} to {new_dll_file_name}'
+            )
+            rename_file_in_zip(new_file, dll_file_name, new_dll_file_name)
+
+        # Rename <fmiModelDescription modelName> in modelDescription.xml
+        new_model_description['_xmlOpts']['_rootAttributes']['modelName'] = new_name
+
+        # Rename <CoSimulation modelIdentifier> in modelDescription.xml
+        # (STC requires consistency between <fmiModelDescription modelName> and <CoSimulation modelIdentifier>)
+        co_simulation: dict = new_model_description[
+            find_key(new_model_description, 'CoSimulation$')]
+        co_simulation['_attributes']['modelIdentifier'] = new_name
+
+        # Log the update in modelDescription.xml
+        self._log_update_in_model_description(new_model_description)
+
+        # Write updated modelDescription.xml into new FMU
+        new_fmu = FMU(new_file)
+        new_fmu._write_model_description(new_model_description)
+
+        return new_fmu
+
+    def proxify(self, host: str, port: int):
+        """Creates a proxy version of the FMU
+
+        For details see https://github.com/NTNU-IHB/FMU-proxy
+
+        Parameters
+        ----------
+        host : str
+            Remote host
+        port : int
+            Remote port
+
+        Returns
+        -------
+        FMU
+            The created proxy version of the FMU
         """
 
-        variables_with_start_values = variables_with_start_values or {}
+        import subprocess
+        remote_string = f"--remote={host}:{port}"
+        command = (f'fmu-proxify {self.file.name} {remote_string}')
+        try:
+            subprocess.run(command, timeout=60)
+        except subprocess.TimeoutExpired:
+            logger.exception(f'Timeout occured when calling {command}.')
+            return self
+        proxy_fmu_file = self.file.parent.absolute() / f'{self.file.stem}-proxy.fmu'
+        return FMU(proxy_fmu_file)
+
+    def _modify_start_values(self, variables_with_start_values: dict[str, ScalarVariable]):
+        """Modifies the start values of variables inside the FMUs modelDescription.xml
+        """
 
         logger.info(
             f'{self.file.name}: update start values of variables in modelDescription.xml'
@@ -238,72 +325,6 @@ class FMU():
                     'variability'] = variable_with_start_values.variability
 
         self._log_update_in_model_description()
-
-    def copy(self, new_name: str):
-        """Creates a copy of the FMU with a new name
-        """
-        # Prepare
-        new_name = Path(new_name).stem
-        existing_name = self.file.stem
-        if new_name == existing_name:
-            logger.error(
-                f'{self.file.name} copy: new name {new_name} is identical with existing name. copy() aborted.'
-            )
-        new_model_description: CppDict = deepcopy(self.model_description)
-        new_file = self.file.parent.absolute() / f'{new_name}.fmu'
-
-        # Copy FMU
-        copyfile(self.file, new_file)
-
-        # Rename *.dll files in FMU to match new fmu name
-        with ZipFile(new_file, 'r') as document:
-            dll_file_names = [
-                file.filename
-                for file in document.infolist()
-                if re.search(r'.*\.dll$', file.filename) and existing_name in file.filename
-            ]
-        new_dll_file_names = [
-            re.sub(existing_name, new_name, dll_file_name) for dll_file_name in dll_file_names
-        ]
-        for dll_file_name, new_dll_file_name in zip(dll_file_names, new_dll_file_names):
-            logger.info(
-                f'{self.file.name} copy: renaming dll {dll_file_name} to {new_dll_file_name}'
-            )
-            rename_file_in_zip(new_file, dll_file_name, new_dll_file_name)
-
-        # Rename <fmiModelDescription modelName> in modelDescription.xml
-        new_model_description['_xmlOpts']['_rootAttributes']['modelName'] = new_name
-
-        # Rename <CoSimulation modelIdentifier> in modelDescription.xml
-        # (STC requires consistency between <fmiModelDescription modelName> and <CoSimulation modelIdentifier>)
-        co_simulation: dict = new_model_description[
-            find_key(new_model_description, 'CoSimulation$')]
-        co_simulation['_attributes']['modelIdentifier'] = new_name
-
-        # Log the update in modelDescription.xml
-        self._log_update_in_model_description(new_model_description)
-
-        # Write updated modelDescription.xml into new FMU
-        new_fmu = FMU(new_file)
-        new_fmu._write_model_description(new_model_description)
-
-        return new_fmu
-
-    def proxify(self, host: str, port: int):
-        """Creates a proxy version of the FMU
-
-        For details see NTNU-IHB/fmu-proxify
-        """
-        import subprocess
-        remote_string = f"--remote={host}:{port}"
-        command = (f'fmu-proxify {self.file.name} {remote_string}')
-        try:
-            subprocess.run(command, timeout=60)
-        except subprocess.TimeoutExpired:
-            logger.exception(f'Timeout occured when calling {command}.')
-            return self
-        proxy_fmu_file = self.file.parent.absolute() / f'{self.file.stem}-proxy.fmu'
-        return FMU(proxy_fmu_file)
 
     def _log_update_in_model_description(self, model_description: Union[CppDict, None] = None):
 

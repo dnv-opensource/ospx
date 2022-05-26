@@ -85,10 +85,10 @@ class SystemStructure():
             if 'target' in connection_properties:
                 connection.target = self._read_endpoint(connection_properties['target'])
             if connection.source and connection.target:
-                self._connections[connection_name] = connection
+                self._connections[connection.name] = connection
             else:
                 logger.error(
-                    f'connection {connection_name}: connection could not be resolved. Please recheck connection properties in case dict.'
+                    f'connection {connection.name}: connection could not be resolved. Please recheck connection properties in case dict.'
                 )
         return
 
