@@ -6,3 +6,4 @@ from .systemStructure import SystemStructure        # noqa: F401
 from .ospSimulationCase import OspSimulationCase    # noqa: F401
 from .graph import Graph                            # noqa: F401
 from .ospCaseBuilder import OspCaseBuilder          # noqa: F401
+from .importer import OspSystemStructureImporter    # noqa: F401

@@ -62,7 +62,7 @@
             "type": "python",
             "request": "launch",
             "cwd": "${workspaceFolder}\\tests\\test_dicts",
-            "program": "${workspaceFolder}\\src\\ospx\\importer\\cli\\importSystemStructure.py",
+            "program": "${workspaceFolder}\\src\\ospx\\cli\\importSystemStructure.py",
             "args": [
                 "test_import_OspSystemStructure.xml",
             ],
