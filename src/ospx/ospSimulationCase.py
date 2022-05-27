@@ -1,7 +1,7 @@
 import logging
 import re
 from pathlib import Path
-from shutil import copyfile, rmtree
+from shutil import rmtree, copy2
 
 from dictIO.cppDict import CppDict
 from dictIO.dictWriter import DictWriter
@@ -50,7 +50,7 @@ class OspSimulationCase():
         This will also copy all referenced FMUs from the library into the case folder.
         """
 
-        self.reset()
+        self.clean()
 
         logger.info(f'Set up OSP simulation case folder: {self.case_folder}')   # 0
 
@@ -65,8 +65,8 @@ class OspSimulationCase():
         # Make sure all components have a step size defined
         self._check_components_step_size()
 
-    def reset(self):
-        """Removes any local fmu and results files that had formerly been generated in the current working directory, retaining basically only the initial case dict file.
+    def clean(self):
+        """Cleans up the case folder and deletes any existing ospx files, e.g. modelDescription.xml .fmu .csv etc.
         """
 
         # specify all files to be deleted (or comment-in / comment-out as needed)
@@ -423,8 +423,8 @@ class OspSimulationCase():
                     )
                     raise FileNotFoundError(f'file not found: {fmu_file_in_library.absolute()}')
 
-                logger.info(f'copy {fmu_file_in_library} --> {fmu_file_in_case_folder}')    # 2
-                copyfile(fmu_file_in_library, fmu_file_in_case_folder)
+                logger.info(f'copy {fmu_file_in_library} --> {fmu_file_in_case_folder}')
+                copy2(fmu_file_in_library, self.case_folder)
                 file_names_copied.append(fmu_file_name)
 
     def _check_components_step_size(self):
@@ -452,7 +452,7 @@ class OspSimulationCase():
     def _inspect(self):
         """Inspects all components and all FMUs for the public variable names and units they declare, as documented in their modelDescription.xml's
 
-        Results are logged to the console.
+        Results get logged to the console.
         """
         delim = '\t' * 3
 

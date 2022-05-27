@@ -21,7 +21,8 @@ def _argparser() -> argparse.ArgumentParser:
         epilog='_________________ospCaseBuilder___________________',
         prefix_chars='-',
         add_help=True,
-        description='Builds an OSP (Co-)simulation case.'
+        description=
+        'Builds the OSP-specific configuration files needed to run an OSP (co-)simulation case.'
     )
 
     parser.add_argument(
@@ -36,7 +37,7 @@ def _argparser() -> argparse.ArgumentParser:
         '--clean',
         action='store_true',
         help=(
-            'cleans up working directory and deletes any existing ospx files, e.g. *modelDescription.xml *.fmu *.csv etc.'
+            'cleans up working directory and deletes any existing ospx files, e.g. modelDescription.xml .fmu .csv etc.'
         ),
         default=False,
         required=False,
@@ -47,8 +48,7 @@ def _argparser() -> argparse.ArgumentParser:
         '--inspect',
         action='store_true',
         help=(
-            'inspect mode: check all modelDescription.xml refs\n'
-            'but do not actually write connectors and connections.'
+            'inspect mode: reads all properties from the FMUs but does not actually create the OSP case files.'
         ),
         default=False,
         required=False,
