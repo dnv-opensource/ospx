@@ -5,6 +5,10 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 
 ## [Unreleased]
 
+* -
+
+## [0.1.0] - 2022-05-28
+
 ### Changed
 
 * Major refactoring, introducing classes for the main elements such as FMU, Component, SystemStructure etc.
@@ -100,7 +104,8 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 * Added support for Python 3.10
 
 <!-- Markdown link & img dfn's -->
-[unreleased]: https://github.com/dnv-opensource/ospx/compare/v0.0.22...HEAD
+[unreleased]: https://github.com/dnv-opensource/ospx/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/dnv-opensource/ospx/compare/v0.0.22...v0.1.0
 [0.0.22]: https://github.com/dnv-opensource/ospx/compare/v0.0.17...v0.0.22
 [0.0.17]: https://github.com/dnv-opensource/ospx/releases/tag/v0.0.17
 [ospx]: https://github.com/dnv-opensource/ospx
