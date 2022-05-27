@@ -17,6 +17,20 @@ logger = logging.getLogger(__name__)
 
 
 class Component():
+    """A component is an instance of a (component-) model.
+
+    A component represents an instance of a (component-) model. Any system structure can contain an arbitrary number of components.
+    Important here is, that multiple components in a system structure can be instances of one and the same model.
+    In practical terms this means that multiple components can refer to the same physical FMU file. \n
+    As components are instances of a model (FMU), they inherit the start values defined in the FMU's modelDescription file upon instantiation; \n
+    howevere, being an instance, each component can alter and overwrite these start values.
+    This is accomplished using the 'initialize' section inside a 'component' element in the ospx case dict. \n
+    See https://dnv-opensource.github.io/ospx/fileFormat.caseDict.html
+
+    Equivalent terms to 'component' are: \n
+    \t 'Simulator' in OSP. See https://open-simulation-platform.github.io/libcosim/configuration#simulator \n
+    \t 'Simulation model' in FMI for co-simulation- See https://github.com/modelica/fmi-standard/releases/download/v2.0.3/FMI-Specification-2.0.3.pdf
+    """
 
     def __init__(self, name: str, properties: MutableMapping):
 
@@ -144,8 +158,8 @@ class Component():
     def connectors(self) -> dict[str, Connector]:
         return self._connectors
 
-    def write_osp_model_description(self):                              # sourcery skip: merge-dict-assign
-        """writing OspModelDescription.xml
+    def write_osp_model_description_xml(self):                          # sourcery skip: merge-dict-assign
+        """Writes the <component.name>_OspModelDescription.xml file in the current working directory.
         """
         osp_model_description_file = self.fmu.file.parent.absolute(
         ) / f'{self.name}_OspModelDescription.xml'

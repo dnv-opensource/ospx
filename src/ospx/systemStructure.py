@@ -11,6 +11,13 @@ logger = logging.getLogger(__name__)
 
 
 class SystemStructure():
+    """The system structure describes the topology of the co-simulated system.
+
+    A system structure can contain an arbitrary number of components.
+    Components can be connected through connections.
+    Connections relate a source endpoint with a target endpoint.
+    Both component variables and component connectors can be used as endpoints in a connection.
+    """
 
     def __init__(self, properties: MutableMapping):
         self._components: dict[str, Component] = {}

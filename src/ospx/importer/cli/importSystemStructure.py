@@ -3,7 +3,6 @@
 
 import argparse
 import logging
-import re
 from argparse import ArgumentParser
 from pathlib import Path
 from typing import Union
@@ -11,8 +10,8 @@ from typing import Union
 from dictIO.dictReader import DictReader
 from dictIO.dictWriter import DictWriter
 from dictIO.utils.counter import BorgCounter
-from ospx.utils.logging import configure_logging
 from ospx.utils.dict import find_key, find_type_identifier_in_keys
+from ospx.utils.logging import configure_logging
 
 
 logger = logging.getLogger(__name__)

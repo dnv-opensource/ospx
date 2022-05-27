@@ -195,7 +195,7 @@ class FMU():
         return default_experiment
 
     def copy(self, new_name: str):
-        """Creates a copy of the FMU with a new name
+        """Saves a copy of the FMU with a new name
 
         Parameters
         ----------
@@ -347,7 +347,7 @@ class FMU():
         )
         model_description['_xmlOpts']['_rootAttributes']['description'] += add_description_string
 
-    # @TODO: Check when and where this method needs to be called.
+    # @TODO: Check when and where this method needs to be called. And why..
     #        CLAROS, 2022-05-24
     def _clean_solver_internal_variables(self, model_description: MutableMapping):
         """Clean solver internal variables, such as '_iti_...'
