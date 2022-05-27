@@ -242,9 +242,8 @@ class OspSimulationCase():
         }
         system_structure_ssd['DefaultExperiment'] = default_experiment
 
-        # Elements
-        # (an 'element' in ssd equals what is a 'simulator' in osp, or a 'component' in ospx: An instance of a model.)
-        elements = {}
+        # Components
+        components = {}
         for component_name, component in self.system_structure.components.items():
             connectors: dict = {}
             for connector in component.connectors.values():
@@ -259,14 +258,14 @@ class OspSimulationCase():
                         'Real': {},
                     }
             element_key = f'{self.counter():06d}_Component'
-            elements[element_key] = {
+            components[element_key] = {
                 '_attributes': {
                     'name': component_name,
                     'source': component.fmu.file.name,
                 },
                 'Connectors': connectors,
             }
-        system_structure_ssd['System']['Elements'] = elements
+        system_structure_ssd['System']['Elements'] = components
 
         # Connections
         connections: dict = {}

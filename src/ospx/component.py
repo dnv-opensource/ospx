@@ -29,7 +29,8 @@ class Component():
 
     Equivalent terms to 'component' are: \n
     \t 'Simulator' in OSP. See https://open-simulation-platform.github.io/libcosim/configuration#simulator \n
-    \t 'Simulation model' in FMI for co-simulation- See https://github.com/modelica/fmi-standard/releases/download/v2.0.3/FMI-Specification-2.0.3.pdf
+    \t 'Simulation model' in FMI for co-simulation. See https://github.com/modelica/fmi-standard/releases/download/v2.0.3/FMI-Specification-2.0.3.pdf \n
+    \t 'Component' in SSP. See https://ssp-standard.org/publications/SSP10/SystemStructureAndParameterization10.pdf
     """
 
     def __init__(self, name: str, properties: MutableMapping):

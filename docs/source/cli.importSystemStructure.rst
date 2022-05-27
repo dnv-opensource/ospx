@@ -1,3 +1,3 @@
 .. sphinx_argparse_cli::
-   :module: ospx.importer.cli.importSystemStructure
+   :module: ospx.cli.importSystemStructure
    :func: _argparser
