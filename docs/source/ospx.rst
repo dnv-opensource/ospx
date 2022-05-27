@@ -13,7 +13,6 @@ Subpackages
    :maxdepth: 4
 
    ospx.fmi
-   ospx.watch
 
 Submodules
 ----------
@@ -24,6 +23,8 @@ Submodules
    ospx.component
    ospx.connection
    ospx.connector
+   ospx.graph
    ospx.ospCaseBuilder
+   ospx.ospSimulationCase
    ospx.simulation
    ospx.systemStructure
