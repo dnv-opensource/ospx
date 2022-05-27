@@ -3,9 +3,7 @@ import re
 from pathlib import Path
 from shutil import rmtree, copy2
 
-from dictIO.cppDict import CppDict
-from dictIO.dictWriter import DictWriter
-from dictIO.formatter import XmlFormatter
+from dictIO import CppDict, DictWriter, XmlFormatter
 from dictIO.utils.counter import BorgCounter
 
 from ospx import Simulation, SystemStructure

@@ -17,6 +17,7 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
         ~~~py
         from ospx import OspCaseBuilder
         ~~~
+* Use new simplified imports from namespace dictIO (using updated version of dictIO package)
 * Two changes were introduced in the case dict file format:
     1. Connector element: key 'reference' changed to 'variable':<br>
         * Old (<= v0.0.22):

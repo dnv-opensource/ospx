@@ -3,8 +3,7 @@ import os
 from pathlib import Path
 from typing import Union
 
-from dictIO.cppDict import CppDict
-from dictIO.dictReader import DictReader
+from dictIO import CppDict, DictReader
 
 from ospx import Graph, OspSimulationCase
 

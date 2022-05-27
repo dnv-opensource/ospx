@@ -10,8 +10,7 @@ import numpy as np
 import pandas as pd
 from math import sqrt as sqrt
 from matplotlib import cm
-from dictIO.dictReader import DictReader
-from dictIO.dictWriter import DictWriter
+from dictIO import DictReader, DictWriter
 from ospx.utils.plotting import create_meta_dict, save_figure
 from typing import Union
 import os

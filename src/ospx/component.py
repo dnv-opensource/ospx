@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import MutableMapping, Union
 
-from dictIO.dictWriter import DictWriter
+from dictIO import DictWriter
 from dictIO.utils.counter import BorgCounter
 
 from ospx import Connector

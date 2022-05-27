@@ -3,8 +3,7 @@ import os
 from pathlib import Path
 from typing import Union
 
-from dictIO.dictReader import DictReader
-from dictIO.dictWriter import DictWriter
+from dictIO import DictReader, DictWriter
 from dictIO.utils.counter import BorgCounter
 
 from ospx.utils.dict import find_key, find_type_identifier_in_keys

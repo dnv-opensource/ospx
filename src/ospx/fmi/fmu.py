@@ -9,9 +9,7 @@ from shutil import copyfile
 from typing import MutableMapping, Union
 from zipfile import ZipFile
 
-from dictIO.cppDict import CppDict
-from dictIO.formatter import XmlFormatter
-from dictIO.parser import XmlParser
+from dictIO import CppDict, XmlFormatter, XmlParser
 from dictIO.utils.counter import BorgCounter
 from ospx.fmi import BaseUnit, DisplayUnit, Experiment, ScalarVariable, Unit
 from ospx.utils.dict import find_key, find_type_identifier_in_keys, shrink_dict
