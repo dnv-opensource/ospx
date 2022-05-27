@@ -62,9 +62,8 @@ class OspSimulationCase():
 
         self.system_structure = SystemStructure(self.case_dict['systemStructure'])
 
-        # set master algorithm step size
-        if self.simulation and self.simulation.base_step_size:
-            self._set_components_step_size(self.simulation.base_step_size)
+        # Make sure all components have a step size defined
+        self._check_components_step_size()
 
     def reset(self):
         """Removes any local fmu and results files that had formerly been generated in the current working directory, retaining basically only the initial case dict file.
@@ -427,6 +426,20 @@ class OspSimulationCase():
                 logger.info(f'copy {fmu_file_in_library} --> {fmu_file_in_case_folder}')    # 2
                 copyfile(fmu_file_in_library, fmu_file_in_case_folder)
                 file_names_copied.append(fmu_file_name)
+
+    def _check_components_step_size(self):
+        """Ensure that all components have a step size defined.
+
+        If a components step size is undefined, it will be set to the base step size.
+        """
+        if not self.system_structure or not self.system_structure.components:
+            return
+        if not self.simulation or not self.simulation.base_step_size:
+            return
+        for component in self.system_structure.components.values():
+            if not component.step_size:
+                component.step_size = self.simulation.base_step_size
+        return
 
     def _set_components_step_size(self, step_size: float):
         """Overwrites the step size of all components with the passed in value"""
