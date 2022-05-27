@@ -20,7 +20,7 @@ ospx provides both an API for use inside Python as well as a CLI for shell execu
 
 Reading a caseDict file and building the case-specific OSP (co-)simulation configuration files:
 ~~~py
-from ospx.ospCaseBuilder import OspCaseBuilder
+from ospx import OspCaseBuilder
 
 OspCaseBuilder.build('caseDict')
 ~~~
@@ -79,11 +79,6 @@ _For a detailed documentation of the dictIO dict file format used by farn, see [
     $ pip install -r requirements.txt
     ~~~
 
-
-## Release History
-
-* 0.0.23
-    * Pre-release
 
 ## Meta
 
