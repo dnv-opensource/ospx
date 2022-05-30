@@ -5,7 +5,16 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 
 ## [Unreleased]
 
+
+## [0.1.1] - 2022-05-30
+
+### Changed
+
 * case dict file format:  Removed 'root' element from '_environment' section, as it is obsolete.
+
+### Fixed
+
+* relative paths in the 'fmu' element led to a FileNotFound error. This is fixed now.
 
 ## [0.1.0] - 2022-05-28
 
@@ -104,7 +113,8 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 * Added support for Python 3.10
 
 <!-- Markdown link & img dfn's -->
-[unreleased]: https://github.com/dnv-opensource/ospx/compare/v0.1.0...HEAD
+[unreleased]: https://github.com/dnv-opensource/ospx/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/dnv-opensource/ospx/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/dnv-opensource/ospx/compare/v0.0.22...v0.1.0
 [0.0.22]: https://github.com/dnv-opensource/ospx/compare/v0.0.17...v0.0.22
 [0.0.17]: https://github.com/dnv-opensource/ospx/releases/tag/v0.0.17
