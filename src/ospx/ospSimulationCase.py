@@ -414,7 +414,7 @@ class OspSimulationCase():
             fmu_file_name_in_case_dict: str = component_properties['fmu']
             fmu_file_name = Path(fmu_file_name_in_case_dict).name
             fmu_file_in_library = self.lib_source / fmu_file_name_in_case_dict
-            fmu_file_in_case_folder = self.case_folder / (component_name + '.fmu')
+            fmu_file_in_case_folder = self.case_folder / fmu_file_name
             if fmu_file_name not in file_names_copied:
                 if not fmu_file_in_library.exists():
                     logger.error(
@@ -423,9 +423,8 @@ class OspSimulationCase():
                     raise FileNotFoundError(f'file not found: {fmu_file_in_library.absolute()}')
 
                 logger.info(f'copy {fmu_file_in_library} --> {fmu_file_in_case_folder}')
-
-                copy2(fmu_file_in_library, fmu_file_in_case_folder)
-                file_names_copied.append(fmu_file_in_case_folder)
+                copy2(fmu_file_in_library, self.case_folder)
+                file_names_copied.append(fmu_file_name)
 
     def _check_components_step_size(self):
         """Ensure that all components have a step size defined.
