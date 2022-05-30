@@ -5,6 +5,9 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 
 ## [Unreleased]
 
+### Changed
+
+* variable.py: variable.start -> added type casting to setter property ensuring an already defined data_type of the variable is not altered when a new start value is set.
 
 ## [0.1.1] - 2022-05-30
 
