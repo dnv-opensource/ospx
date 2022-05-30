@@ -25,39 +25,50 @@ class OspSimulationCase():
 
         self.counter = BorgCounter()
         self.case_dict: CppDict = case_dict
-
-        self.name: str = self.case_dict['run']['simulation']['name']
-        logger.info(f"Create OSP simulation case '{self.name}'")
-
-        self.lib_source: Path = Path(self.case_dict['_environment']['libSource'])
-        self.simulation: Simulation     # general properties of the simulation case
+        self.case_folder: Path = Path.cwd()
         self.system_structure: SystemStructure
 
-        self.case_folder: Path = Path.cwd()
-        for key in self.case_dict['_environment'].keys():
-            if re.match('root', key, re.I):
-                self.case_folder: Path = Path.cwd() / self.case_dict['_environment'][key]
+        # Global settings
+        self.simulation: Simulation             # general properties of the simulation case
+        self._read_simulation()
+        self.name: str = self.case_dict.name    # initialize conservatively (with fallback path)
+        if self.simulation and self.simulation.name:
+            self.name = self.simulation.name
 
-        if not self.case_folder.exists():
-            logger.error(f'case folder {self.case_folder} does not exist')
-            return
+        # Library source path
+        self.lib_source: Path = Path.cwd()                                                                                                                    # initialize conservatively (with fallback path)
+        if '_environment' in self.case_dict:
+            if 'libSource' in self.case_dict['_environment']:
+                self.lib_source = Path(self.case_dict['_environment']['libSource'])
+            else:
+                logger.warning(
+                    f"no 'libSource' element found in {self.case_dict.name}['_environment']. Path to libSource will be set to current working directory."
+                )
+        else:
+            logger.warning(
+                f"no '_environment' section found in {self.case_dict.name}. Path to libSource hence is unknown and will be set to current working directory."
+            )
+        self.lib_source: Path = Path(self.case_dict['_environment']['libSource'])
 
     def setup(self):
         """Sets up the OSP simulation case folder.
 
         This will also copy all referenced FMUs from the library into the case folder.
         """
+        logger.info(f"Set up OSP simulation case '{self.name}' in case folder: {self.case_folder}")
 
+        # Clean up case folder
         self.clean()
 
-        logger.info(f'Set up OSP simulation case folder: {self.case_folder}')   # 0
-
-        # general properties
-        self._read_simulation()
-
-        # register and copy to local case folder all FMUs referenced by components in the case dict
+        # Register and copy to local case folder all FMUs referenced by components in the case dict
         self._copy_fmus_from_library()
 
+        # Read system structure
+        if 'systemStructure' not in self.case_dict:
+            logger.error(
+                f"no 'systemStructure' section found in {self.case_dict.name}. Cannot set up OSP simulation case."
+            )
+            return
         self.system_structure = SystemStructure(self.case_dict['systemStructure'])
 
         # Make sure all components have a step size defined
@@ -81,7 +92,7 @@ class OspSimulationCase():
             'zip',
         ]
 
-        logger.info(f'Reset OSP simulation case folder: {self.case_folder}')
+        logger.info(f'Clean OSP simulation case folder: {self.case_folder}')
 
         for pattern in case_builder_result_files:
             files = list(Path('.').rglob(pattern))
@@ -96,10 +107,10 @@ class OspSimulationCase():
         """Writes the <component.name>_OspModelDescription.xml files for all components defined in the system structure
 
         """
+        logger.info(f"Write OspModelDescription.xml files for OSP simulation case '{self.name}' in case folder: {self.case_folder}")
         if not self.system_structure or not self.system_structure.components:
             return
         for component in self.system_structure.components.values():
-            # component.fmu.set_start_values(component.initial_values)
             component.write_osp_model_description_xml()
         return
 
@@ -107,6 +118,7 @@ class OspSimulationCase():
         """Writes the OspSystemStructure.xml file
         """
         # sourcery skip: merge-dict-assign
+        logger.info(f"Write OspSystemStructure.xml file for OSP simulation case '{self.name}' in case folder: {self.case_folder}")
 
         osp_system_structure: dict = {}
         osp_system_structure['_xmlOpts'] = {
@@ -202,6 +214,7 @@ class OspSimulationCase():
         """Writes the SystemStructure.ssd file
         """
         # sourcery skip: merge-dict-assign
+        logger.info(f"Write SystemStructure.ssd file for OSP simulation case '{self.name}' in case folder: {self.case_folder}")
 
         system_structure_ssd: dict = {}
         system_structure_ssd['_xmlOpts'] = {
@@ -293,6 +306,7 @@ class OspSimulationCase():
         I.e. for documentation or further statistical analysis.
         """
         # sourcery skip: merge-dict-assign, simplify-dictionary-update
+        logger.info(f"Write statistics dict for OSP simulation case '{self.name}' in case folder: {self.case_folder}")
 
         statistics_dict = {}
 
@@ -348,6 +362,8 @@ class OspSimulationCase():
             - convergence plotting
             - extracting the results
         """
+        logger.info(f"Write watch dict for OSP simulation case '{self.name}' in case folder: {self.case_folder}")
+
         watch_dict = {
             'datasources': {},
             'delimiter': ',',                   # 'objects': {},
@@ -451,6 +467,8 @@ class OspSimulationCase():
 
         Results get logged to the console.
         """
+        logger.info(f"Inspect OSP simulation case '{self.name}' in case folder: {self.case_folder}")
+
         delim = '\t' * 3
 
         log_string = (

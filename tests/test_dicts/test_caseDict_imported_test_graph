@@ -4,8 +4,7 @@ filetype dictionary; coding utf-8; version 0.1; local --; purpose --;
 
 _environment
 {
-    libSource                 'C:\Dev\farn-demo\importSystemStructure\house';
-    root                      .;
+    libSource                 ../library/house;
 }
 systemStructure
 {

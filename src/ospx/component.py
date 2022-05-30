@@ -64,7 +64,10 @@ class Component():
         if 'fmu' not in properties:
             logger.error(f"component {self.name}: 'fmu' element missing in case dict.")
             return
-        fmu_file_name = properties['fmu']
+        # Read name of fmu file from component properties.
+        # Note: Relative paths (if existing) are omitted from the fmu name, as it is by convention expected
+        # that the fmu has already been copied from the library into the current working directory (=case folder)
+        fmu_file_name = Path(properties['fmu']).name
         fmu_file = Path(fmu_file_name)
         if not fmu_file.exists():
             logger.exception(f"component {self.name}: referenced FMU '{fmu_file_name}' not found.")

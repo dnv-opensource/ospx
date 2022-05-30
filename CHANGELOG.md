@@ -5,7 +5,7 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 
 ## [Unreleased]
 
-* -
+* case dict file format:  Removed 'root' element from '_environment' section, as it is obsolete.
 
 ## [0.1.0] - 2022-05-28
 

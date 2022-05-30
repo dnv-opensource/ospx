@@ -5,8 +5,7 @@ filetype dictionary; coding utf-8; version 0.1; local --; purpose --;
 
 _environment
 {
-    libSource                           'C:\Dev\farn-demo\library';  //adjust this path to point to the library folder containing the fmu's
-    root                                .;
+    libSource                           ../library;  //adjust this path to point to the library folder containing the fmu's
 }
 systemStructure
 {
@@ -87,7 +86,7 @@ systemStructure
                     type                output;
                 }
             }
-            fmu                         difference.fmu;
+            fmu                         simple/difference.fmu;
         }
         quotient
         {
@@ -110,7 +109,7 @@ systemStructure
                 }
 
             }
-            fmu                         quotient.fmu;
+            fmu                         simple/quotient.fmu;
         }
         minuend
             {
@@ -131,7 +130,7 @@ systemStructure
                     start               $minuend;
                 }
             }
-            fmu                         constantVal.fmu;
+            fmu                         simple/constantVal.fmu;
         }
         subtrahend
         {
@@ -152,7 +151,7 @@ systemStructure
                     start               $subtrahend;
                 }
             }
-            fmu                         constantVal.fmu;
+            fmu                         simple/constantVal.fmu;
         }
         dividend
         {
@@ -173,7 +172,7 @@ systemStructure
                     start               $dividend;
                 }
             }
-            fmu                         constantVal.fmu;
+            fmu                         simple/constantVal.fmu;
         }
     }
 }

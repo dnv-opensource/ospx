@@ -21,7 +21,6 @@ A caseDict file contains
 | #include                                          | string    | include directive. The specified dict file (e.g. a paramDict) will be read and merged into the caseDict |
 | _environment                                      | dict      | environment variables needed by ospCaseBuilder at runtime |
 | &numsp;libSource                                  | string    | relative or absolute path to the directory where the FMUs are located, i.e. the base folder of an FMU library. It acts as entry point for the FMU search. |
-| &numsp;root                                       | string    | relative path to the build directory. Use '.' for cwd. |
 | systemStructure                                   | dict      | complete system structure |
 | &numsp;components                                 | dict      | defines all component models used in the simulation |
 | &numsp;&numsp;\<COMPONENT>                        | dict      | unique name identifying a component in the simulation |
@@ -65,8 +64,7 @@ filetype dictionary; coding utf-8; version 0.1; local --; purpose --;
 
 _environment
 {
-    libSource                           'path/to/a/model/library/on/your/machine';
-    root                                .;
+    libSource                           path/to/a/model/library/on/your/machine;
 }
 systemStructure
 {
@@ -147,7 +145,7 @@ systemStructure
                     type                output;
                 }
             }
-            fmu                         'subfolder/in/your/library/difference.fmu';
+            fmu                         subfolder/in/your/library/difference.fmu;
         }
         quotient
         {
@@ -170,7 +168,7 @@ systemStructure
                 }
 
             }
-            fmu                         'subfolder/in/your/library/quotient.fmu';
+            fmu                         subfolder/in/your/library/quotient.fmu;
         }
         minuend
             {
@@ -191,7 +189,7 @@ systemStructure
                     start               $minuend;
                 }
             }
-            fmu                         'subfolder/in/your/library/constantVal.fmu';
+            fmu                         subfolder/in/your/library/constantVal.fmu;
         }
         subtrahend
         {
@@ -212,7 +210,7 @@ systemStructure
                     start               $subtrahend;
                 }
             }
-            fmu                         'subfolder/in/your/library/constantVal.fmu';
+            fmu                         subfolder/in/your/library/constantVal.fmu;
         }
         dividend
         {
@@ -233,7 +231,7 @@ systemStructure
                     start               $dividend;
                 }
             }
-            fmu                         'subfolder/in/your/library/constantVal.fmu';
+            fmu                         subfolder/in/your/library/constantVal.fmu;
         }
     }
 }
@@ -262,8 +260,7 @@ filetype dictionary; coding utf-8; version 0.1; local --; purpose --;
 \*----------------------------------------------------------------------------*/
 _environment
 {
-    libSource                 'path/to/a/model/library/on/your/machine';
-    root                     .;
+    libSource                 path/to/a/model/library/on/your/machine;
 }
 systemStructure
 {
@@ -271,23 +268,23 @@ systemStructure
     {
         difference
         {
-            fmu             'subfolder/in/your/library/difference.fmu';
+            fmu             subfolder/in/your/library/difference.fmu;
         }
         quotient
         {
-            fmu             'subfolder/in/your/library/quotient.fmu';
+            fmu             subfolder/in/your/library/quotient.fmu;
         }
         minuend
         {
-            fmu             'subfolder/in/your/library/constantVal.fmu';
+            fmu             subfolder/in/your/library/constantVal.fmu;
         }
         subtrahend
         {
-            fmu             'subfolder/in/your/library/constantVal.fmu';
+            fmu             subfolder/in/your/library/constantVal.fmu;
         }
         dividend
         {
-            fmu             'subfolder/in/your/library/constantVal.fmu';
+            fmu             subfolder/in/your/library/constantVal.fmu;
         }
     }
 }

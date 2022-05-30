@@ -69,8 +69,7 @@ class OspCaseBuilder():
             # inspect and stop
             case._inspect()
             # clean up
-            # logger.info(f'inspect mode: delete {component.fmu.file.name}')
-            # component.fmu.file.unlink()
+            case.clean()
             return
 
         case.write_osp_model_description_xmls()
