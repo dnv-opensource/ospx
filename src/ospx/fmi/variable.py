@@ -179,7 +179,21 @@ def get_fmi_data_type(arg: Any) -> str:
 
 def _cast_to_fmi_data_type(arg: Union[int, float, bool, str, Sequence],
                            fmi_data_type: str) -> Union[int, float, bool, str, list, None]:
-    parsed_value: Union[int, float, bool]
+    """Casts the passed in argument to a Python data type that matches the requested fmi data type
+
+    Parameters
+    ----------
+    arg : Union[int, float, bool, str, Sequence]
+        The argument to be casted
+    fmi_data_type : str
+        The fmi data type the argument shall be casted to.\n
+        valid fmi 2.0 data types are 'Integer', 'Real', 'Boolean', 'String' and 'Enumeration'
+
+    Returns
+    -------
+    Union[int, float, bool, str, list, None]
+        The casted value (in a Python data type that matches the requested fmi data type)
+    """
     if fmi_data_type in {'Integer', 'Real', 'Boolean'}:
         if isinstance(arg, Sequence):
             logger.warning(
@@ -187,6 +201,7 @@ def _cast_to_fmi_data_type(arg: Union[int, float, bool, str, Sequence],
             )
             return None
         # parse if arg is string
+        parsed_value: Union[int, float, bool]
         parsed_value = Parser().parse_type(arg) if isinstance(arg, str) else arg
         # cast to int / float / bool
         if fmi_data_type == 'Integer':
