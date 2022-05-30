@@ -1,5 +1,6 @@
 import logging
 from typing import Any, Sequence, Union
+from dictIO import Parser, Formatter
 
 
 __ALL__ = ['ScalarVariable', 'get_fmi_data_type']
@@ -118,8 +119,27 @@ class ScalarVariable():
 
     @start.setter
     def start(self, value: Union[int, float, bool, str, None]):
-        self._start = value
-        if not self.data_type and self.start:
+        if value is None:
+            logger.error(
+                f"variable {self.name}: start shall be set to 'None', but 'None' is invalid for start."
+            )
+            return
+        if self.data_type:
+            # make sure the data type of the new value does either match or gets casted to the data_type defined for the variable
+            new_value_data_type = get_fmi_data_type(value)
+            if new_value_data_type == self.data_type:
+                self._start = value
+            else:
+                casted_value = _cast_to_fmi_data_type(value, self.data_type)
+                if casted_value is not None:
+                    self._start = casted_value
+                else:
+                    logger.error(
+                        f"variable {self.name}: start shall be set to 'None', but 'None' is invalid for start."
+                    )
+                    return
+        else:
+            self._start = value
             self.data_type = get_fmi_data_type(self.start)
 
 
@@ -150,3 +170,32 @@ def get_fmi_data_type(arg: Any) -> str:
         return 'Enumeration'
     else:
         return 'String'
+
+
+def _cast_to_fmi_data_type(arg: Union[int, float, bool, str, Sequence],
+                           fmi_data_type: str) -> Union[int, float, bool, str, list, None]:
+    parsed_value: Union[int, float, bool]
+    if fmi_data_type in {'Integer', 'Real', 'Boolean'}:
+        if isinstance(arg, Sequence):
+            logger.warning(
+                f"_cast_to_fmi_data_type(): argument {arg} of type List/Tuple/Sequence cannot be casted to fmi data type {fmi_data_type}"
+            )
+            return None
+        # parse if arg is string
+        parsed_value = Parser().parse_type(arg) if isinstance(arg, str) else arg
+        # cast to int / float / bool
+        if fmi_data_type == 'Integer':
+            return int(parsed_value)
+        elif fmi_data_type == 'Real':
+            return float(parsed_value)
+        else:
+            return bool(parsed_value)
+    elif fmi_data_type == 'String':
+        # format as string
+        return Formatter().format_dict(arg) if isinstance(arg, Sequence
+                                                          ) else Formatter().format_type(arg)
+    elif fmi_data_type == 'Enumeration':
+        # cast to list
+        return list(arg) if isinstance(arg, Sequence) else [arg]
+    else:
+        return None

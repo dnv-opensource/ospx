@@ -100,5 +100,19 @@
                 "enable": true
             }
         },
+        {
+            "name": "ospCaseBuilder test_caseDict_minimal_set_int_for_real",
+            "type": "python",
+            "request": "launch",
+            "cwd": "${workspaceFolder}\\tests\\test_dicts",
+            "program": "${workspaceFolder}\\src\\ospx\\cli\\ospCaseBuilder.py",
+            "args": [
+                "test_caseDict_minimal_set_int_for_real",
+            ],
+            "console": "integratedTerminal",
+            "autoReload": {
+                "enable": true
+            }
+        },
     ]
 }
