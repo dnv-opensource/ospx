@@ -56,11 +56,9 @@ class OspSimulationCase():
         self._read_simulation()
 
         # register and copy to local case folder all FMUs referenced by components in the case dict
-        # here it is important to have lib source available, otherwise the dict entry makes no sense
-        # root is meant to be pointing to the working directory, if it is deviant from . (remote).
-        # the implementation is perhaps incomplete here and it is questionable if the expense is worthwile
         self._copy_fmus_from_library()
-        self.system_structure = SystemStructure(self.case_dict['systemStructure'], self.lib_source)
+
+        self.system_structure = SystemStructure(self.case_dict['systemStructure'])
 
         # Make sure all components have a step size defined
         self._check_components_step_size()
