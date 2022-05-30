@@ -65,7 +65,7 @@ class Component():
             logger.error(f"component {self.name}: 'fmu' element missing in case dict.")
             return
         fmu_file_name = properties['fmu']
-        fmu_file = Path(fmu_file_name)
+        fmu_file = Path.joinpath(properties['libSource'], fmu_file_name)
         if not fmu_file.exists():
             logger.exception(f"component {self.name}: referenced FMU '{fmu_file_name}' not found.")
             raise FileNotFoundError(fmu_file)

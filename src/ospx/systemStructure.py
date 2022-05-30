@@ -1,5 +1,6 @@
 import logging
 from typing import MutableMapping, Union
+from pathlib import Path
 
 from ospx import Component, Connection, Connector, Endpoint
 from ospx.fmi import FMU, ScalarVariable, Unit
@@ -19,10 +20,10 @@ class SystemStructure():
     Both component variables and component connectors can be used as endpoints in a connection.
     """
 
-    def __init__(self, properties: MutableMapping):
+    def __init__(self, properties: MutableMapping, lib_source: Path):
         self._components: dict[str, Component] = {}
         self._connections: dict[str, Connection] = {}
-        self._read_components(properties)
+        self._read_components(properties, lib_source)
         self._read_connections(properties)
 
     @property
@@ -65,7 +66,7 @@ class SystemStructure():
                 variables |= component.variables
         return variables
 
-    def _read_components(self, properties: MutableMapping):
+    def _read_components(self, properties: MutableMapping, lib_source: Path):
         """Reads components from (case dict) properties
         """
         logger.info('read components from case dict')
@@ -73,6 +74,7 @@ class SystemStructure():
         if 'components' not in properties:
             return
         for component_name, component_properties in properties['components'].items():
+            component_properties.update({'libSource':lib_source})
             component = Component(component_name, component_properties)
             self._components[component.name] = component
 
