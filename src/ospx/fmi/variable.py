@@ -131,11 +131,16 @@ class ScalarVariable():
                 self._start = value
             else:
                 casted_value = _cast_to_fmi_data_type(value, self.data_type)
-                if casted_value is not None:
+                if casted_value is not None and not isinstance(casted_value, Sequence):
                     self._start = casted_value
-                else:
+                elif casted_value is None:
                     logger.error(
                         f"variable {self.name}: start shall be set to 'None', but 'None' is invalid for start."
+                    )
+                    return
+                else:
+                    logger.error(
+                        f"variable {self.name}: start shall be set to {casted_value}, but fmi data type 'Enumeration' is invalid for start."
                     )
                     return
         else:
