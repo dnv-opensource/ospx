@@ -1,0 +1,265 @@
+/*---------------------------------*- C++ -*----------------------------------*\
+filetype dictionary; coding utf-8; version 0.1; local --; purpose --;
+\*----------------------------------------------------------------------------*/
+#include '.\paramDict'
+
+_environment
+{
+    libSource                 C:\Users\FRALUM\Documents\SystemSimulation\repo\dnv-opensource\ospx\tests\library\house;
+}
+systemStructure
+{
+    components
+    {
+        Clock
+        {
+            connectors
+            {
+                PORT_Clock_VAR_Clock
+                {
+                    variable        Clock;
+                    type            output;
+                }
+            }
+            fmu               Clock.fmu;
+        }
+        InnerWall
+        {
+            connectors
+            {
+                PORT_InnerWall_VAR_h_wall
+                {
+                    variable        h_wall;
+                    type            output;
+                }
+                PORT_InnerWall_VAR_T_room1
+                {
+                    variable        T_room1;
+                    type            input;
+                }
+                PORT_InnerWall_VAR_T_room2
+                {
+                    variable        T_room2;
+                    type            input;
+                }
+            }
+            fmu               InnerWall.fmu;
+        }
+        OuterWall1
+        {
+            connectors
+            {
+                PORT_OuterWall1_VAR_h_wall
+                {
+                    variable        h_wall;
+                    type            output;
+                }
+                PORT_OuterWall1_VAR_T_room1
+                {
+                    variable        T_room1;
+                    type            input;
+                }
+            }
+            fmu               OuterWall1.fmu;
+            initialize
+            {
+                T_outside
+                {
+                    causality           parameter;
+                    variability         fixed;
+                    start        $outerTemperature;
+                }
+            }
+        }
+        OuterWall2
+        {
+            connectors
+            {
+                PORT_OuterWall2_VAR_h_wall
+                {
+                    variable        h_wall;
+                    type            output;
+                }
+                PORT_OuterWall2_VAR_T_room2
+                {
+                    variable        T_room2;
+                    type            input;
+                }
+            }
+            fmu               OuterWall2.fmu;
+            initialize
+            {
+                T_outside
+                {
+                    causality           parameter;
+                    variability         fixed;
+                    start        $outerTemperature;
+                }
+            }
+        }
+        Room1
+        {
+            connectors
+            {
+                PORT_Room1_VAR_h_OuterWall
+                {
+                    variable        h_OuterWall;
+                    type            input;
+                }
+                PORT_Room1_VAR_h_InnerWall
+                {
+                    variable        h_InnerWall;
+                    type            input;
+                }
+                PORT_Room1_VAR_h_powerHeater
+                {
+                    variable        h_powerHeater;
+                    type            input;
+                }
+                PORT_Room1_VAR_T_room
+                {
+                    variable        T_room;
+                    type            output;
+                }
+            }
+            fmu               Room1.fmu;
+        }
+        Room2
+        {
+            connectors
+            {
+                PORT_Room2_VAR_h_InnerWall
+                {
+                    variable        h_InnerWall;
+                    type            input;
+                }
+                PORT_Room2_VAR_h_OuterWall
+                {
+                    variable        h_OuterWall;
+                    type            input;
+                }
+                PORT_Room2_VAR_h_powerHeater
+                {
+                    variable        h_powerHeater;
+                    type            input;
+                }
+                PORT_Room2_VAR_T_room
+                {
+                    variable        T_room;
+                    type            output;
+                }
+            }
+            fmu               Room2.fmu;
+        }
+        TempController
+        {
+            connectors
+            {
+                PORT_TempController_VAR_h_room1
+                {
+                    variable        h_room1;
+                    type            output;
+                }
+                PORT_TempController_VAR_h_room2
+                {
+                    variable        h_room2;
+                    type            output;
+                }
+                PORT_TempController_VAR_T_room2
+                {
+                    variable        T_room2;
+                    type            input;
+                }
+                PORT_TempController_VAR_T_room1
+                {
+                    variable        T_room1;
+                    type            input;
+                }
+                PORT_TempController_VAR_T_clock
+                {
+                    variable        T_clock;
+                    type            input;
+                }
+            }
+            fmu               TempController.fmu;
+        }
+    }
+    connections
+    {
+        OuterWall1_TO_Room1
+        {
+            source            PORT_OuterWall1_VAR_h_wall;
+            target            PORT_Room1_VAR_h_OuterWall;
+        }
+        InnerWall_TO_Room1
+        {
+            source            PORT_InnerWall_VAR_h_wall;
+            target            PORT_Room1_VAR_h_InnerWall;
+        }
+        TempController_TO_Room1
+        {
+            source            PORT_TempController_VAR_h_room1;
+            target            PORT_Room1_VAR_h_powerHeater;
+        }
+        Room1_TO_OuterWall1
+        {
+            source            PORT_Room1_VAR_T_room;
+            target            PORT_OuterWall1_VAR_T_room1;
+        }
+        InnerWall_TO_Room2
+        {
+            source            PORT_InnerWall_VAR_h_wall;
+            target            PORT_Room2_VAR_h_InnerWall;
+        }
+        OuterWall2_TO_Room2
+        {
+            source            PORT_OuterWall2_VAR_h_wall;
+            target            PORT_Room2_VAR_h_OuterWall;
+        }
+        TempController_TO_Room2
+        {
+            source            PORT_TempController_VAR_h_room2;
+            target            PORT_Room2_VAR_h_powerHeater;
+        }
+        Room2_TO_TempController
+        {
+            source            PORT_Room2_VAR_T_room;
+            target            PORT_TempController_VAR_T_room2;
+        }
+        Room1_TO_TempController
+        {
+            source            PORT_Room1_VAR_T_room;
+            target            PORT_TempController_VAR_T_room1;
+        }
+        Clock_TO_TempController
+        {
+            source            PORT_Clock_VAR_Clock;
+            target            PORT_TempController_VAR_T_clock;
+        }
+        Room1_TO_InnerWall
+        {
+            source            PORT_Room1_VAR_T_room;
+            target            PORT_InnerWall_VAR_T_room1;
+        }
+        Room2_TO_InnerWall
+        {
+            source            PORT_Room2_VAR_T_room;
+            target            PORT_InnerWall_VAR_T_room2;
+        }
+        Room2_TO_OuterWall2
+        {
+            source            PORT_Room2_VAR_T_room;
+            target            PORT_OuterWall2_VAR_T_room2;
+        }
+    }
+}
+run
+{
+    simulation
+    {
+        name                  houseDemoTimestepping_demoCase;
+        startTime             0;
+        stopTime              NULL;
+        baseStepSize          $baseTimeStepSize;
+    }
+}
