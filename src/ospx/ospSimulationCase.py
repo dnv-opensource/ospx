@@ -7,6 +7,7 @@ from dictIO import CppDict, DictWriter, XmlFormatter
 from dictIO.utils.counter import BorgCounter
 
 from ospx import Simulation, SystemStructure
+from ospx.utils.dict import find_key
 
 
 __ALL__ = ['OspSimulationCase']
@@ -107,7 +108,9 @@ class OspSimulationCase():
         """Writes the <component.name>_OspModelDescription.xml files for all components defined in the system structure
 
         """
-        logger.info(f"Write OspModelDescription.xml files for OSP simulation case '{self.name}' in case folder: {self.case_folder}")
+        logger.info(
+            f"Write OspModelDescription.xml files for OSP simulation case '{self.name}' in case folder: {self.case_folder}"
+        )
         if not self.system_structure or not self.system_structure.components:
             return
         for component in self.system_structure.components.values():
@@ -118,7 +121,9 @@ class OspSimulationCase():
         """Writes the OspSystemStructure.xml file
         """
         # sourcery skip: merge-dict-assign
-        logger.info(f"Write OspSystemStructure.xml file for OSP simulation case '{self.name}' in case folder: {self.case_folder}")
+        logger.info(
+            f"Write OspSystemStructure.xml file for OSP simulation case '{self.name}' in case folder: {self.case_folder}"
+        )
 
         osp_system_structure: dict = {}
         osp_system_structure['_xmlOpts'] = {
@@ -152,7 +157,7 @@ class OspSimulationCase():
                 '_attributes': {
                     'name': component.name,
                     'source': component.fmu.file.name,
-                    'stepSize': step_size
+                    'stepSize': component.step_size
                 }
             }
             if component.initial_values:
@@ -221,7 +226,9 @@ class OspSimulationCase():
         """Writes the SystemStructure.ssd file
         """
         # sourcery skip: merge-dict-assign
-        logger.info(f"Write SystemStructure.ssd file for OSP simulation case '{self.name}' in case folder: {self.case_folder}")
+        logger.info(
+            f"Write SystemStructure.ssd file for OSP simulation case '{self.name}' in case folder: {self.case_folder}"
+        )
 
         system_structure_ssd: dict = {}
         system_structure_ssd['_xmlOpts'] = {
@@ -313,7 +320,9 @@ class OspSimulationCase():
         I.e. for documentation or further statistical analysis.
         """
         # sourcery skip: merge-dict-assign, simplify-dictionary-update
-        logger.info(f"Write statistics dict for OSP simulation case '{self.name}' in case folder: {self.case_folder}")
+        logger.info(
+            f"Write statistics dict for OSP simulation case '{self.name}' in case folder: {self.case_folder}"
+        )
 
         statistics_dict = {}
 
@@ -369,7 +378,9 @@ class OspSimulationCase():
             - convergence plotting
             - extracting the results
         """
-        logger.info(f"Write watch dict for OSP simulation case '{self.name}' in case folder: {self.case_folder}")
+        logger.info(
+            f"Write watch dict for OSP simulation case '{self.name}' in case folder: {self.case_folder}"
+        )
 
         watch_dict = {
             'datasources': {},
@@ -474,7 +485,9 @@ class OspSimulationCase():
 
         Results get logged to the console.
         """
-        logger.info(f"Inspect OSP simulation case '{self.name}' in case folder: {self.case_folder}")
+        logger.info(
+            f"Inspect OSP simulation case '{self.name}' in case folder: {self.case_folder}"
+        )
 
         delim = '\t' * 3
 
@@ -497,6 +510,12 @@ class OspSimulationCase():
                 v in fmu.model_description['_xmlOpts']['_rootAttributes'].items()
             )
             log_string += fmu_attributes
+            if default_experiment_key := find_key(fmu.model_description, 'DefaultExperiment$'):
+                fmu_default_experiment = '\n'.join(
+                    f'\t{delim}{k}{delim}{v}' for k,
+                    v in fmu.model_description[default_experiment_key]['_attributes'].items()
+                )
+                log_string += f'\n{fmu_default_experiment}'
         logger.info(log_string + '\n')
 
         log_string = (
