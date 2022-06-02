@@ -215,7 +215,7 @@ class CosimWatcher:
                                 {
                                     'displayColNames': [
                                         re.sub(
-                                            r'(^#|\s*\[.*?\]$)',
+                                            r'(^#|\s+\[.*?\]$)',
                                             '',
                                             data_source_name + '|' + col_name
                                         ) for col_name in data_source_properties['colNames']
