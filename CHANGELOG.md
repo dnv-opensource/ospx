@@ -9,6 +9,10 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 
 * variable.py: variable.start -> added type casting to setter property ensuring an already defined data_type of the variable is not altered when a new start value is set.
 
+### Added
+
+* ospCaseBuilder inspect mode (--inspect): Results now include the attributes of the DefaultExperiment element from the FMU's modelDescription.xml
+
 ## [0.1.1] - 2022-05-30
 
 ### Changed
