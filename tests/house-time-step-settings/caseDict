@@ -188,68 +188,172 @@ systemStructure
     {
         OuterWall1_TO_Room1
         {
-            source            PORT_OuterWall1_VAR_h_wall;
-            target            PORT_Room1_VAR_h_OuterWall;
+            source
+            {
+                component     OuterWall1;
+                connector     PORT_OuterWall1_VAR_h_wall;
+            }
+            target
+            {
+                component     Room1;
+                connector     PORT_Room1_VAR_h_OuterWall;
+            }
         }
         InnerWall_TO_Room1
         {
-            source            PORT_InnerWall_VAR_h_wall;
-            target            PORT_Room1_VAR_h_InnerWall;
+            source
+            {
+                component     InnerWall;
+                connector     PORT_InnerWall_VAR_h_wall;
+            }
+            target
+            {
+                component     Room1;
+                connector     PORT_Room1_VAR_h_InnerWall;
+            }
         }
         TempController_TO_Room1
         {
-            source            PORT_TempController_VAR_h_room1;
-            target            PORT_Room1_VAR_h_powerHeater;
+            source
+            {
+                component     TempController;
+                connector     PORT_TempController_VAR_h_room1;
+            }
+            target
+            {
+                component     Room1;
+                connector     PORT_Room1_VAR_h_powerHeater;
+            }
         }
         Room1_TO_OuterWall1
         {
-            source            PORT_Room1_VAR_T_room;
-            target            PORT_OuterWall1_VAR_T_room1;
+            source
+            {
+                component     Room1;
+                connector     PORT_Room1_VAR_T_room;
+            }
+            target
+            {
+                component     OuterWall1;
+                connector     PORT_OuterWall1_VAR_T_room1;
+            }
         }
         InnerWall_TO_Room2
         {
-            source            PORT_InnerWall_VAR_h_wall;
-            target            PORT_Room2_VAR_h_InnerWall;
+            source
+            {
+                component     InnerWall;
+                connector     PORT_InnerWall_VAR_h_wall;
+            }
+            target
+            {
+                component     Room2;
+                connector     PORT_Room2_VAR_h_InnerWall;
+            }
         }
         OuterWall2_TO_Room2
         {
-            source            PORT_OuterWall2_VAR_h_wall;
-            target            PORT_Room2_VAR_h_OuterWall;
+            source
+            {
+                component     OuterWall2;
+                connector     PORT_OuterWall2_VAR_h_wall;
+            }
+            target
+            {
+                component     Room2;
+                connector     PORT_Room2_VAR_h_OuterWall;
+            }
         }
         TempController_TO_Room2
         {
-            source            PORT_TempController_VAR_h_room2;
-            target            PORT_Room2_VAR_h_powerHeater;
+            source
+            {
+                component     TempController;
+                connector     PORT_TempController_VAR_h_room2;
+            }
+            target
+            {
+                component     Room2;
+                connector     PORT_Room2_VAR_h_powerHeater;
+            }
         }
         Room2_TO_TempController
         {
-            source            PORT_Room2_VAR_T_room;
-            target            PORT_TempController_VAR_T_room2;
+            source
+            {
+                component     Room2;
+                connector     PORT_Room2_VAR_T_room;
+            }
+            target
+            {
+                component     TempController;
+                connector     PORT_TempController_VAR_T_room2;
+            }
         }
         Room1_TO_TempController
         {
-            source            PORT_Room1_VAR_T_room;
-            target            PORT_TempController_VAR_T_room1;
+            source
+            {
+                component     Room1;
+                connector     PORT_Room1_VAR_T_room;
+            }
+            target
+            {
+                component     TempController;
+                connector     PORT_TempController_VAR_T_room1;
+            }
         }
         Clock_TO_TempController
         {
-            source            PORT_Clock_VAR_Clock;
-            target            PORT_TempController_VAR_T_clock;
+            source
+            {
+                component     Clock;
+                connector     PORT_Clock_VAR_Clock;
+            }
+            target
+            {
+                component     TempController;
+                connector     PORT_TempController_VAR_T_clock;
+            }
         }
         Room1_TO_InnerWall
         {
-            source            PORT_Room1_VAR_T_room;
-            target            PORT_InnerWall_VAR_T_room1;
+            source
+            {
+                component     Room1;
+                connector     PORT_Room1_VAR_T_room;
+            }
+            target
+            {
+                component     InnerWall;
+                connector     PORT_InnerWall_VAR_T_room1;
+            }
         }
         Room2_TO_InnerWall
         {
-            source            PORT_Room2_VAR_T_room;
-            target            PORT_InnerWall_VAR_T_room2;
+            source
+            {
+                component     Room2;
+                connector     PORT_Room2_VAR_T_room;
+            }
+            target
+            {
+                component     InnerWall;
+                connector     PORT_InnerWall_VAR_T_room2;
+            }
         }
         Room2_TO_OuterWall2
         {
-            source            PORT_Room2_VAR_T_room;
-            target            PORT_OuterWall2_VAR_T_room2;
+            source
+            {
+                component     Room2;
+                connector     PORT_Room2_VAR_T_room;
+            }
+            target
+            {
+                component     OuterWall2;
+                connector     PORT_OuterWall2_VAR_T_room2;
+            }
         }
     }
 }
