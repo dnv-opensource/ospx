@@ -146,13 +146,6 @@ class OspSimulationCase():
         simulators: dict = {}
         for index, (_, component) in enumerate(self.system_structure.components.items()):
             simulator_key = f'{index:06d}_Simulator'
-
-            # if global setting for step size: use this one for all
-            if self.simulation.base_step_size:
-                step_size = self.simulation.base_step_size
-            else:
-                step_size = component.step_size
-
             simulator_properties = {
                 '_attributes': {
                     'name': component.name,
