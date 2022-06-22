@@ -127,9 +127,9 @@ class CosimWatcher:
                 subplot.plot(
                     'Time',
                     current_key,
-                    linewidth=2,
-                    color=cm.get_cmap('gist_rainbow')(index / self.number_of_subplots),
-                    data=df[['Time', current_key]],
+                    linewidth = 2,
+                    color = cm.get_cmap('gist_rainbow')(index / self.number_of_subplots),
+                    data = df[['Time', current_key]]
                 )
                 # subplot.set_title(currentKey,  fontsize=10)
                 subplot.grid(color='#66aa88', linestyle='--')
@@ -196,6 +196,9 @@ class CosimWatcher:
             - column names (= variable names)
         """
 
+        pattern = re.compile(r'(^#|\s+\[.*?\]$)')
+        #pattern = re.compile(r'(^#|\s+\[[\w\d\s]+\]$)')
+
         for data_source_name, data_source_properties in self.data_sources.items():                                    # loop over all data sources
             for csv_file_name in self.csv_file_names:
                 if re.match(data_source_name, csv_file_name):                                       # find the correct csv file
@@ -205,54 +208,25 @@ class CosimWatcher:
                             self.delimiter
                         )                                                                           # extract the header line to find the variable names
                         if 'columns' in data_source_properties:                                     # if key columns was given
-                            data_source_properties.update(
-                                {
-                                    'colNames':
-                                    [data_header[x] for x in data_source_properties['columns']]
-                                }
-                            )
-                            data_source_properties.update(
-                                {
-                                    'displayColNames': [
-                                        re.sub(
-                                            r'(^#|\s+\[.*?\]$)',
-                                            '',
-                                            data_source_name + '|' + col_name
-                                        ) for col_name in data_source_properties['colNames']
-                                    ]
-                                }
-                            )
+                            colNames = [data_header[x] for x in data_source_properties['columns']]
+                            data_source_properties.update({'colNames':colNames})
+
+                            displayColNames = [pattern.sub('', col_name) for col_name in data_source_properties['colNames']]
+                            displayColNames = ['Time', 'StepCount'] + [data_source_name + '|' + col_name for col_name in displayColNames if col_name not in ['Time', 'StepCount']]
+                            data_source_properties.update({'displayColNames':displayColNames})
 
                         else:                                                                       # if no columns is given, extract all relevant columns avoiding settings. and StepCount
-                            data_source_properties.update(
-                                {
-                                    'colNames': [
-                                        col_name for col_name in data_header
-                                        if not re.match(r'^(StepCount|settings)', col_name)
-                                    ]
-                                }
-                            )
-                            data_source_properties.update(
-                                {
-                                    'displayColNames': [
-                                        re.sub(
-                                            r'(^#|\s*\[.*?\]$)',
-                                            '',
-                                            data_source_name + '|' + col_name
-                                        ) for col_name in data_source_properties['colNames']
-                                    ]
-                                }
-                            )
-                            data_source_properties.update(
-                                {'columns': list(range(len(data_source_properties['colNames'])))}
-                            )
+                            colNames = [col_name for col_name in data_header if not re.match(r'^(StepCount|settings)', col_name)]
+                            data_source_properties.update({'colNames':colNames})
 
-                    data_source_properties.update(
-                        {'xColumn': data_source_properties['columns'][0]}
-                    )
-                    data_source_properties.update(
-                        {'yColumns': data_source_properties['columns'][1:]}
-                    )
+                            displayColNames = [pattern.sub('', col_name) for col_name in data_source_properties['colNames']]
+                            displayColNames = ['Time', 'StepCount'] + [data_source_name + '|' + col_name for col_name in displayColNames if col_name not in ['Time', 'StepCount']]
+                            data_source_properties.update({'displayColNames': displayColNames})
+
+                            data_source_properties.update({'columns': list(range(len(data_source_properties['colNames'])))})
+
+                    data_source_properties.update({'xColumn': data_source_properties['columns'][0]})
+                    data_source_properties.update({'yColumns': data_source_properties['columns'][1:]})
 
     def _initialize_plot(self):
         """Initializes the plot.
@@ -293,19 +267,16 @@ class CosimWatcher:
 
         df_all_data_sources = pd.DataFrame()    # initialize empty df
 
-        for index, (data_source_name,
-                    data_source_properties) in enumerate(self.data_sources.items()):
+        for index, (data_source_name, data_source_properties) in enumerate(self.data_sources.items()):
             # create the mapping dict
-            map = dict(
-                zip(data_source_properties['colNames'], data_source_properties['displayColNames'])
-            )
+            map = dict(zip(data_source_properties['colNames'], data_source_properties['displayColNames']))
             '''it could be so easy
             but we have to remove Time and StepCount because they are in each csv file and need to be filtered
             could be also required here to specify an abscissa differing from column 1 or 2
             but, anyways this is only applicable to cosim
             '''
-            for remove_item in ['Time', 'StepCount']:
-                map.pop(remove_item, None)
+            #for remove_item in ['Time', 'StepCount']:
+            #    map.pop(remove_item, None)
 
             if index == 0:                                                              # first call, also include Time (and StepCount)
                 df_single_data_source = pd.read_csv(
@@ -315,17 +286,37 @@ class CosimWatcher:
             else:
                 df_single_data_source = pd.read_csv(
                     Path(data_source_properties['csvFile']),
-                    usecols=[
-                        col_name for col_name in data_source_properties['colNames']
-                        if col_name not in ['Time', 'StepCount']
-                    ],
+                    #usecols = [col_name for col_name in data_source_properties['colNames'] if col_name not in ['Time', 'StepCount']],
+                    usecols = data_source_properties['colNames'],
                 )
 
             df_single_data_source = df_single_data_source.rename(columns=map)   # rename
 
-            df_all_data_sources = pd.concat(
-                [df_all_data_sources, df_single_data_source], axis=1
-            )                                                           # concatenate column-wise
+            if df_all_data_sources.empty:
+                # first df inherit all columns from single df
+                df_all_data_sources = df_single_data_source
+            else:
+                # all subsequent merge row-wise by time column,
+                # ignoring index
+                # (after setting individual time steps for each individual component)
+
+                #df_all_data_sources = pd.concat([df_all_data_sources, df_single_data_source], axis=1)   # concatenate column-wise
+
+                #df_all_data_sources = df_all_data_sources.append(df_single_data_source, ignore_index=True)
+                df_all_data_sources = df_all_data_sources.append(df_single_data_source)
+
+                # potential solution
+                # interpolating non-matching time data
+                # otherwise should component-wise dataframes do a better job
+                # bypass StepCound yielding in big holes, not plotted by mpl.
+                #df_all_data_sources = pd.merge_asof(
+                #    df_all_data_sources,
+                #    df_single_data_source,
+                #    on = 'Time',
+                #    by = 'StepCount',
+                #    direction = 'nearest',
+                #    #tolerance = pd.Timedelta('1ms')
+                #)
 
         # find latest common start point for skip and latest
         # consider skipping negative values due to wrong inputs
