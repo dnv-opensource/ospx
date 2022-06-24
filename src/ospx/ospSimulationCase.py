@@ -87,7 +87,7 @@ class OspSimulationCase():
             '*.fmu',
             '*callGraph',
             '*.pdf',
-            '*.png',
+            #'*.png',                   # 'protect results/*.png'
             'watchDict',
             'statisticsDict',           # 'results',
             'zip',
