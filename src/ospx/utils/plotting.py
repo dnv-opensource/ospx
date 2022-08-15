@@ -35,15 +35,18 @@ def save_figure(plt, fig, extension, path: Union[str, os.PathLike[str]], title: 
         logger.info(f'path {path} does not exist, creating')    # 0
         path.mkdir(parents=True, exist_ok=True)
 
-    title_in_file_name = re.sub(r'[:\[\]\{\},]+', '', re.sub(r'\s+', '_', title))
+    title_in_file_name = re.sub(r'[\[\]\{\},]+', '', re.sub(r'[\(\)\:\s,]+', '_', title))
 
     title_string_replacements = [
         ('==', '_eq_'),
         ('!=', '_neq_'),
         ('>', '_gt_'),
         ('<', '_lt_'),
-        ('>=', '_geq'),
+        ('>=', '_geq_'),
         ('<=', '_leq_'),
+        ('+', '_plus_'),
+        ('^', '_hat_'),
+        ('*', '_ast_'),
     ]
     for item in title_string_replacements:
         title_in_file_name = title_in_file_name.replace(item[0], item[1])
