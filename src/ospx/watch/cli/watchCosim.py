@@ -5,6 +5,7 @@ import argparse
 import logging
 import os
 import re
+import shutil
 from argparse import ArgumentParser
 from pathlib import Path
 from time import sleep
@@ -224,6 +225,12 @@ def _main(
 
     if dump:
         watcher.dump()
+
+        # finally: move annoying csv files to results
+        # after simplifying watchCosim or splitting off, it can be considered to move csv files in advance
+        # (not suitable for -c option!)
+        for file in csv_files:
+            shutil.move(file, "results")
 
 
 if __name__ == '__main__':
