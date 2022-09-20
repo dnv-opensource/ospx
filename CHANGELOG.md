@@ -5,13 +5,29 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 
 ## [Unreleased]
 
+* -
+
+## [0.1.2] - 2022-08-19
+
 ### Changed
 
-* variable.py: variable.start -> added type casting to setter property ensuring an already defined data_type of the variable is not altered when a new start value is set.
+* variable.py:
+    * variable.start -> added type casting to setter property ensuring an already defined data_type of the variable is not altered when a new start value is set.
 
-### Added
+* watchCosim.py
+    * put watchCosim in working state after time stepping, before changing over to individual data frames
+    * move *.csv files finally into folder /results
 
-* ospCaseBuilder inspect mode (--inspect): Results now include the attributes of the DefaultExperiment element from the FMU's modelDescription.xml
+* Protect png's in result folder from being deleted
+
+* ospCaseBuilder CLI:
+    * inspect mode (--inspect) now adds to the results the attributes of the DefaultExperiment element from the FMU's modelDescription.xml
+
+* plotting.py:
+    * added further exceptions for non-word characters in title strings
+
+* dependencies:
+    * ospx now uses dictIO v0.1.1
 
 ## [0.1.1] - 2022-05-30
 
@@ -120,7 +136,8 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 * Added support for Python 3.10
 
 <!-- Markdown link & img dfn's -->
-[unreleased]: https://github.com/dnv-opensource/ospx/compare/v0.1.1...HEAD
+[unreleased]: https://github.com/dnv-opensource/ospx/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/dnv-opensource/ospx/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/dnv-opensource/ospx/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/dnv-opensource/ospx/compare/v0.0.22...v0.1.0
 [0.0.22]: https://github.com/dnv-opensource/ospx/compare/v0.0.17...v0.0.22
