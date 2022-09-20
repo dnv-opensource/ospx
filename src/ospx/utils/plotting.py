@@ -47,6 +47,7 @@ def save_figure(plt, fig, extension, path: Union[str, os.PathLike[str]], title: 
         ('+', '_plus_'),
         ('^', '_hat_'),
         ('*', '_ast_'),
+        ('|', '_')
     ]
     for item in title_string_replacements:
         title_in_file_name = title_in_file_name.replace(item[0], item[1])
