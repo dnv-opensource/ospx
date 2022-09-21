@@ -1,0 +1,16 @@
+<?xml version="1.0" ?>
+<OspSystemStructure xmlns="http://opensimulationplatform.com/MSMI/OSPSystemStructure" version="0.1">
+    <BaseStepSize>0.01</BaseStepSize>
+    <Algorithm>fixedStep</Algorithm>
+    <Simulators>
+        <Simulator name="Vessel" source="Vessel.fmu" stepSize="60.0"/>
+        <Simulator name="LOSGuidance" source="LOSGuidance.fmu" stepSize="0.2">
+            <InitialValues>
+                <InitialValue variable="UDesired">
+                    <Integer value="1"/>
+                </InitialValue>
+            </InitialValues>
+        </Simulator>
+    </Simulators>
+    <Connections/>
+</OspSystemStructure>
