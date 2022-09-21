@@ -1,0 +1,89 @@
+/*---------------------------------*- C++ -*----------------------------------*\
+filetype dictionary; coding utf-8; version 0.1; local --; purpose --;
+\*----------------------------------------------------------------------------*/
+_environment
+{
+//    libSource                 'C:/Users/CHAVAS/Documents/PYTHON/Ospx_v3/VModel';
+    libSource                 'C:/Users/FRALUM/Documents/SystemSimulation/repo/dnv-opensource/ospx/tests/ospx_variable_group/src';
+}
+systemStructure
+{
+    connections
+    {
+        LOSGuidance2_to_LOSGuidance
+        {
+            source
+            {
+                component       LOSGuidance2;
+                connector       LOSGuidance2_ASVStates;
+            }
+            target
+            {
+                component       LOSGuidance;
+                connector       LOSGuidance_ASVStates;
+            }
+        }
+        LOSGuidance2_to_LOSGuidance_single
+        {
+            source
+            {
+                component       LOSGuidance2;
+                connector       LOSGuidance2_ASVStates_single;
+            }
+            target
+            {
+                component       LOSGuidance;
+                connector       LOSGuidance_ASVStates_single;
+            }
+        }
+
+    }
+    components
+    {
+        LOSGuidance
+        {
+            connectors
+            {
+                LOSGuidance_ASVStates
+                {
+                    variable        ASVStates;
+                    type            input;
+                }
+                LOSGuidance_ASVStates_single
+                {
+                    variable        AsvStatesLf[0];
+                    type            input;
+                }
+               
+            }
+            fmu               LOSGuidance.fmu;
+        }
+        LOSGuidance2
+        {
+            connectors
+            {
+                LOSGuidance2_ASVStates
+                {
+                    variable        ASVStates;
+                    type            output;
+                }
+                LOSGuidance2_ASVStates_single
+                {
+                    variable        AsvStatesLf[0];
+                    type            output;
+                }
+            }
+            fmu               LOSGuidance.fmu;
+        }
+    }
+}
+run
+{
+    simulation
+    {
+        name                  OspSystemStructure;
+        startTime             0.0;
+        baseStepSize          0.01;
+        algorithm             fixedStep;
+    }
+}
