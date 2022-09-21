@@ -92,17 +92,23 @@ class OspSimulationCase():
             'statisticsDict',           # 'results',
             'zip',
         ]
+        except_list = ['src', '^test_']
+        except_pattern = '(' + '|'.join(except_list) + ')'
 
         logger.info(f'Clean OSP simulation case folder: {self.case_folder}')
 
         for pattern in case_builder_result_files:
             files = list(Path('.').rglob(pattern))
             for file in files:
-                if file.is_file():
-                    if not file.name.startswith('test_'):
+                if not re.search(except_pattern, str(file)):
+                    #logger.info("%s in list to clean" % file)
+                    if file.is_file():
+                        #if not file.name.startswith('test_'):
+                        #logger.info("file %s cleaned" % file)
                         file.unlink(missing_ok=True)
-                else:
-                    rmtree(file)
+                    else:
+                        #logger.info("dir %s removed" % file)
+                        rmtree(file)
 
     def write_osp_model_description_xmls(self):
         """Writes the <component.name>_OspModelDescription.xml files for all components defined in the system structure
