@@ -138,6 +138,7 @@ class Component():
 
     def _init_variables(self):
         self._variables = deepcopy(self.fmu.variables)
+
         for variable_name, variable in self._initial_values.items():
             if variable.causality:
                 self._variables[variable_name].causality = variable.causality
