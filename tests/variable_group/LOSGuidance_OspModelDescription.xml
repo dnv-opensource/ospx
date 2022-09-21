@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<OspModelDescription xmlns="http://opensimulationplatform.com/MSMI/OSPModelDescription" version="0.1">
+	<UnitDefinitions>
+	</UnitDefinitions>
+	<VariableGroups>
+		<!-- Input -->
+		<Generic name="ASVStates">
+			<Variable ref="AsvStatesLf[0]"/>			
+			<Variable ref="AsvStatesLf[1]"/>			
+			<Variable ref="AsvStatesLf[2]"/>
+			<Variable ref="AsvStatesLf[3]"/>			
+			<Variable ref="AsvStatesLf[4]"/>			
+			<Variable ref="AsvStatesLf[5]"/>							
+		</Generic>
+	</VariableGroups>
+</OspModelDescription>
