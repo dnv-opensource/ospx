@@ -59,13 +59,13 @@ class Endpoint():
         self._variable = variable
 
     @property
-    def name(self) -> str:
-        _name: str = 'UNKNOWN'
+    def variable_name(self) -> str:
         if self._connector:
-            _name = self._connector.name
-        if self._variable:
-            _name = self._variable.name
-        return _name
+            return self._connector.variable_name
+        elif self._variable:
+            return self._variable.name
+        else:
+            return 'UNKNOWN'
 
     @property
     def is_valid(self) -> bool:

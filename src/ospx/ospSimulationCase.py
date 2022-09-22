@@ -197,13 +197,13 @@ class OspSimulationCase():
                     '000000_Variable': {
                         '_attributes': {
                             'simulator': connection.source_endpoint.component.name,
-                            'name': connection.source_endpoint.name,
+                            'name': connection.source_endpoint.variable_name,
                         }
                     },
                     '000001_Variable': {
                         '_attributes': {
                             'simulator': connection.target_endpoint.component.name,
-                            'name': connection.target_endpoint.name,
+                            'name': connection.target_endpoint.variable_name,
                         }
                     }
                 }
@@ -214,13 +214,13 @@ class OspSimulationCase():
                     '000000_VariableGroup': {
                         '_attributes': {
                             'simulator': connection.source_endpoint.component.name,
-                            'name': connection.source_endpoint.name,
+                            'name': connection.source_endpoint.variable_name,
                         }
                     },
                     '000001_VariableGroup': {
                         '_attributes': {
                             'simulator': connection.target_endpoint.component.name,
-                            'name': connection.target_endpoint.name,
+                            'name': connection.target_endpoint.variable_name,
                         }
                     }
                 }
@@ -317,9 +317,9 @@ class OspSimulationCase():
                 connections[connection_key] = {
                     '_attributes': {
                         'startElement': connection.source_endpoint.component.name,
-                        'startConnector': connection.source_endpoint.name,
+                        'startConnector': connection.source_endpoint.variable_name,
                         'endElement': connection.target_endpoint.component.name,
-                        'endConnector': connection.target_endpoint.name,
+                        'endConnector': connection.target_endpoint.variable_name,
                     }
                 }
         system_structure_ssd['System']['Connections'] = connections
