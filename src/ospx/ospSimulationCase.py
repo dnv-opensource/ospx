@@ -1,7 +1,7 @@
 import logging
 import re
 from pathlib import Path
-from shutil import rmtree, copy2
+from shutil import copy2
 from typing import Union
 
 from dictIO import CppDict, DictWriter, XmlFormatter
@@ -95,10 +95,10 @@ class OspSimulationCase():
     def write_osp_system_structure_xml(self):
         """Writes the OspSystemStructure.xml file
         """
+        # sourcery skip: class-extract-method, merge-dict-assign
 
         self.clean('OspSystemStructure.xml')
 
-        # sourcery skip: merge-dict-assign
         logger.info(
             f"Write OspSystemStructure.xml file for OSP simulation case '{self.name}' in case folder: {self.case_folder}"
         )
@@ -312,7 +312,7 @@ class OspSimulationCase():
         I.e. for documentation or further statistical analysis.
         """
         target_file_path = Path.cwd() / 'statisticsDict'
-        #self.clean(target_file_path)
+        # self.clean(target_file_path)
 
         # sourcery skip: merge-dict-assign, simplify-dictionary-update
         logger.info(
@@ -372,7 +372,7 @@ class OspSimulationCase():
             - extracting the results
         """
         target_file_path = Path.cwd() / 'watchDict'
-        #self.clean(target_file_path)
+        # self.clean(target_file_path)
 
         logger.info(
             f"Write watch dict for OSP simulation case '{self.name}' in case folder: {self.case_folder}"
