@@ -26,7 +26,8 @@ A caseDict file contains
 | &numsp;&numsp;\<COMPONENT>                        | dict      | unique name identifying a component in the simulation |
 | &numsp;&numsp;&numsp;connectors                   | dict      | itemization of connectors as defined in the FMU's modelDescription.xml |
 | &numsp;&numsp;&numsp;&numsp;\<CONNECTOR>          | dict      | speaking name of a connector, i.e. what it does and where it is mounted |
-| &numsp;&numsp;&numsp;&numsp;&numsp;reference      | string    | internal name of the connector as defined in the FMU file |
+| &numsp;&numsp;&numsp;&numsp;&numsp;variable       | string    | name of a referenced variable as defined in the FMU file (mutually exclusive with variableGroup)|
+| &numsp;&numsp;&numsp;&numsp;&numsp;variableGroup  | string    | name of a referenced VariableGroup as defined in <fmu_name>_OSPModelDescription.xml (mutually exclusive with variable)|
 | &numsp;&numsp;&numsp;&numsp;&numsp;type           | string    | type of the connector. Choices: {input, output} |
 | &numsp;&numsp;&numsp;initialize                   | dict      | optional initialization, updating the FMU's default settings |
 | &numsp;&numsp;&numsp;&numsp;\<VARIABLE>           | dict      | the variable / parameter to be set. Needs to match the name as defined in the FMU file. |
@@ -38,12 +39,12 @@ A caseDict file contains
 | &numsp;&numsp;\<CONNECTION>                       | dict      | speaking name of the connection |
 | &numsp;&numsp;&numsp;source                       | dict      | source endpoint of \<CONNECTION> |
 | &numsp;&numsp;&numsp;&numsp;component             | string    | name of source \<COMPONENT> |
-| &numsp;&numsp;&numsp;&numsp;connector             | string    | name of \<CONNECTOR> at source \<COMPONENT> (optional. either connector or variable can be referenced as endpoint) |
-| &numsp;&numsp;&numsp;&numsp;variable              | string    | name of \<VARIABLE> at source \<COMPONENT> (optional. either connector or variable can be referenced as endpoint) |
+| &numsp;&numsp;&numsp;&numsp;connector             | string    | name of \<CONNECTOR> at source \<COMPONENT> (mutually exclusive with variable) |
+| &numsp;&numsp;&numsp;&numsp;variable              | string    | name of \<VARIABLE> at source \<COMPONENT> (mutually exclusive with connector) |
 | &numsp;&numsp;&numsp;target                       | dict      | target endpoint of \<CONNECTION> |
 | &numsp;&numsp;&numsp;&numsp;component             | string    | name of target \<COMPONENT> |
-| &numsp;&numsp;&numsp;&numsp;connector             | string    | name of \<CONNECTOR> at target \<COMPONENT> (optional. either connector or variable can be referenced as endpoint) |
-| &numsp;&numsp;&numsp;&numsp;variable              | string    | name of \<VARIABLE> at target \<COMPONENT> (optional. either connector or variable can be referenced as endpoint) |
+| &numsp;&numsp;&numsp;&numsp;connector             | string    | name of \<CONNECTOR> at target \<COMPONENT> (mutually exclusive with variable) |
+| &numsp;&numsp;&numsp;&numsp;variable              | string    | name of \<VARIABLE> at target \<COMPONENT> (mutually exclusive with connector) |
 | run                                               | dict      | settings for simulation run |
 | &numsp;simulation                                 | dict      | additional information about the simulaton. Used for window decoration. |
 | &numsp;&numsp;name                                | string    | name of the simulation |
