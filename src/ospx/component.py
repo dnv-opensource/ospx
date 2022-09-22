@@ -96,6 +96,8 @@ class Component():
             connector = Connector(name=connector_name)
             if 'variable' in connector_properties:
                 connector.variable = connector_properties['variable']
+            if 'variableGroup' in connector_properties:
+                connector.variable_group = connector_properties['variableGroup']
             if 'type' in connector_properties:
                 connector.type = connector_properties['type']
             self._connectors[connector.name] = connector

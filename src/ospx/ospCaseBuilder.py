@@ -71,7 +71,7 @@ class OspCaseBuilder():
 
             return
 
-        case.write_osp_model_description_xmls()
+        # case.write_osp_model_description_xmls()
         case.write_osp_system_structure_xml()
         case.write_system_structure_ssd()
 

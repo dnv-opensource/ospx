@@ -84,51 +84,61 @@ class SystemStructure():
         if 'connections' not in properties:
             return
         for connection_name, connection_properties in properties['connections'].items():
-            connection = Connection(name=connection_name)
+            source_endpoint: Union[Endpoint, None] = None
+            target_endpoint: Union[Endpoint, None] = None
             if 'source' in connection_properties:
-                connection.source = self._read_endpoint(connection_properties['source'])
+                source_endpoint = self._read_endpoint(connection_properties['source'])
             if 'target' in connection_properties:
-                connection.target = self._read_endpoint(connection_properties['target'])
-            if connection.source and connection.target:
+                target_endpoint = self._read_endpoint(connection_properties['target'])
+            if source_endpoint and target_endpoint:
+                connection = Connection(
+                    name=connection_name,
+                    source_endpoint=source_endpoint,
+                    target_endpoint=target_endpoint,
+                )
                 self._connections[connection.name] = connection
             else:
                 logger.error(
-                    f'connection {connection.name}: connection could not be resolved. Please recheck connection properties in case dict.'
+                    f'connection {connection_name}: connection could not be resolved. Please recheck connection properties in case dict.'
                 )
         return
 
     def _read_endpoint(self, properties: MutableMapping) -> Union[Endpoint, None]:
-        endpoint: Endpoint = Endpoint()
+        if 'component' not in properties:
+            return None
         component: Union[Component, None] = None
         connector: Union[Connector, None] = None
         variable: Union[ScalarVariable, None] = None
-        if 'component' in properties:
-            component_name = properties['component']
-            if component_name in self.components:
-                component = self.components[component_name]
-                endpoint.component = component_name
+
+        component_name: str = properties['component']
+        if component_name in self.components:
+            component = self.components[component_name]
+
         if 'connector' in properties:
             connector_name = properties['connector']
             if component and connector_name in component.connectors:
                 connector = component.connectors[connector_name]
-                endpoint.connector = connector_name
             else:
                 for component_name, c in self.components.items():
                     if connector_name in c.connectors:
                         component = c
                         connector = c.connectors[connector_name]
-                        endpoint.component = component_name
-                        endpoint.connector = connector_name
                         break
-            if component and connector:
-                if variable_name := connector.variable:
-                    if variable_name in component.variables:
-                        variable = component.variables[variable_name]
-                        endpoint.variable = variable_name
+
         if 'variable' in properties:
             variable_name = properties['variable']
             if component and variable_name in component.variables:
                 variable = component.variables[variable_name]
-                endpoint.variable = variable_name
 
-        return endpoint if component and variable else None
+        if not component:
+            return None
+
+        if connector or variable:
+            endpoint: Endpoint = Endpoint(
+                component=component,
+                connector=connector,
+                variable=variable,
+            )
+            return endpoint if endpoint.is_valid else None
+
+        return None
