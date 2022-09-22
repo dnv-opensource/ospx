@@ -80,7 +80,7 @@ systemStructure
                 {
                     causality        parameter;
                     variability        fixed;
-                    start        1.;
+                    start        1;
                 }
             }
         }
