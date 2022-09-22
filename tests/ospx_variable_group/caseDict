@@ -6,26 +6,6 @@ _environment
 //    libSource                 'C:/Users/CHAVAS/Documents/PYTHON/Ospx_v3/VModel';
     libSource                 'C:/Users/FRALUM/Documents/SystemSimulation/project/2022-09-20_OSP_faulty_case/src';
 }
-_buildOpts
-{
-    clean
-    (
-        *.csv
-        *.out
-        *.xml
-        *.fmu
-        *callGraph
-        *.pdf
-        watchDict
-        statisticsDict
-        zip
-    );
-    exceptToClean
-    (
-        src
-        test_
-    );
-}
 systemStructure
 {
     connections
@@ -36,13 +16,11 @@ systemStructure
             {
                 component       Vessel;
                 connector       Vessel_ASVStates;
-                //variable        ASVStates;
             }
             target
             {
                 component       LOSGuidance;
                 connector       LOSGuidance_ASVStates;
-                //variable        ASVStates;
             }
         }
     }
