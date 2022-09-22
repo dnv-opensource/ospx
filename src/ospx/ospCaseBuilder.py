@@ -68,8 +68,7 @@ class OspCaseBuilder():
         if inspect:
             # inspect and stop
             case._inspect()
-            # clean up
-            case.clean()
+
             return
 
         case.write_osp_model_description_xmls()
