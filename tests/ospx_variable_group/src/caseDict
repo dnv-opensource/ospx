@@ -3,7 +3,7 @@ filetype dictionary; coding utf-8; version 0.1; local --; purpose --;
 \*----------------------------------------------------------------------------*/
 _environment
 {
-    libSource                 'C:/Users/CHAVAS/Documents/PYTHON/Ospx_v3/VModel';
+    libSource                 'C:/Users/CHAVAS/Documents/PYTHON/Ospx_v3/VModel';                    
 }
 systemStructure
 {
