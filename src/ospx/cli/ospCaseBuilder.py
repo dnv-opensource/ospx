@@ -176,7 +176,7 @@ def _clean():
         'statisticsDict',           # 'results',
         'zip',
     ]
-    except_list = ['src', '^test_']
+    except_list = ['src', '^test_', '_OspModelDescription.xml']
     except_pattern = '(' + '|'.join(except_list) + ')'
 
     logger.info(f'Clean OSP simulation case folder: {case_folder}')
