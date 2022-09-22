@@ -7,7 +7,7 @@ from typing import Union
 from dictIO import DictReader, DictWriter
 from dictIO.utils.counter import BorgCounter
 
-from ospx.utils.dict import find_key, find_type_identifier_in_keys
+from ospx.utils.dict import find_key, find_keys, find_type_identifier_in_keys
 
 
 __ALL__ = ['OspSystemStructureImporter']
@@ -66,7 +66,7 @@ class OspSystemStructureImporter():
 
                 connection: dict[str, dict] = {}
                 connection_name: str = ''
-                # this loop has the range {0,1}
+                # following loop has range {0,1}
                 for index, (endpoint_type,
                             endpoint_properties) in enumerate(connection_properties.items()):
                     endpoint_type: str = re.sub(r'(^\d{1,6}_)', '', endpoint_type)
@@ -122,40 +122,40 @@ class OspSystemStructureImporter():
                     temp_connectors[f'{counter():06d}_{component_name}'] = {
                         _connector_name: _connector
                     }
-
+                # Save in connections dict
                 connections[connection_name] = connection
 
         # Simulators (=Components)
         if simulators_key := find_key(source_dict, 'Simulators$'):
             for simulator_properties in source_dict[simulators_key].values():
                 # Component
-                component: dict[str, dict] = {}
                 component_name = simulator_properties['_attributes']['name']
                 # Connectors
                 component_connectors: dict[str, dict] = {}
                 for temp_connector_key, connector in temp_connectors.items():
                     if component_name in temp_connector_key:
                         component_connectors |= connector
-                component['connectors'] = component_connectors
                 # FMU
                 fmu_name = simulator_properties['_attributes']['source']
-                component['fmu'] = fmu_name
                 # Initial values
+                component_initial_values: dict[str, dict] = {}
                 if initial_values_key := find_key(simulator_properties, 'InitialValues$'):
                     initial_values = simulator_properties[initial_values_key]
-                    if initial_value_key := find_key(initial_values, 'InitialValue$'):
-                        initial_value = initial_values[initial_value_key]
-                        if data_type := find_type_identifier_in_keys(initial_value):
-                            type_key = find_key(initial_value, f'{data_type}$')
-                            referenced_name = initial_value['_attributes']['variable']
-                            value = initial_value[type_key]['_attributes']['value']
-                            component['initialize'] = {
-                                referenced_name: {
-                                    'causality': 'parameter',
-                                    'variability': 'fixed',
-                                    'start': value,
-                                }
-                            }
+                    if initial_value_keys := find_keys(initial_values, 'InitialValue$'):
+                        for initial_value_key in initial_value_keys:
+                            initial_value = initial_values[initial_value_key]
+                            if data_type := find_type_identifier_in_keys(initial_value):
+                                type_key = find_key(initial_value, f'{data_type}$')
+                                referenced_name = initial_value['_attributes']['variable']
+                                value = initial_value[type_key]['_attributes']['value']
+                                component_initial_values |= {referenced_name: {'start': value}}
+                # Assemble component
+                component: dict[str, dict] = {
+                    'connectors': component_connectors,
+                    'fmu': fmu_name,
+                }
+                if component_initial_values:
+                    component['initialize'] = component_initial_values
                 # Save in components dict
                 components[component_name] = component
 
