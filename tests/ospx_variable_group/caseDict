@@ -6,26 +6,6 @@ _environment
 //    libSource                 'C:/Users/CHAVAS/Documents/PYTHON/Ospx_v3/VModel';
     libSource                 ./src;
 }
-_buildOpts
-{
-    clean
-    (
-        *.csv
-        *.out
-        *.xml
-        *.fmu
-        *callGraph
-        *.pdf
-        watchDict
-        statisticsDict
-        zip
-    );
-    exceptToClean
-    (
-        src
-        test_
-    );
-}
 systemStructure
 {
     connections
