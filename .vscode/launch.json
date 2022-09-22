@@ -143,5 +143,19 @@
                 "enable": true
             }
         },
+        {
+            "name": "importSystemStructure variable_group OspSystemStructure.xml",
+            "type": "python",
+            "request": "launch",
+            "cwd": "${workspaceFolder}\\tests\\ospx_variable_group",
+            "program": "${workspaceFolder}\\src\\ospx\\cli\\importSystemStructure.py",
+            "args": [
+                "OspSystemStructure.xml",
+            ],
+            "console": "integratedTerminal",
+            "autoReload": {
+                "enable": true
+            }
+        },
     ]
 }

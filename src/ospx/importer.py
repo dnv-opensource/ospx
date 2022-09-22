@@ -1,6 +1,7 @@
 import logging
 import os
 from pathlib import Path
+import re
 from typing import Union
 
 from dictIO import DictReader, DictWriter
@@ -47,35 +48,80 @@ class OspSystemStructureImporter():
         # iterate over the connections first as they contain the variable and component names
         temp_connectors = {}
         if connections_key := find_key(source_dict, 'Connections$'):
-            for connection_properties in source_dict[connections_key].values():
+            for connection_type, connection_properties in source_dict[connections_key].items():
+                connection_type: str = re.sub(r'(^\d{1,6}_)', '', connection_type)
+
+                if connection_type not in {'VariableConnection', 'VariableGroupConnection'}:
+                    if connection_type in {'SignalConnection', 'SignalGroupConnection'}:
+                        msg: str = (
+                            f"Import failed: {system_structure_file.name} contains a connection with OSP-IS connection type '{connection_type}'\n"
+                            f"The support for connection type '{connection_type}' is not yet implemented in ospx."
+                        )
+                    else:
+                        msg: str = (
+                            f"Import failed: {system_structure_file.name} contains a connection with unknown connection type '{connection_type}'\n"
+                        )
+                    logger.error(msg)
+                    raise TypeError(msg)
+
                 connection: dict[str, dict] = {}
                 connection_name: str = ''
                 # this loop has the range {0,1}
                 for index, (endpoint_type,
                             endpoint_properties) in enumerate(connection_properties.items()):
-                    component_name = endpoint_properties['_attributes']['simulator']
-                    variable_name = endpoint_properties['_attributes']['name']
+                    endpoint_type: str = re.sub(r'(^\d{1,6}_)', '', endpoint_type)
+
+                    if endpoint_type not in {'Variable', 'VariableGroup'}:
+                        if endpoint_type in {'Signal', 'SignalGroup'}:
+                            msg: str = (
+                                f"Import failed: {system_structure_file.name} contains a connection with OSP-IS endpoint type '{endpoint_type}'\n"
+                                f"The support for endpoint type '{endpoint_type}' is not yet implemented in ospx."
+                            )
+                        else:
+                            msg: str = (
+                                f"Import failed: {system_structure_file.name} contains a connection with unknown endpoint type '{endpoint_type}'\n"
+                            )
+                        logger.error(msg)
+                        raise TypeError(msg)
+
+                    component_name: str = endpoint_properties['_attributes']['simulator']
+                    referenced_name: str = endpoint_properties['_attributes']['name']
                     # alternator for source <--> target (because there are always 2 entries in VariableConnection in always the same sequence)
-                    endpoint_type: str = 'source' if index % 2 == 0 else 'target'
-                    connection[endpoint_type] = {
-                        'component': component_name,
-                        'variable': variable_name,
-                    }
-                    # Save connector in temp_connectors dict.
-                    # (The variable and component information stored in these connectors
-                    #  is later used to complete the component properties)
-                    connector_name = f'{component_name}_{variable_name}'
-                    connector_type = 'output' if endpoint_type == 'source' else 'input'
-                    temp_connectors[f'{counter():06d}_{component_name}'] = {
-                        connector_name: {
-                            'variable': variable_name,
-                            'type': connector_type,
+                    endpoint_name: str = 'source' if index % 2 == 0 else 'target'
+                    endpoint: dict[str, str] = {}
+                    _connector_type: str = 'output' if endpoint_name == 'source' else 'input'
+                    _connector: dict[str, str] = {}
+                    _connector_name: str = f'{component_name}_{referenced_name}'
+                    if endpoint_type == 'Variable':
+                        endpoint = {
+                            'component': component_name,
+                            'variable': referenced_name,
                         }
-                    }
+                        _connector = {
+                            'variable': referenced_name,
+                            'type': _connector_type,
+                        }
+                    elif endpoint_type == 'VariableGroup':
+                        endpoint = {
+                            'component': component_name,
+                            'connector': _connector_name,
+                        }
+                        _connector = {
+                            'variableGroup': referenced_name,
+                            'type': _connector_type,
+                        }
+                    connection[endpoint_name] = endpoint
                     if not connection_name:
                         connection_name = component_name
                     else:
                         connection_name += f'_to_{component_name}'
+
+                    # Save _connector in temp_connectors dict.
+                    # (The variable and component information stored in these connectors
+                    #  is later used to complete component properties)
+                    temp_connectors[f'{counter():06d}_{component_name}'] = {
+                        _connector_name: _connector
+                    }
 
                 connections[connection_name] = connection
 
@@ -101,10 +147,10 @@ class OspSystemStructureImporter():
                         initial_value = initial_values[initial_value_key]
                         if data_type := find_type_identifier_in_keys(initial_value):
                             type_key = find_key(initial_value, f'{data_type}$')
-                            variable_name = initial_value['_attributes']['variable']
+                            referenced_name = initial_value['_attributes']['variable']
                             value = initial_value[type_key]['_attributes']['value']
                             component['initialize'] = {
-                                variable_name: {
+                                referenced_name: {
                                     'causality': 'parameter',
                                     'variability': 'fixed',
                                     'start': value,
@@ -141,7 +187,6 @@ class OspSystemStructureImporter():
         case_dict = {
             '_environment': {
                 'libSource': '.',
-                'root': Path.cwd(),
             },
             'systemStructure': system_structure,
             'run': {
