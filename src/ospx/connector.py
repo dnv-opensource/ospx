@@ -82,3 +82,12 @@ class Connector():
     @property
     def is_group_connector(self) -> bool:
         return bool(self._variable_group)
+
+    @property
+    def variable_name(self) -> str:
+        if self._variable:
+            return self._variable
+        elif self._variable_group:
+            return self._variable_group
+        else:
+            return 'UNKNOWN'
