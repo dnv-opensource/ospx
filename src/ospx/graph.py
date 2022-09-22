@@ -118,12 +118,12 @@ class Graph():
 
         # Connections
         for connection in case.system_structure.connections.values():
-            if not (connection.source and connection.target):
+            if not (connection.source_endpoint and connection.target_endpoint):
                 return
-            if not (connection.source.component and connection.target.component):
+            if not (connection.source_endpoint.component and connection.target_endpoint.component):
                 return
-            from_key: str = connection.source.component
-            to_key: str = connection.target.component
+            from_key: str = connection.source_endpoint.component.name
+            to_key: str = connection.target_endpoint.component.name
             label = _get_edge_label(connection)
 
             if re.search(input_names, from_key, re.I):
@@ -191,11 +191,7 @@ def _get_node_label(component: Component) -> Tuple[str, str]:
 
 
 def _get_edge_label(connection: Connection) -> str:
-    if not (connection.source and connection.target):
-        return ''
-    return (f"{connection.source.component}"
-            '-->'
-            f"{connection.target.component}")
+    return f"{connection.source_endpoint.component}-->{connection.target_endpoint.component}" if connection.is_valid else ''
 
 
 def _create_table(name, child=None) -> str:

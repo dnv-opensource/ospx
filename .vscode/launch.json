@@ -118,11 +118,25 @@
             "name": "ospCaseBuilder variable_group --inspect",
             "type": "python",
             "request": "launch",
-            "cwd": "${workspaceFolder}\\tests\\variable_group",
+            "cwd": "${workspaceFolder}\\tests\\ospx_variable_group",
             "program": "${workspaceFolder}\\src\\ospx\\cli\\ospCaseBuilder.py",
             "args": [
                 "caseDict",
                 "--inspect",
+            ],
+            "console": "integratedTerminal",
+            "autoReload": {
+                "enable": true
+            }
+        },
+        {
+            "name": "ospCaseBuilder variable_group",
+            "type": "python",
+            "request": "launch",
+            "cwd": "${workspaceFolder}\\tests\\ospx_variable_group",
+            "program": "${workspaceFolder}\\src\\ospx\\cli\\ospCaseBuilder.py",
+            "args": [
+                "caseDict",
             ],
             "console": "integratedTerminal",
             "autoReload": {
