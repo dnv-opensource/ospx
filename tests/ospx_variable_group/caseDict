@@ -4,7 +4,7 @@ filetype dictionary; coding utf-8; version 0.1; local --; purpose --;
 _environment
 {
 //    libSource                 'C:/Users/CHAVAS/Documents/PYTHON/Ospx_v3/VModel';
-    libSource                 'C:/Users/FRALUM/Documents/SystemSimulation/project/2022-09-20_OSP_faulty_case/src';
+    libSource                 'C:/Users/FRALUM/Documents/SystemSimulation/repo/dnv-opensource/ospx/tests/ospx_variable_group/src';
 }
 systemStructure
 {
@@ -74,7 +74,6 @@ systemStructure
                 }
             }
             fmu               LOSGuidance.fmu;
-            /*
             initialize
             {
                 UDesired
@@ -84,7 +83,6 @@ systemStructure
                     start        1;
                 }
             }
-            */
         }
     }
 }
