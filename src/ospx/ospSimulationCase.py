@@ -2,6 +2,7 @@ import logging
 import re
 from pathlib import Path
 from shutil import rmtree, copy2
+from typing import Union
 
 from dictIO import CppDict, DictWriter, XmlFormatter
 from dictIO.utils.counter import BorgCounter
@@ -58,9 +59,6 @@ class OspSimulationCase():
         """
         logger.info(f"Set up OSP simulation case '{self.name}' in case folder: {self.case_folder}")
 
-        # Clean up case folder
-        self.clean()
-
         # Register and copy to local case folder all FMUs referenced by components in the case dict
         self._copy_fmus_from_library()
 
@@ -75,39 +73,11 @@ class OspSimulationCase():
         # Make sure all components have a step size defined
         self._check_components_step_size()
 
-    def clean(self):
-        """Cleans up the case folder and deletes any existing ospx files, e.g. modelDescription.xml .fmu .csv etc.
+    def clean(self, file_to_remove: Union[str, Path]):
+        """Clean up single file
         """
-
-        # specify all files to be deleted (or comment-in / comment-out as needed)
-        case_builder_result_files = [
-            '*.csv',
-            '*.out',
-            '*.xml',
-            '*.fmu',
-            '*callGraph',
-            '*.pdf',                    # '*.png',                   # 'protect results/*.png'
-            'watchDict',
-            'statisticsDict',           # 'results',
-            'zip',
-        ]
-        except_list = ['src', '^test_']
-        except_pattern = '(' + '|'.join(except_list) + ')'
-
-        logger.info(f'Clean OSP simulation case folder: {self.case_folder}')
-
-        for pattern in case_builder_result_files:
-            files = list(Path('.').rglob(pattern))
-            for file in files:
-                if not re.search(except_pattern, str(file)):
-                    # logger.info("%s in list to clean" % file)
-                    if file.is_file():
-                        # if not file.name.startswith('test_'):
-                        # logger.info("file %s cleaned" % file)
-                        file.unlink(missing_ok=True)
-                    else:
-                        # logger.info("dir %s removed" % file)
-                        rmtree(file)
+        file_to_remove = Path.cwd() / file_to_remove
+        file_to_remove.unlink(missing_ok=True)
 
     def write_osp_model_description_xmls(self):
         """Writes the <component.name>_OspModelDescription.xml files for all components defined in the system structure
@@ -125,6 +95,9 @@ class OspSimulationCase():
     def write_osp_system_structure_xml(self):
         """Writes the OspSystemStructure.xml file
         """
+
+        self.clean('OspSystemStructure.xml')
+
         # sourcery skip: merge-dict-assign
         logger.info(
             f"Write OspSystemStructure.xml file for OSP simulation case '{self.name}' in case folder: {self.case_folder}"
@@ -242,6 +215,8 @@ class OspSimulationCase():
     def write_system_structure_ssd(self):
         """Writes the SystemStructure.ssd file
         """
+        self.clean('SystemStructure.ssd')
+
         # sourcery skip: merge-dict-assign
         logger.info(
             f"Write SystemStructure.ssd file for OSP simulation case '{self.name}' in case folder: {self.case_folder}"
@@ -336,6 +311,9 @@ class OspSimulationCase():
 
         I.e. for documentation or further statistical analysis.
         """
+        target_file_path = Path.cwd() / 'statisticsDict'
+        #self.clean(target_file_path)
+
         # sourcery skip: merge-dict-assign, simplify-dictionary-update
         logger.info(
             f"Write statistics dict for OSP simulation case '{self.name}' in case folder: {self.case_folder}"
@@ -383,8 +361,6 @@ class OspSimulationCase():
             'names': list(self.system_structure.variables.keys()),
         }
 
-        target_file_path = Path.cwd() / 'statisticsDict'
-
         DictWriter.write(statistics_dict, target_file_path, mode='a')
 
     def write_watch_dict(self):
@@ -395,6 +371,9 @@ class OspSimulationCase():
             - convergence plotting
             - extracting the results
         """
+        target_file_path = Path.cwd() / 'watchDict'
+        self.clean(target_file_path)
+
         logger.info(
             f"Write watch dict for OSP simulation case '{self.name}' in case folder: {self.case_folder}"
         )
@@ -419,7 +398,6 @@ class OspSimulationCase():
 
             watch_dict['datasources'].update({component_name: {'columns': columns}})
 
-        target_file_path = Path.cwd() / 'watchDict'
         DictWriter.write(watch_dict, target_file_path, mode='a')
 
         return
@@ -585,6 +563,10 @@ class OspSimulationCase():
     def _write_plot_config_json(self):
         """Writes the PlotConfig.json file, containing postprocessing information
         """
+
+        target_file_path = Path.cwd() / 'PlotConfig.json'
+        self.clean(target_file_path)
+
         temp_dict = {'plots': []}
         if 'plots' in self.case_dict['postProcessing'].keys():
             for plot in self.case_dict['postproc']['plots'].values():
@@ -608,7 +590,6 @@ class OspSimulationCase():
                     }
                 )
 
-            target_file_path = Path.cwd() / 'PlotConfig.json'
             DictWriter.write(temp_dict, target_file_path)
 
         return

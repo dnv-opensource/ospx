@@ -170,7 +170,6 @@ class Component():
         """
         osp_model_description_file = self.fmu.file.parent.absolute(
         ) / f'{self.name}_OspModelDescription.xml'
-
         self.clean(osp_model_description_file)
 
         osp_model_description = {}
