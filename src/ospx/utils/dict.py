@@ -1,13 +1,22 @@
 import re
 from collections import OrderedDict
-from typing import MutableMapping, Union
+from typing import List, MutableMapping, Union
 
 
 def find_key(dict: MutableMapping, pattern: str) -> Union[str, None]:
-    """Finds the first key name in dict that matches the given pattern
+    """Finds the first key in dict that matches the given pattern
     """
     try:
         return [k for k in dict.keys() if re.search(pattern, k)][0]
+    except Exception:
+        return None
+
+
+def find_keys(dict: MutableMapping, pattern: str) -> Union[List[str], None]:
+    """Finds all keys in dict that match the given pattern
+    """
+    try:
+        return [k for k in dict.keys() if re.search(pattern, k)]
     except Exception:
         return None
 
