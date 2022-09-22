@@ -15,12 +15,12 @@ systemStructure
             source
             {
                 component       Vessel;
-                connector       Vessel_ASVStates;
+                connector       Vessel_ASVStatesVSSL;
             }
             target
             {
                 component       LOSGuidance;
-                connector       LOSGuidance_ASVStates;
+                connector       LOSGuidance_ASVStatesLOSG;
             }
         }
     }
@@ -30,7 +30,7 @@ systemStructure
         {
             connectors
             {
-                Vessel_ASVStates
+                Vessel_ASVStatesVSSL
                 {
                     variableGroup        ASVStates;
                     type        output;
@@ -52,7 +52,7 @@ systemStructure
         {
             connectors
             {
-                LOSGuidance_ASVStates
+                LOSGuidance_ASVStatesLOSG
                 {
                     variableGroup        ASVStates;
                     type        input;
