@@ -372,7 +372,7 @@ class OspSimulationCase():
             - extracting the results
         """
         target_file_path = Path.cwd() / 'watchDict'
-        self.clean(target_file_path)
+        #self.clean(target_file_path)
 
         logger.info(
             f"Write watch dict for OSP simulation case '{self.name}' in case folder: {self.case_folder}"

@@ -32,7 +32,7 @@ systemStructure
             {
                 Vessel_ASVStatesVSSL
                 {
-                    variableGroup        ASVStates;
+                    variableGroup        ASVStatesVSSL;
                     type        output;
                 }
                 Vessel_UDesiredCAS
@@ -54,7 +54,7 @@ systemStructure
             {
                 LOSGuidance_ASVStatesLOSG
                 {
-                    variableGroup        ASVStates;
+                    variableGroup        ASVStatesLOSG;
                     type        input;
                 }
                 LOSGuidance_ULos

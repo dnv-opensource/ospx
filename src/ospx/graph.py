@@ -117,13 +117,16 @@ class Graph():
             )
 
         # Connections
-        for connection in case.system_structure.connections.values():
+
+        for key, connection in case.system_structure.connections.items():
+
             if not (connection.source_endpoint and connection.target_endpoint):
                 return
             if not (connection.source_endpoint.component and connection.target_endpoint.component):
                 return
             from_key: str = connection.source_endpoint.component.name
             to_key: str = connection.target_endpoint.component.name
+
             label = _get_edge_label(connection)
 
             if re.search(input_names, from_key, re.I):
@@ -167,6 +170,7 @@ class Graph():
             )
 
         # Create callGraph pdf
+
         try:
             cg.render(f"{case.simulation.name}_callGraph", format='pdf')
         except Exception:
@@ -191,7 +195,7 @@ def _get_node_label(component: Component) -> Tuple[str, str]:
 
 
 def _get_edge_label(connection: Connection) -> str:
-    return f"{connection.source_endpoint.component}-->{connection.target_endpoint.component}" if connection.is_valid else ''
+    return f"{connection.source_endpoint.variable_name}-->{connection.target_endpoint.variable_name}" if connection.is_valid else ''
 
 
 def _create_table(name, child=None) -> str:
