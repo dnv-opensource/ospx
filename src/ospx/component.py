@@ -176,7 +176,7 @@ class Component():
         """
         osp_model_description_file = self.fmu.file.parent.absolute(
         ) / f'{self.name}_OspModelDescription.xml'
-        self.clean(osp_model_description_file)
+        self._clean(osp_model_description_file)
 
         osp_model_description = {}
 
@@ -256,10 +256,11 @@ class Component():
 
         DictWriter.write(osp_model_description, osp_model_description_file)
 
-    def clean(self, file_to_remove: Union[str, Path]):
+    def _clean(self, file_to_remove: Union[str, Path]):
         """Clean up single file
         """
-        file_to_remove = Path.cwd() / file_to_remove
+        if isinstance(file_to_remove, str):
+            file_to_remove = Path.cwd() / file_to_remove
         file_to_remove.unlink(missing_ok=True)
 
 

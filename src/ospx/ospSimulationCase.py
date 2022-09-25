@@ -73,10 +73,11 @@ class OspSimulationCase():
         # Make sure all components have a step size defined
         self._check_components_step_size()
 
-    def clean(self, file_to_remove: Union[str, Path]):
+    def _clean(self, file_to_remove: Union[str, Path]):
         """Clean up single file
         """
-        file_to_remove = Path.cwd() / file_to_remove
+        if isinstance(file_to_remove, str):
+            file_to_remove = self.case_folder / file_to_remove
         file_to_remove.unlink(missing_ok=True)
 
     def write_osp_model_description_xmls(self):
@@ -97,7 +98,8 @@ class OspSimulationCase():
         """
         # sourcery skip: class-extract-method, merge-dict-assign
 
-        self.clean('OspSystemStructure.xml')
+        osp_system_structure_file = self.case_folder / 'OspSystemStructure.xml'
+        self._clean(osp_system_structure_file)
 
         logger.info(
             f"Write OspSystemStructure.xml file for OSP simulation case '{self.name}' in case folder: {self.case_folder}"
@@ -206,9 +208,8 @@ class OspSimulationCase():
         osp_system_structure['Connections'] = connections
 
         # Write OspSystemStructure.xml
-        target_file = self.case_folder / 'OspSystemStructure.xml'
         formatter = XmlFormatter()
-        DictWriter.write(osp_system_structure, target_file, formatter=formatter)
+        DictWriter.write(osp_system_structure, osp_system_structure_file, formatter=formatter)
 
         self._correct_wrong_xml_namespace(
             'OspSystemStructure.xml',
@@ -221,7 +222,9 @@ class OspSimulationCase():
     def write_system_structure_ssd(self):
         """Writes the SystemStructure.ssd file
         """
-        self.clean('SystemStructure.ssd')
+
+        system_structure_ssd_file = self.case_folder / 'SystemStructure.ssd'
+        self._clean(system_structure_ssd_file)
 
         # sourcery skip: merge-dict-assign
         logger.info(
@@ -306,9 +309,8 @@ class OspSimulationCase():
         system_structure_ssd['System']['Connections'] = connections
 
         # Write SystemStructure.ssd
-        target_file_path = Path.cwd() / 'SystemStructure.ssd'
         formatter = XmlFormatter(omit_prefix=False)
-        DictWriter.write(system_structure_ssd, target_file_path, formatter=formatter)
+        DictWriter.write(system_structure_ssd, system_structure_ssd_file, formatter=formatter)
 
         return
 
@@ -317,8 +319,8 @@ class OspSimulationCase():
 
         I.e. for documentation or further statistical analysis.
         """
-        target_file_path = Path.cwd() / 'statisticsDict'
-        # self.clean(target_file_path)
+        statistics_dict_file = self.case_folder / 'statisticsDict'
+        # self._clean(statistics_dict_file)
 
         # sourcery skip: merge-dict-assign, simplify-dictionary-update
         logger.info(
@@ -367,7 +369,7 @@ class OspSimulationCase():
             'names': list(self.system_structure.variables.keys()),
         }
 
-        DictWriter.write(statistics_dict, target_file_path, mode='a')
+        DictWriter.write(statistics_dict, statistics_dict_file, mode='a')
 
     def write_watch_dict(self):
         """Writes a case-specific watch dict file
@@ -377,8 +379,8 @@ class OspSimulationCase():
             - convergence plotting
             - extracting the results
         """
-        target_file_path = Path.cwd() / 'watchDict'
-        # self.clean(target_file_path)
+        watch_dict_file = self.case_folder / 'watchDict'
+        # self._clean(watch_dict_file)
 
         logger.info(
             f"Write watch dict for OSP simulation case '{self.name}' in case folder: {self.case_folder}"
@@ -404,7 +406,7 @@ class OspSimulationCase():
 
             watch_dict['datasources'].update({component_name: {'columns': columns}})
 
-        DictWriter.write(watch_dict, target_file_path, mode='a')
+        DictWriter.write(watch_dict, watch_dict_file, mode='a')
 
         return
 
@@ -570,11 +572,11 @@ class OspSimulationCase():
         """Writes the PlotConfig.json file, containing postprocessing information
         """
 
-        target_file_path = Path.cwd() / 'PlotConfig.json'
-        self.clean(target_file_path)
+        plot_config_file = self.case_folder / 'PlotConfig.json'
+        self._clean(plot_config_file)
 
-        temp_dict = {'plots': []}
         if 'plots' in self.case_dict['postProcessing'].keys():
+            temp_dict = {'plots': []}
             for plot in self.case_dict['postproc']['plots'].values():
                 variables: list[dict] = []
                 for component_name, component in self.system_structure.components.items():
@@ -596,7 +598,7 @@ class OspSimulationCase():
                     }
                 )
 
-            DictWriter.write(temp_dict, target_file_path)
+            DictWriter.write(temp_dict, plot_config_file)
 
         return
 
