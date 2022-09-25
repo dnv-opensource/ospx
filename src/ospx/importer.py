@@ -136,7 +136,11 @@ class OspSystemStructureImporter():
                     if component_name in temp_connector_key:
                         component_connectors |= connector
                 # FMU
-                fmu_name = simulator_properties['_attributes']['source']
+                fmu_name: str = simulator_properties['_attributes']['source']
+                # Step Size
+                step_size: Union[float, None] = None
+                if 'stepSize' in simulator_properties['_attributes']:
+                    step_size = float(simulator_properties['_attributes']['stepSize'])
                 # Initial values
                 component_initial_values: dict[str, dict] = {}
                 if initial_values_key := find_key(simulator_properties, 'InitialValues$'):
@@ -150,10 +154,12 @@ class OspSystemStructureImporter():
                                 value = initial_value[type_key]['_attributes']['value']
                                 component_initial_values |= {referenced_name: {'start': value}}
                 # Assemble component
-                component: dict[str, dict] = {
+                component: dict[str, Union[dict, str, float]] = {
                     'connectors': component_connectors,
                     'fmu': fmu_name,
                 }
+                if step_size:
+                    component['stepSize'] = step_size
                 if component_initial_values:
                     component['initialize'] = component_initial_values
                 # Save in components dict

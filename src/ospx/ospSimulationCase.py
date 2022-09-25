@@ -124,13 +124,19 @@ class OspSimulationCase():
         simulators: dict = {}
         for index, (_, component) in enumerate(self.system_structure.components.items()):
             simulator_key = f'{index:06d}_Simulator'
-            simulator_properties = {
+            simulator_properties: dict[str, dict[str, Union[str, float, dict]]] = {
                 '_attributes': {
                     'name': component.name,
                     'source': component.fmu.file.name,
-                    'stepSize': component.step_size
                 }
             }
+            if component.step_size:
+                write_step_size_to_osp_system_structure: bool = True
+                if component.fmu.default_experiment and component.fmu.default_experiment.step_size and component.step_size == component.fmu.default_experiment.step_size:
+                    write_step_size_to_osp_system_structure = False
+                if write_step_size_to_osp_system_structure:
+                    simulator_properties['_attributes']['stepSize'] = component.step_size
+
             if component.initial_values:
                 simulator_properties['InitialValues'] = {}
                 for index, (_, variable) in enumerate(component.initial_values.items()):
