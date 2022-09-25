@@ -139,8 +139,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-
-#zip
+# zip
 *.zip
 *.ZIP
 *.tar.gz
@@ -149,3 +148,6 @@ dmypy.json
 *.tbz
 *.7z
 *.rar
+
+# modules
+modules.txt
