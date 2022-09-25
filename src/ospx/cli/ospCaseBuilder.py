@@ -157,7 +157,6 @@ def _clean():
     """Cleans up the case folder and deletes any existing ospx files, e.g. modelDescription.xml .fmu .csv etc.
     """
     import re
-    from glob import glob
     from shutil import rmtree
 
     case_folder = Path.cwd()
@@ -171,7 +170,7 @@ def _clean():
         '*.fmu',
         '*callGraph',
         '*.pdf',
-        '*.png',                   # 'protect results/*.png'
+        '*.png',                    # 'protect results/*.png'
         'watchDict',
         'statisticsDict',           # 'results',
         'zip',
@@ -186,12 +185,12 @@ def _clean():
 
         for file in files:
             if not re.search(except_pattern, str(file)):
-                #logger.info("%s in list to clean" % file)
+                # logger.info("%s in list to clean" % file)
                 if file.is_file():
-                    #logger.info("file %s cleaned" % file)
+                    # logger.info("file %s cleaned" % file)
                     file.unlink(missing_ok=True)
                 else:
-                    #logger.info("dir %s removed" % file)
+                    # logger.info("dir %s removed" % file)
                     rmtree(file)
     return
 
