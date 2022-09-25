@@ -47,6 +47,7 @@ systemStructure
                 }
             }
             fmu               Vessel.fmu;
+            stepSize          1.;
         }
         LOSGuidance
         {

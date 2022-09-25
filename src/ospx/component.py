@@ -48,6 +48,7 @@ class Component():
         self._variables: dict[str, ScalarVariable]
 
         self._read_fmu(properties)
+        self._read_step_size(properties)
 
         self._read_generate_proxy(properties)
         self._read_remote_access(properties)
@@ -75,6 +76,11 @@ class Component():
         self.fmu = FMU(fmu_file)
         if self.fmu.default_experiment and not self.step_size:
             self.step_size = self.fmu.default_experiment.step_size
+
+    def _read_step_size(self, properties: MutableMapping):
+        if 'stepSize' not in properties:
+            return
+        self.step_size = float(properties['stepSize'])
 
     def _read_initialize(self, properties: MutableMapping):
         if 'initialize' not in properties:
