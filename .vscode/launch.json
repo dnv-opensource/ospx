@@ -118,7 +118,7 @@
             "name": "ospCaseBuilder variable_group --inspect",
             "type": "python",
             "request": "launch",
-            "cwd": "${workspaceFolder}\\tests\\ospx_variable_group",
+            "cwd": "${workspaceFolder}\\tests\\variable_groups",
             "program": "${workspaceFolder}\\src\\ospx\\cli\\ospCaseBuilder.py",
             "args": [
                 "caseDict",
@@ -133,7 +133,7 @@
             "name": "ospCaseBuilder variable_group",
             "type": "python",
             "request": "launch",
-            "cwd": "${workspaceFolder}\\tests\\ospx_variable_group",
+            "cwd": "${workspaceFolder}\\tests\\variable_groups",
             "program": "${workspaceFolder}\\src\\ospx\\cli\\ospCaseBuilder.py",
             "args": [
                 "caseDict",
@@ -147,7 +147,7 @@
             "name": "importSystemStructure variable_group OspSystemStructure.xml",
             "type": "python",
             "request": "launch",
-            "cwd": "${workspaceFolder}\\tests\\ospx_variable_group",
+            "cwd": "${workspaceFolder}\\tests\\variable_groups",
             "program": "${workspaceFolder}\\src\\ospx\\cli\\importSystemStructure.py",
             "args": [
                 "OspSystemStructure.xml",
