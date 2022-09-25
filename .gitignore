@@ -139,9 +139,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-#FMU
-*.fmu
-*.FMU
 
 #zip
 *.zip
@@ -152,4 +149,3 @@ dmypy.json
 *.tbz
 *.7z
 *.rar
-
