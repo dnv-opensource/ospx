@@ -35,6 +35,7 @@ A caseDict file contains
 | &numsp;&numsp;&numsp;&numsp;&numsp;variability    | string    | variability of the variable. Choices: {fixed, calculated, tunable} |
 | &numsp;&numsp;&numsp;&numsp;&numsp;start          | float     | initial value the variable shall be set to. |
 | &numsp;&numsp;&numsp;fmu                          | string    | relative path to the location of the source FMU (relative to libSource) |
+| &numsp;&numsp;&numsp;stepSize                     | string    | optional step size for this component. Only necessary in case the step size shall deviate from the default step size defined in the FMU's ModelDescription.xml  |
 | &numsp;connections                                | dict      | itemization of connections |
 | &numsp;&numsp;\<CONNECTION>                       | dict      | speaking name of the connection |
 | &numsp;&numsp;&numsp;source                       | dict      | source endpoint of \<CONNECTION> |
