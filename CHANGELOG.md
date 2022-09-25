@@ -5,7 +5,23 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 
 ## [Unreleased]
 
-* -
+### Changed
+
+* OSPModelDescription.xml: <br>
+  The handling of OSPModelDescription.xml files has changed:
+    * no OSPModelDescription.xml files get written by default
+    * existing OSPModelDescription.xml files will be kept
+
+### Added
+
+* OSPSystemStructure.xml:
+    * Added support for VariableGroups (as defined in OSP-IS). <br>
+      Accordingly, importSystemStructure is now also able to import OSPSystemStructure.xml files that use Connections of OSP-IS type  'VariableGroupConnection'.
+
+    * Added support for <Simulator> stepSize attribute: <br>
+      If a \<Simulator\> element in OSPSystemStructure.xml explicitely defines the stepSize attribute, and if the value given for a \<Simulator\>'s stepSize inside OSPSystemStructure.xml differs from the default stepSize defined in the FMU's ModelDescription.xml, then the stepSize defined in OSPSystemStructure.xml prevails and will also explicitely be included in the OSPSystemStructure.xml file written by ospCaseBuilder.
+
+
 
 ## [0.1.2] - 2022-08-19
 
