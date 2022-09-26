@@ -5,7 +5,7 @@ filetype dictionary; coding utf-8; version 0.1; local --; purpose --;
 
 _environment
 {
-    libSource                 C:\Users\FRALUM\Documents\SystemSimulation\repo\dnv-opensource\ospx\tests\library\house;
+    libSource                 ../library/house;
 }
 systemStructure
 {
