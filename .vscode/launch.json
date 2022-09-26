@@ -101,6 +101,21 @@
             }
         },
         {
+            "name": "watchCosim test_caseDict",
+            "type": "python",
+            "request": "launch",
+            "cwd": "${workspaceFolder}\\tests\\test_dicts",
+            "program": "${workspaceFolder}\\src\\ospx\\watch\\cli\\watchCosim.py",
+            "args": [
+                "watchDict",
+                "-pd",
+            ],
+            "console": "integratedTerminal",
+            "autoReload": {
+                "enable": true
+            }
+        },
+        {
             "name": "ospCaseBuilder test_caseDict_minimal_set_int_for_real",
             "type": "python",
             "request": "launch",
@@ -108,6 +123,20 @@
             "program": "${workspaceFolder}\\src\\ospx\\cli\\ospCaseBuilder.py",
             "args": [
                 "test_caseDict_minimal_set_int_for_real",
+            ],
+            "console": "integratedTerminal",
+            "autoReload": {
+                "enable": true
+            }
+        },
+        {
+            "name": "ospCaseBuilder house",
+            "type": "python",
+            "request": "launch",
+            "cwd": "${workspaceFolder}\\tests\\house",
+            "program": "${workspaceFolder}\\src\\ospx\\cli\\ospCaseBuilder.py",
+            "args": [
+                "caseDict",
             ],
             "console": "integratedTerminal",
             "autoReload": {
