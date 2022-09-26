@@ -230,9 +230,10 @@ class CosimWatcher:
                         columns = data_source_properties['columns']
                     else:
                         # if columns were not explicitely specified in watch dict:
-                        # Read all columns except StepCount and settings.
+                        # Read all columns except settings.
                         for index, col_name in enumerate(data_header):
-                            if not re.match(r'^(StepCount|settings)', col_name):
+                            # if not re.match(r'^(StepCount|settings)', col_name):
+                            if not re.match(r'^(settings)', col_name):
                                 columns.append(index)
 
                     _column_names = [data_header[column] for column in columns]
