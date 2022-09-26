@@ -1,7 +1,7 @@
 import logging
 import re
 from pathlib import Path
-from typing import MutableSequence
+from typing import List, MutableSequence
 
 import matplotlib
 import matplotlib.axes
@@ -121,9 +121,10 @@ class CosimWatcher:
                 current_key = list(df)[index + 1
                                        ]            # 0 is Time, StepCount was removed for simplification
 
-                subplot: matplotlib.axes.SubplotBase = self.figure.add_subplot(
-                    self.maxRow, self.number_of_columns, index + 1
-                )
+                subplot: Union[matplotlib.axes.Axes,
+                               matplotlib.axes.SubplotBase] = self.figure.add_subplot(
+                                   self.maxRow, self.number_of_columns, index + 1
+                               )
                 subplot.plot(
                     'Time',
                     current_key,
@@ -136,8 +137,12 @@ class CosimWatcher:
                 subplot.xaxis.set_tick_params(labelsize=8)
                 subplot.yaxis.set_tick_params(labelsize=8)
                 subplot.legend(fontsize=8)
-
-                axs.append(subplot)
+                if isinstance(subplot, matplotlib.axes.SubplotBase):
+                    axs.append(subplot)
+                else:
+                    raise TypeError(
+                        f'CosimWatcher.plot(): subplot is of type {type(subplot)}. Expected type was matplotlib.axes.SubplotBase .'
+                    )
 
             self.figure.suptitle(self.title)
 
@@ -197,48 +202,54 @@ class CosimWatcher:
         """
 
         pattern = re.compile(r'(^#|\s+\[.*?\]$)')
-        #pattern = re.compile(r'(^#|\s+\[[\w\d\s]+\]$)')
+        # pattern = re.compile(r'(^#|\s+\[[\w\d\s]+\]$)')
 
         for data_source_name, data_source_properties in self.data_sources.items():                                    # loop over all data sources
             for csv_file_name in self.csv_file_names:
-                if re.match(data_source_name, csv_file_name):       # find the correct csv file
+                if re.match(data_source_name, csv_file_name):                               # find the correct csv file
                     data_source_properties.update({'csvFile': csv_file_name})
                     with open(csv_file_name, 'r') as f:
                         data_header = f.readline().strip().split(
                             self.delimiter
-                        )                                           # extract the header line to find the variable names
-                        if 'columns' in data_source_properties:     # if key columns was given
-                            colNames = [data_header[x] for x in data_source_properties['columns']]
-                            data_source_properties.update({'colNames': colNames})
+                        )                                                                   # extract the header line to find the variable names
+                        if 'columns' in data_source_properties:                             # if key columns was given
+                            _column_names = [
+                                data_header[x] for x in data_source_properties['columns']
+                            ]
+                            data_source_properties.update({'colNames': _column_names})
 
-                            displayColNames = [
+                            _display_column_names = [
                                 pattern.sub('', col_name)
                                 for col_name in data_source_properties['colNames']
                             ]
-                            displayColNames = ['Time', 'StepCount'] + [
+                            _display_column_names = ['Time', 'StepCount'] + [
                                 data_source_name + '|' + col_name
-                                for col_name in displayColNames
+                                for col_name in _display_column_names
                                 if col_name not in ['Time', 'StepCount']
                             ]
-                            data_source_properties.update({'displayColNames': displayColNames})
+                            data_source_properties.update(
+                                {'displayColNames': _display_column_names}
+                            )
 
                         else:                                                           # if no columns is given, extract all relevant columns avoiding settings. and StepCount
-                            colNames = [
+                            _column_names = [
                                 col_name for col_name in data_header
                                 if not re.match(r'^(StepCount|settings)', col_name)
                             ]
-                            data_source_properties.update({'colNames': colNames})
+                            data_source_properties.update({'colNames': _column_names})
 
-                            displayColNames = [
+                            _display_column_names = [
                                 pattern.sub('', col_name)
                                 for col_name in data_source_properties['colNames']
                             ]
-                            displayColNames = ['Time', 'StepCount'] + [
+                            _display_column_names = ['Time', 'StepCount'] + [
                                 data_source_name + '|' + col_name
-                                for col_name in displayColNames
+                                for col_name in _display_column_names
                                 if col_name not in ['Time', 'StepCount']
                             ]
-                            data_source_properties.update({'displayColNames': displayColNames})
+                            data_source_properties.update(
+                                {'displayColNames': _display_column_names}
+                            )
 
                             data_source_properties.update(
                                 {'columns': list(range(len(data_source_properties['colNames'])))}
@@ -290,10 +301,9 @@ class CosimWatcher:
 
         df_all_data_sources = pd.DataFrame()    # initialize empty df
 
-        for index, (data_source_name,
-                    data_source_properties) in enumerate(self.data_sources.items()):
-            # create the mapping dict
-            map = dict(
+        for data_source_name, data_source_properties in self.data_sources.items():
+            # mapping dict for display column names
+            column_name_to_display_column_name_mapping = dict(
                 zip(data_source_properties['colNames'], data_source_properties['displayColNames'])
             )
             '''it could be so easy
@@ -301,22 +311,21 @@ class CosimWatcher:
             could be also required here to specify an abscissa differing from column 1 or 2
             but, anyways this is only applicable to cosim
             '''
-            #for remove_item in ['Time', 'StepCount']:
-            #    map.pop(remove_item, None)
+            # for remove_item in ['Time', 'StepCount']:
+            #    column_name_to_display_column_name_mapping.pop(remove_item, None)
 
-            if index == 0:                                          # first call, also include Time (and StepCount)
-                df_single_data_source = pd.read_csv(
-                    Path(data_source_properties['csvFile']),
-                    usecols=data_source_properties['colNames'],
-                )
-            else:
-                df_single_data_source = pd.read_csv(
-                    Path(data_source_properties['csvFile']),
-                                                                    #usecols = [col_name for col_name in data_source_properties['colNames'] if col_name not in ['Time', 'StepCount']],
-                    usecols=data_source_properties['colNames'],
-                )
+            _column_names: List[str] = data_source_properties['colNames']
+            # Alternative value for _column_names which excludes 'Time' and 'StepCount':
+            # _column_names = [col_name for col_name in data_source_properties['colNames'] if col_name not in ['Time', 'StepCount']],
 
-            df_single_data_source = df_single_data_source.rename(columns=map)   # rename
+            df_single_data_source = pd.read_csv(
+                Path(data_source_properties['csvFile']),
+                usecols=_column_names,
+            )
+
+            df_single_data_source = df_single_data_source.rename(
+                columns=column_name_to_display_column_name_mapping
+            )
 
             if df_all_data_sources.empty:
                 # first df inherit all columns from single df
@@ -335,14 +344,14 @@ class CosimWatcher:
                 # interpolating non-matching time data
                 # otherwise should component-wise dataframes do a better job
                 # bypass StepCound yielding in big holes, not plotted by mpl.
-                #df_all_data_sources = pd.merge_asof(
+                # df_all_data_sources = pd.merge_asof(
                 #    df_all_data_sources,
                 #    df_single_data_source,
                 #    on = 'Time',
                 #    by = 'StepCount',
                 #    direction = 'nearest',
                 #    #tolerance = pd.Timedelta('1ms')
-                #)
+                # )
 
         # find latest common start point for skip and latest
         # consider skipping negative values due to wrong inputs
@@ -367,5 +376,5 @@ class CosimWatcher:
         # Opening and closing of window may be deprecated when a better solution is found
         mgr = plt.get_current_fig_manager()
         mgr.full_screen_toggle()
-        self.screenSize = (mgr.canvas.width(), mgr.canvas.height())
-        mgr.window.close()
+        self.screenSize = (mgr.canvas.width(), mgr.canvas.height())     # type: ignore
+        mgr.window.close()                                              # type: ignore
