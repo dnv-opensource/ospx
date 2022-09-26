@@ -157,5 +157,33 @@
                 "enable": true
             }
         },
+        {
+            "name": "importSystemStructure gunnerus-dp/control-system OspSystemStructure.xml",
+            "type": "python",
+            "request": "launch",
+            "cwd": "${workspaceFolder}\\tests\\gunnerus-dp",
+            "program": "${workspaceFolder}\\src\\ospx\\cli\\importSystemStructure.py",
+            "args": [
+                "./config/control-system/OspSystemStructure.xml",
+            ],
+            "console": "integratedTerminal",
+            "autoReload": {
+                "enable": true
+            }
+        },
+        {
+            "name": "ospCaseBuilder gunnerus-dp",
+            "type": "python",
+            "request": "launch",
+            "cwd": "${workspaceFolder}\\tests\\gunnerus-dp",
+            "program": "${workspaceFolder}\\src\\ospx\\cli\\ospCaseBuilder.py",
+            "args": [
+                "caseDict",
+            ],
+            "console": "integratedTerminal",
+            "autoReload": {
+                "enable": true
+            }
+        },
     ]
 }
