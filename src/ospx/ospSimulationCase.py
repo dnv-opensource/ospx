@@ -399,9 +399,8 @@ class OspSimulationCase():
             no_of_connectors = len(component.connectors.keys())
 
             # @TODO: Time, StepCount, conn0, conn1, etc from modelDescription.xml ModelVariables
-            #        should match connectors in caseDict for respective model.Improvement needed.
+            #        should match connectors in caseDict for respective model. Improvement needed.
             #        FRALUM, 2021-xx-xx
-            # columns = [0, 1]+[x+2 for x in range(no_of_connectors)]
             columns = [0, 1] + [x + 2 for x in range(no_of_connectors)]     # f*** StepCount
 
             watch_dict['datasources'].update({component_name: {'columns': columns}})
