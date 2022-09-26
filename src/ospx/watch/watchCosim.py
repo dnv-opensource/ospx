@@ -171,15 +171,15 @@ class CosimWatcher:
         df = self._read_csv_files_into_dataframe()
 
         result_dict = {}
-        for item in list(df):
-            arr = df[item].to_numpy()
-            result_dict[item] = {
-                'latestValue': arr[-1],
-                'firstValue': arr[0],
-                'mean': np.mean(arr),
-                'stdev': np.std(arr),
-                'min': np.min(arr),
-                'max': np.max(arr)
+        for header in list(df):
+            values = df[header].dropna().to_numpy()
+            result_dict[header] = {
+                'latestValue': values[-1],
+                'firstValue': values[0],
+                'mean': np.mean(values),
+                'stdev': np.std(values),
+                'min': np.min(values),
+                'max': np.max(values)
             }
 
         # debug
@@ -206,61 +206,51 @@ class CosimWatcher:
 
         for data_source_name, data_source_properties in self.data_sources.items():                                    # loop over all data sources
             for csv_file_name in self.csv_file_names:
-                if re.match(data_source_name, csv_file_name):                               # find the correct csv file
+                if re.match(data_source_name, csv_file_name):   # find the correct csv file
                     data_source_properties.update({'csvFile': csv_file_name})
+
+                    # extract the header row from the csv file to determine the variable names
+                    data_header: List[str] = []
                     with open(csv_file_name, 'r') as f:
-                        data_header = f.readline().strip().split(
-                            self.delimiter
-                        )                                                                   # extract the header line to find the variable names
-                        if 'columns' in data_source_properties:                             # if key columns was given
-                            _column_names = [
-                                data_header[x] for x in data_source_properties['columns']
-                            ]
-                            data_source_properties.update({'colNames': _column_names})
+                        data_header = f.readline().strip().split(self.delimiter)
+                    if not data_header:
+                        continue
+                    columns: List[int] = []
+                    read_only_shortlisted_columns: bool = False
+                    # @TODO: The following line is commented out, currently,
+                    #        as the column indices shortlisted in watch dict
+                    #        are incorrect if variableGroups are used in connectors.
+                    #        Once this issue is solved and shortlisted columns are correctly written to the watch dict again,
+                    #        the following line can be activated and this TODO comment be deleted.
+                    #        CLAROS, 2022-09-26
+                    # read_only_shortlisted_columns = True if 'columns' in data_source_properties else False
+                    if read_only_shortlisted_columns:
+                        # if columns were explicitely specified (shortlisted) in watch dict:
+                        # Read only shortlisted columns.
+                        columns = data_source_properties['columns']
+                    else:
+                        # if columns were not explicitely specified in watch dict:
+                        # Read all columns except StepCount and settings.
+                        for index, col_name in enumerate(data_header):
+                            if not re.match(r'^(StepCount|settings)', col_name):
+                                columns.append(index)
 
-                            _display_column_names = [
-                                pattern.sub('', col_name)
-                                for col_name in data_source_properties['colNames']
-                            ]
-                            _display_column_names = ['Time', 'StepCount'] + [
-                                data_source_name + '|' + col_name
-                                for col_name in _display_column_names
-                                if col_name not in ['Time', 'StepCount']
-                            ]
-                            data_source_properties.update(
-                                {'displayColNames': _display_column_names}
-                            )
+                    _column_names = [data_header[column] for column in columns]
+                    data_source_properties.update({'colNames': _column_names})
 
-                        else:                                                           # if no columns is given, extract all relevant columns avoiding settings. and StepCount
-                            _column_names = [
-                                col_name for col_name in data_header
-                                if not re.match(r'^(StepCount|settings)', col_name)
-                            ]
-                            data_source_properties.update({'colNames': _column_names})
+                    _display_column_names = [
+                        pattern.sub('', col_name)
+                        for col_name in data_source_properties['colNames']
+                    ]
+                    _display_column_names = ['Time', 'StepCount'] + [
+                        data_source_name + '|' + col_name
+                        for col_name in _display_column_names
+                        if col_name not in ['Time', 'StepCount']
+                    ]
+                    data_source_properties.update({'displayColNames': _display_column_names})
 
-                            _display_column_names = [
-                                pattern.sub('', col_name)
-                                for col_name in data_source_properties['colNames']
-                            ]
-                            _display_column_names = ['Time', 'StepCount'] + [
-                                data_source_name + '|' + col_name
-                                for col_name in _display_column_names
-                                if col_name not in ['Time', 'StepCount']
-                            ]
-                            data_source_properties.update(
-                                {'displayColNames': _display_column_names}
-                            )
-
-                            data_source_properties.update(
-                                {'columns': list(range(len(data_source_properties['colNames'])))}
-                            )
-
-                    data_source_properties.update(
-                        {'xColumn': data_source_properties['columns'][0]}
-                    )
-                    data_source_properties.update(
-                        {'yColumns': data_source_properties['columns'][1:]}
-                    )
+                    data_source_properties.update({'xColumn': columns[0]})
+                    data_source_properties.update({'yColumns': columns[1:]})
 
     def _initialize_plot(self):
         """Initializes the plot.
@@ -335,7 +325,8 @@ class CosimWatcher:
                 # ignoring index
                 # (after setting individual time steps for each individual component)
 
-                # df_all_data_sources = pd.concat([df_all_data_sources, df_single_data_source], axis=1)   # concatenate column-wise
+                # concatenate column-wise
+                # df_all_data_sources = pd.concat([df_all_data_sources, df_single_data_source], axis=1)
 
                 # df_all_data_sources = pd.concat([df_all_data_sources, df_single_data_source], ignore_index=True)
                 df_all_data_sources = pd.concat([df_all_data_sources, df_single_data_source])
