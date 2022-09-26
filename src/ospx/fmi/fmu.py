@@ -180,18 +180,20 @@ class FMU():
         default_experiment_key = find_key(self.model_description, 'DefaultExperiment$')
         if not default_experiment_key:
             return None
+        default_experiment_properties = self.model_description[default_experiment_key]
+        if not default_experiment_properties:
+            return None
         default_experiment = Experiment()
-        if '_attributes' in self.model_description[default_experiment_key]:
-            default_experiment_properties = self.model_description[default_experiment_key][
-                '_attributes']
-            if 'startTime' in default_experiment_properties:
-                default_experiment.start_time = default_experiment_properties['startTime']
-            if 'stopTime' in default_experiment_properties:
-                default_experiment.stop_time = default_experiment_properties['stopTime']
-            if 'tolerance' in default_experiment_properties:
-                default_experiment.tolerance = default_experiment_properties['tolerance']
-            if 'stepSize' in default_experiment_properties:
-                default_experiment.step_size = default_experiment_properties['stepSize']
+        if '_attributes' in default_experiment_properties:
+            default_experiment_attributes = default_experiment_properties['_attributes']
+            if 'startTime' in default_experiment_attributes:
+                default_experiment.start_time = default_experiment_attributes['startTime']
+            if 'stopTime' in default_experiment_attributes:
+                default_experiment.stop_time = default_experiment_attributes['stopTime']
+            if 'tolerance' in default_experiment_attributes:
+                default_experiment.tolerance = default_experiment_attributes['tolerance']
+            if 'stepSize' in default_experiment_attributes:
+                default_experiment.step_size = default_experiment_attributes['stepSize']
         return default_experiment
 
     def copy(self, new_name: str):
