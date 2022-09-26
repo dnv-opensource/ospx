@@ -3,8 +3,9 @@
 *.FMU
 
 *.csv
-./caseDict_imported_from_OspSystemStructure_xml
-./OspSystemStructure.xml
-./statisticsDict
-./SystemStructure.ssd
-./watchDict
+/caseDict
+/caseDict_imported_from_OspSystemStructure_xml
+/OspSystemStructure.xml
+/statisticsDict
+/SystemStructure.ssd
+/watchDict
