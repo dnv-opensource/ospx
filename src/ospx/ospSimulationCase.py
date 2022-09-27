@@ -513,11 +513,12 @@ class OspSimulationCase():
             )
             log_string += fmu_attributes
             if default_experiment_key := find_key(fmu.model_description, 'DefaultExperiment$'):
-                fmu_default_experiment = '\n'.join(
-                    f'\t{delim}{k}{delim}{v}' for k,
-                    v in fmu.model_description[default_experiment_key]['_attributes'].items()
-                )
-                log_string += f'\n{fmu_default_experiment}'
+                if fmu.model_description[default_experiment_key] is not None:
+                    fmu_default_experiment = '\n'.join(
+                        f'\t{delim}{k}{delim}{v}' for k,
+                        v in fmu.model_description[default_experiment_key]['_attributes'].items()
+                    )                    
+                    log_string += f'\n{fmu_default_experiment}'
         logger.info(log_string + '\n')
 
         log_string = (

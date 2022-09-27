@@ -184,7 +184,7 @@ class FMU():
         if not default_experiment_properties:
             return None
         default_experiment = Experiment()
-        if '_attributes' in default_experiment_properties:
+        if default_experiment_properties  and '_attributes' in default_experiment_properties:
             default_experiment_attributes = default_experiment_properties['_attributes']
             if 'startTime' in default_experiment_attributes:
                 default_experiment.start_time = default_experiment_attributes['startTime']
