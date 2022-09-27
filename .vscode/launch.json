@@ -243,5 +243,20 @@
                 "enable": true
             }
         },
+        {
+            "name": "ospCaseBuilder gunnerus-dp --inspect",
+            "type": "python",
+            "request": "launch",
+            "cwd": "${workspaceFolder}\\tests\\gunnerus-dp",
+            "program": "${workspaceFolder}\\src\\ospx\\cli\\ospCaseBuilder.py",
+            "args": [
+                "caseDict",
+                "--inspect",
+            ],
+            "console": "integratedTerminal",
+            "autoReload": {
+                "enable": true
+            }
+        },
     ]
 }
