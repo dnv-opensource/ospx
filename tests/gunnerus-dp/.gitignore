@@ -4,7 +4,7 @@
 
 *.csv
 /caseDict
-/caseDict_imported_from_OspSystemStructure_xml
+caseDict_imported_from_OspSystemStructure_xml
 /OspSystemStructure.xml
 /statisticsDict
 /SystemStructure.ssd
