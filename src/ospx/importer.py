@@ -1,5 +1,4 @@
 import logging
-from multiprocessing.sharedctypes import Value
 import os
 from pathlib import Path
 import re
@@ -19,7 +18,10 @@ logger = logging.getLogger(__name__)
 class OspSystemStructureImporter():
 
     @staticmethod
-    def import_system_structure(system_structure_file: Union[str, os.PathLike[str]], ):
+    def import_system_structure(
+        system_structure_file: Union[str, os.PathLike[str]],
+        enter_lib_source_as_relative_path: bool = False,
+    ):
 
         # Make sure source_file argument is of type Path. If not, cast it to Path type.
         system_structure_file = system_structure_file if isinstance(
@@ -260,7 +262,7 @@ class OspSystemStructureImporter():
                     'Absolute path for libSource will be used instead.'
                 )
                 logger.warning(msg)
-        if lib_source_folder_relative_to_target_folder:
+        if lib_source_folder_relative_to_target_folder and enter_lib_source_as_relative_path:
             environment['libSource'] = lib_source_folder_relative_to_target_folder
         else:
             environment['libSource'] = lib_source_folder
