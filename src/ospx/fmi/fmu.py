@@ -180,11 +180,9 @@ class FMU():
         default_experiment_key = find_key(self.model_description, 'DefaultExperiment$')
         if not default_experiment_key:
             return None
-        default_experiment_properties = self.model_description[default_experiment_key]
-        if not default_experiment_properties:
-            return None
         default_experiment = Experiment()
-        if default_experiment_properties  and '_attributes' in default_experiment_properties:
+        default_experiment_properties = self.model_description[default_experiment_key]
+        if '_attributes' in default_experiment_properties:
             default_experiment_attributes = default_experiment_properties['_attributes']
             if 'startTime' in default_experiment_attributes:
                 default_experiment.start_time = default_experiment_attributes['startTime']
