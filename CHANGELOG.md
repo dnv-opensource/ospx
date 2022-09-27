@@ -5,12 +5,20 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 
 ## [Unreleased]
 
+### Solved
+
+* importer.py: <br>
+  Relative paths to libSource and FMUs are now properly resolved, relative to the target directory the OSPSystemStructure.xml is imported into (= folder in which the caseDict is created).
+
 ### Changed
 
 * OSPModelDescription.xml: <br>
   The handling of OSPModelDescription.xml files has changed:
     * no OSPModelDescription.xml files get written by default
     * existing OSPModelDescription.xml files will be kept
+
+* dependencies:
+    * upgraded to dictIO >= 0.1.2
 
 ### Added
 
