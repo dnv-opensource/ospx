@@ -1,8 +1,9 @@
 import logging
+from multiprocessing.sharedctypes import Value
 import os
 from pathlib import Path
 import re
-from typing import Union
+from typing import List, Set, Tuple, Union
 
 from dictIO import DictReader, DictWriter
 from dictIO.utils.counter import BorgCounter
@@ -39,6 +40,9 @@ class OspSystemStructureImporter():
         counter = BorgCounter()
 
         source_dict = DictReader.read(system_structure_file, comments=False)
+        source_folder: Path = system_structure_file.resolve().parent.absolute()
+        lib_source_folder: Path = source_folder     # setting to source_folder acts as fallback / default
+        target_folder: Path = Path.cwd().absolute()
 
         # Main subdicts contained in systemStructure
         connections: dict[str, dict] = {}
@@ -127,6 +131,40 @@ class OspSystemStructureImporter():
 
         # Simulators (=Components)
         if simulators_key := find_key(source_dict, 'Simulators$'):
+            # Determine the highest common root folder among all FMU's.
+            # This will be used as libSource folder.
+            fmu_folders: List[Path] = []
+            for simulator_properties in source_dict[simulators_key].values():
+                fmu_name: str = simulator_properties['_attributes']['source']
+                fmu_file: Path = Path(fmu_name)
+                fmu_folder: Path
+                fmu_folder_as_parts: Set[str]
+                if fmu_file.is_absolute():
+                    fmu_folder = fmu_file.resolve().parent.absolute()
+                else:
+                    fmu_folder = (source_folder / fmu_file).resolve().parent.absolute()
+                fmu_folders.append(fmu_folder)
+            if len(fmu_folders) > 0:
+                if len(fmu_folders) == 1:
+                    lib_source_folder = fmu_folders[0]
+                else:
+                    # Find highest common root folder
+                    fmu_folders_as_parts: List[Tuple[str]] = [
+                        fmu_folder.parts for fmu_folder in fmu_folders
+                    ]
+                    fmu_folders_as_parts.sort(key=lambda x: len(x), reverse=True)
+                    longest_fmu_folder_as_parts: Tuple[str] = fmu_folders_as_parts[0]
+                    all_other_fmu_folders_as_parts: List[Tuple[str]] = fmu_folders_as_parts[1:]
+                    common_parts: Set[str] = set(longest_fmu_folder_as_parts).intersection(
+                        *[set(_tuple) for _tuple in all_other_fmu_folders_as_parts]
+                    )
+                    fmu_folders_as_parts.sort(key=lambda x: len(x), reverse=False)
+                    shortest_fmu_folder_as_parts: Tuple[str] = fmu_folders_as_parts[0]
+                    common_root_folder_as_parts: Tuple[str] = tuple(
+                        part for part in shortest_fmu_folder_as_parts if part in common_parts
+                    )
+                    lib_source_folder = Path(*common_root_folder_as_parts)
+
             for simulator_properties in source_dict[simulators_key].values():
                 # Component
                 component_name = simulator_properties['_attributes']['name']
@@ -137,6 +175,12 @@ class OspSystemStructureImporter():
                         component_connectors |= connector
                 # FMU
                 fmu_name: str = simulator_properties['_attributes']['source']
+                fmu_file: Path = Path(fmu_name)
+                if fmu_file.is_absolute():
+                    fmu_file = fmu_file.resolve()
+                else:
+                    fmu_file = (source_folder / fmu_file).resolve()
+                fmu_file_relative_to_lib_source: Path = fmu_file.relative_to(lib_source_folder)
                 # Step Size
                 step_size: Union[float, None] = None
                 if 'stepSize' in simulator_properties['_attributes']:
@@ -154,9 +198,9 @@ class OspSystemStructureImporter():
                                 value = initial_value[type_key]['_attributes']['value']
                                 component_initial_values |= {referenced_name: {'start': value}}
                 # Assemble component
-                component: dict[str, Union[dict, str, float]] = {
+                component: dict[str, Union[dict, str, float, Path]] = {
                     'connectors': component_connectors,
-                    'fmu': fmu_name,
+                    'fmu': fmu_file_relative_to_lib_source,
                 }
                 if step_size:
                     component['stepSize'] = step_size
@@ -189,11 +233,41 @@ class OspSystemStructureImporter():
             if 'Algorithm' in attributes:
                 simulation['algorithm'] = attributes['Algorithm']
 
+        # Environment
+        environment: dict[str, Path] = {}
+        lib_source_folder_relative_to_target_folder: Union[Path, None] = None
+        try:
+            lib_source_folder_relative_to_target_folder = Path(
+                os.path.relpath(lib_source_folder, target_folder)
+            )
+        except ValueError:
+            msg = (
+                'Resolving relative path from target folder to libSource folder failed using pathlib.\n'
+                'Next try will use os.path instead of pathlib.'
+            )
+            logger.debug(msg)
+            try:
+                lib_source_folder_relative_to_target_folder = Path(
+                    os.path.relpath(lib_source_folder, target_folder)
+                )
+                msg = (
+                    'Resolving relative path from target folder to libSource folder succeeded using os.path'
+                )
+                logger.debug(msg)
+            except Exception:
+                msg = (
+                    'Resolving relative path from target folder to libSource folder failed using both pathlib and os.path.\n'
+                    'Absolute path for libSource will be used instead.'
+                )
+                logger.warning(msg)
+        if lib_source_folder_relative_to_target_folder:
+            environment['libSource'] = lib_source_folder_relative_to_target_folder
+        else:
+            environment['libSource'] = lib_source_folder
+
         # Assemble case dict
         case_dict = {
-            '_environment': {
-                'libSource': '.',
-            },
+            '_environment': environment,
             'systemStructure': system_structure,
             'run': {
                 'simulation': simulation,

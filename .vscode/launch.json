@@ -202,13 +202,27 @@
             }
         },
         {
-            "name": "importSystemStructure gunnerus-dp/control-system OspSystemStructure.xml",
+            "name": "importSystemStructure gunnerus-dp/control-system OspSystemStructure.xml (cwd=gunnerus-dp)",
             "type": "python",
             "request": "launch",
             "cwd": "${workspaceFolder}\\tests\\gunnerus-dp",
             "program": "${workspaceFolder}\\src\\ospx\\cli\\importSystemStructure.py",
             "args": [
                 "./config/control-system/OspSystemStructure.xml",
+            ],
+            "console": "integratedTerminal",
+            "autoReload": {
+                "enable": true
+            }
+        },
+        {
+            "name": "importSystemStructure gunnerus-dp/control-system OspSystemStructure.xml (cwd=control-system)",
+            "type": "python",
+            "request": "launch",
+            "cwd": "${workspaceFolder}\\tests\\gunnerus-dp\\config\\control-system",
+            "program": "${workspaceFolder}\\src\\ospx\\cli\\importSystemStructure.py",
+            "args": [
+                "OspSystemStructure.xml",
             ],
             "console": "integratedTerminal",
             "autoReload": {
