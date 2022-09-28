@@ -9,6 +9,7 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 
 * importer.py: <br>
   Relative paths to libSource and FMUs are now properly resolved, relative to the target directory the OSPSystemStructure.xml is imported into (= folder in which the caseDict is created).
+  For libSource, by default the absolute path will be entered. This makes the caseDict insensitive when moved or copied into other (case) folders.
 
 ### Changed
 
@@ -23,8 +24,8 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 ### Added
 
 * OSPSystemStructure.xml:
-    * Added support for VariableGroups (as defined in OSP-IS). <br>
-      Accordingly, importSystemStructure is now also able to import OSPSystemStructure.xml files that use Connections of OSP-IS type  'VariableGroupConnection'.
+    * Added support for VariableGroups and VariableGroupConnections (as defined in OSP-IS). <br>
+      importSystemStructure is now also able to import OSPSystemStructure.xml files that use Connections of OSP-IS type  'VariableGroupConnection'.
 
     * Added support for <Simulator> stepSize attribute: <br>
       If a \<Simulator\> element in OSPSystemStructure.xml explicitely defines the stepSize attribute, and if the value given for a \<Simulator\>'s stepSize inside OSPSystemStructure.xml differs from the default stepSize defined in the FMU's ModelDescription.xml, then the stepSize defined in OSPSystemStructure.xml prevails and will also explicitely be included in the OSPSystemStructure.xml file written by ospCaseBuilder.
