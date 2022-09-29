@@ -16,4 +16,4 @@ pandas>=1.3.4
 graphviz>=0.17
 
 # ../dictIO
-dictIO>=0.1.2
+dictIO>=0.2.0
