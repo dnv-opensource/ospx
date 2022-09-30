@@ -25,13 +25,13 @@ class OspCaseBuilder():
         case_dict_file: Union[str, os.PathLike[str]],
         inspect: bool = False,
         graph: bool = False,
+        clean: bool = False,
     ):
         """Builds the OSP-specific configuration files needed to run an OSP (co-)simulation case.
 
         Builds following files:
             - OspSystemStructure.xml
             - SystemStructure.ssd
-            - <component.name>_OspModelDescription.xml (for all components defined in SystemStructure)
             - Plot.json
             - statisticsDict
             - watchDict
@@ -44,6 +44,8 @@ class OspCaseBuilder():
             inspect mode. If True, build() reads all properties from the FMUs but does not actually create the OSP case files, by default False
         graph : bool, optional
             if True, creates a dependency graph image using graphviz, by default False
+        clean : bool, optional
+            if True, cleans up case folder and deletes any formerly created ospx files, e.g. OspSystemStructure.xml .fmu .csv etc.
 
         Raises
         ------
@@ -57,6 +59,10 @@ class OspCaseBuilder():
         if not case_dict_file.exists():
             logger.error(f"OspCaseBuilder: File {case_dict_file} not found.")
             raise FileNotFoundError(case_dict_file)
+
+        if clean:
+            case_folder: Path = case_dict_file.resolve().parent
+            _clean(case_folder)
 
         logger.info(f'reading {case_dict_file}')    # 0
 
@@ -86,3 +92,43 @@ class OspCaseBuilder():
         case.write_watch_dict()
 
         return
+
+
+def _clean(case_folder: Path):
+    """Cleans up the case folder and deletes any existing ospx files, e.g. modelDescription.xml .fmu .csv etc.
+    """
+    import re
+    from shutil import rmtree
+
+    # specify all files to be deleted (or comment-in / comment-out as needed)
+    case_builder_result_files = [
+        '*.csv',
+        '*.out',
+        '*.xml',
+        '*.ssd',
+        '*.fmu',
+        '*callGraph',
+        '*.pdf',
+        '*.png',                    # 'protect results/*.png'
+        'watchDict',
+        'statisticsDict',           # 'results',
+        'zip',
+    ]
+    except_list = ['src', '^test_', '_OspModelDescription.xml']
+    except_pattern = '(' + '|'.join(except_list) + ')'
+
+    logger.info(f'Clean OSP simulation case folder: {case_folder}')
+
+    for pattern in case_builder_result_files:
+        files = list(case_folder.rglob(pattern))
+
+        for file in files:
+            if not re.search(except_pattern, str(file)):
+                # logger.info("%s in list to clean" % file)
+                if file.is_file():
+                    # logger.info("file %s cleaned" % file)
+                    file.unlink(missing_ok=True)
+                else:
+                    # logger.info("dir %s removed" % file)
+                    rmtree(file)
+    return
