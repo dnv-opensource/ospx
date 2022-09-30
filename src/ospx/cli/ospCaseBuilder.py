@@ -127,10 +127,6 @@ def main():
     graph: bool = args.graph
     clean: bool = args.clean
 
-    if clean:
-        _clean()
-        exit(0)
-
     case_dict_file: Path = Path(args.caseDict)
 
     # Check whether case dict file exists
@@ -143,6 +139,7 @@ def main():
         f"\t case_dict_file: \t\t{case_dict_file}\n"
         f"\t inspect: \t\t\t\t{inspect}\n"
         f"\t graph: \t\t\t{graph}\n"
+        f"\t clean: \t\t\t{clean}\n"
     )
 
     # Invoke API
@@ -150,49 +147,8 @@ def main():
         case_dict_file=case_dict_file,
         inspect=inspect,
         graph=graph,
+        clean=clean,
     )
-
-
-def _clean():
-    """Cleans up the case folder and deletes any existing ospx files, e.g. modelDescription.xml .fmu .csv etc.
-    """
-    import re
-    from shutil import rmtree
-
-    case_folder = Path.cwd()
-
-    # specify all files to be deleted (or comment-in / comment-out as needed)
-    case_builder_result_files = [
-        '*.csv',
-        '*.out',
-        '*.xml',
-        '*.ssd',
-        '*.fmu',
-        '*callGraph',
-        '*.pdf',
-        '*.png',                    # 'protect results/*.png'
-        'watchDict',
-        'statisticsDict',           # 'results',
-        'zip',
-    ]
-    except_list = ['src', '^test_', '_OspModelDescription.xml']
-    except_pattern = '(' + '|'.join(except_list) + ')'
-
-    logger.info(f'Clean OSP simulation case folder: {case_folder}')
-
-    for pattern in case_builder_result_files:
-        files = list(case_folder.rglob(pattern))
-
-        for file in files:
-            if not re.search(except_pattern, str(file)):
-                # logger.info("%s in list to clean" % file)
-                if file.is_file():
-                    # logger.info("file %s cleaned" % file)
-                    file.unlink(missing_ok=True)
-                else:
-                    # logger.info("dir %s removed" % file)
-                    rmtree(file)
-    return
 
 
 if __name__ == '__main__':
