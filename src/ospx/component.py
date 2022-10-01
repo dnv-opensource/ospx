@@ -69,12 +69,9 @@ class Component():
         # Read name of fmu file from component properties.
         # Note: Relative paths (if existing) are omitted from the fmu name, as it is by convention expected
         # that the fmu has already been copied from the library into the current working directory (=case folder)
-        fmu_file_name = Path(properties['fmu']).name
-        fmu_file = Path(fmu_file_name)
+        fmu_file = Path(properties['fmu'])
         if not fmu_file.exists():
-            logger.exception(
-                f'component {self.name}: referenced FMU file {fmu_file_name} not found.'
-            )
+            logger.exception(f'component {self.name}: referenced FMU file {fmu_file} not found.')
             raise FileNotFoundError(fmu_file)
         self.fmu = FMU(fmu_file)
         if self.fmu.default_experiment and not self.step_size:
