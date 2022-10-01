@@ -5,7 +5,16 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 
 ## [Unreleased]
 
+* --
+
+## [0.2.1] - 2022-10-01
+
 ### Changed
+
+* OspSimulationCase:<br>
+    Changed setup(): FMU files get no longer copied into the case folder by default but stay where they are (i.e. in the library).<br>
+    Only if an FMU is not reachable by a relative path from the case folder, the FMU will get copied into the case folder.
+
 
 * dependencies:
     * upgraded to dictIO >= 0.2.0
@@ -169,7 +178,8 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 * Added support for Python 3.10
 
 <!-- Markdown link & img dfn's -->
-[unreleased]: https://github.com/dnv-opensource/ospx/compare/v0.2.0...HEAD
+[unreleased]: https://github.com/dnv-opensource/ospx/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/dnv-opensource/ospx/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/dnv-opensource/ospx/compare/v0.1.1...v0.2.0
 [0.1.2]: https://github.com/dnv-opensource/ospx/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/dnv-opensource/ospx/compare/v0.1.0...v0.1.1
