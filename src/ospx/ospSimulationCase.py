@@ -45,25 +45,30 @@ class OspSimulationCase():
 
     def setup(self):
         """Sets up the OSP simulation case folder.
+
+        Raises
+        ------
+        ValueError
+            If an expected element in caseDict is missing
+        FileNotFoundError
+            If an FMU file referenced in caseDict does not exist
         """
         logger.info(f"Set up OSP simulation case '{self.name}' in case folder: {self.case_folder}")
 
         # Check whether all referenced FMUs actually exist
         self._check_all_fmus_exist()
 
-        # In case one or more FMUs are not accessible from the case folder via a relative path:
-        # Copy all FMUs to local case folder.
-        # (This is necessary because OspSystemStructure.xml allows only relative paths
-        #  as 'source' attribute in a <Simulator> element.)
-        if not self._check_all_fmus_are_accessible_via_relative_path():
-            self._copy_fmus_to_case_folder()
+        # Resolve all referenced FMUs and ensure they are accessible from the case folder via a relative path.
+        # This is necessary because OspSystemStructure.xml allows only relative paths
+        # as 'source' attribute in a <Simulator> element.
+        # If an FMU is not accessible via a relative path, it will be copied into the case folder.
+        self._resolve_all_fmus()
 
         # Read system structure
         if 'systemStructure' not in self.case_dict:
-            logger.error(
-                f"no 'systemStructure' section found in {self.case_dict.name}. Cannot set up OSP simulation case."
-            )
-            return
+            msg = f"no 'systemStructure' section found in {self.case_dict.name}. Cannot set up OSP simulation case."
+            logger.exception(msg)
+            raise ValueError(msg)
         self.system_structure = SystemStructure(self.case_dict['systemStructure'])
 
         # Make sure all components have a step size defined
@@ -115,10 +120,10 @@ class OspSimulationCase():
         simulators: dict = {}
         for index, (_, component) in enumerate(self.system_structure.components.items()):
             simulator_key = f'{index:06d}_Simulator'
-            simulator_properties: dict[str, dict[str, Union[str, float, dict]]] = {
+            simulator_properties: dict[str, dict[str, Union[str, float, dict, Path]]] = {
                 '_attributes': {
                     'name': component.name,
-                    'source': component.fmu.file.name,
+                    'source': relative_path(self.case_folder, component.fmu.file),
                 }
             }
             if component.step_size:
@@ -276,7 +281,7 @@ class OspSimulationCase():
             components[element_key] = {
                 '_attributes': {
                     'name': component_name,
-                    'source': component.fmu.file.name,
+                    'source': relative_path(self.case_folder, component.fmu.file),
                 },
                 'Connectors': connectors,
             }
@@ -358,7 +363,7 @@ class OspSimulationCase():
             'names': list(self.system_structure.variables.keys()),
         }
 
-        DictWriter.write(statistics_dict, statistics_dict_file, mode='a')
+        DictWriter.write(statistics_dict, statistics_dict_file, mode='w')
 
     def write_watch_dict(self):
         """Writes a case-specific watch dict file
@@ -394,7 +399,7 @@ class OspSimulationCase():
 
             watch_dict['datasources'].update({component_name: {'columns': columns}})
 
-        DictWriter.write(watch_dict, watch_dict_file, mode='a')
+        DictWriter.write(watch_dict, watch_dict_file, mode='w')
 
         return
 
@@ -463,44 +468,58 @@ class OspSimulationCase():
                 logger.exception(msg)
                 raise FileNotFoundError(fmu_file)
 
-    def _check_all_fmus_are_accessible_via_relative_path(self) -> bool:
-        """Checks whether all referenced FMUs are accessible from the case folder via a relative path.
+    def _resolve_all_fmus(self):
+        """Resolves all referenced FMUs and ensures they are accessible from the case folder via a relative path.
 
         This is necessary because OspSystemStructure.xml allows only relative paths
         as 'source' attribute in a <Simulator> element.
+        If an FMU is not accessible via a relative path, the FMU will be copied into the case folder.
+        Note: If multiple components reference the same FMU, these get copied only once.
         """
 
         logger.debug(
-            'Check whether all referenced FMUs are accessible from the case folder via a relative path.'
+            'Ensure all referenced FMUs are accessible from the case folder via a relative path.'
         )
-
-        all_fmus_are_accessible_via_relative_path: bool = True
         components = self.case_dict['systemStructure']['components']
         for component_name, component_properties in components.items():
             fmu_file = self._resolve_fmu_file(component_properties['fmu'])
             try:
                 relative_path(self.case_folder, fmu_file)
             except ValueError:
-                all_fmus_are_accessible_via_relative_path = False
-        return all_fmus_are_accessible_via_relative_path
+                fmu_file = self._copy_fmu_to_case_folder(fmu_file)
+            component_properties['fmu'] = fmu_file
 
-    def _copy_fmus_to_case_folder(self):
-        """Copies all referenced FMUs into the case folder.
+    def _copy_fmu_to_case_folder(self, fmu_file: Path) -> Path:
+        """Copies the passed in FMU file into the case folder.
 
-        Note: If multiple components reference the same FMU, these get copied only once.
+        If also an accompanying <fmu_name>_OspModelDescription.xml file exists in the same folder as the FMU file,
+        then also that OspModelDescription.xml file will be copied into the case folder.
+
+        Parameters
+        ----------
+        fmu_file : Path
+            FMU file to be copied into the case folder.
+
+        Returns
+        -------
+        Path
+            FMU file copied into the case folder.
         """
-        logger.info('Copy referenced FMUs into case folder.')
-        file_names_copied: list[str] = []
-        components = self.case_dict['systemStructure']['components']
-
-        for _, component_properties in components.items():
-            fmu_file = self._resolve_fmu_file(component_properties['fmu'])
-            if fmu_file.name in file_names_copied:
-                continue
-            fmu_file_in_case_folder = self.case_folder / fmu_file.name
+        fmu_file_in_case_folder: Path = (self.case_folder / fmu_file.name).resolve().absolute()
+        if not fmu_file_in_case_folder.exists():
             logger.info(f'Copy FMU {fmu_file} --> {fmu_file_in_case_folder}')
             copy2(fmu_file, self.case_folder)
-            file_names_copied.append(fmu_file.name)
+            # Check whether also an <fmu_name>_OspModelDescription.xml file exists.
+            # If so, copy also that one.
+            osp_model_description_file = fmu_file.with_name(
+                f'{fmu_file.stem}_OspModelDescription.xml'
+            )
+            if osp_model_description_file.exists():
+                logger.info(
+                    f'Copy OspModelDescription {osp_model_description_file} --> {fmu_file_in_case_folder}'
+                )
+                copy2(osp_model_description_file, self.case_folder)
+        return fmu_file_in_case_folder
 
     def _check_components_step_size(self):
         """Ensure that all components have a step size defined.

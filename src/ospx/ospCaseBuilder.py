@@ -1,3 +1,4 @@
+from cmath import log
 import logging
 import os
 from pathlib import Path
@@ -62,19 +63,22 @@ class OspCaseBuilder():
 
         if clean:
             case_folder: Path = case_dict_file.resolve().parent
-            _clean(case_folder)
+            _clean_case_folder(case_folder)
 
         logger.info(f'reading {case_dict_file}')    # 0
 
         case_dict: CppDict = DictReader.read(case_dict_file, comments=False)
 
         case = OspSimulationCase(case_dict)
-        case.setup()
+        try:
+            case.setup()
+        except Exception as e:
+            logger.exception(e)
+            return
 
         if inspect:
-            # inspect and stop
+            # inspect and return
             case._inspect()
-
             return
 
         # case.write_osp_model_description_xmls()
@@ -94,7 +98,7 @@ class OspCaseBuilder():
         return
 
 
-def _clean(case_folder: Path):
+def _clean_case_folder(case_folder: Path):
     """Cleans up the case folder and deletes any existing ospx files, e.g. modelDescription.xml .fmu .csv etc.
     """
     import re
