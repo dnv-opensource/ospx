@@ -1,6 +1,6 @@
 #FMU
-*.fmu
-*.FMU
+/*.fmu
+/*.FMU
 
 *.csv
 /caseDict
