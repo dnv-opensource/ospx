@@ -258,5 +258,20 @@
                 "enable": true
             }
         },
+        {
+            "name": "watchCosim gunnerus-dp",
+            "type": "python",
+            "request": "launch",
+            "cwd": "${workspaceFolder}\\tests\\gunnerus-dp",
+            "program": "${workspaceFolder}\\src\\ospx\\watch\\cli\\watchCosim.py",
+            "args": [
+                "watchDict",
+                "-pd",
+            ],
+            "console": "integratedTerminal",
+            "autoReload": {
+                "enable": true
+            }
+        },
     ]
 }

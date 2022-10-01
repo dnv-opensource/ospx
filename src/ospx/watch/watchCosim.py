@@ -187,7 +187,7 @@ class CosimWatcher:
         result_dict_name = '-'.join([self.title, 'resultDict'])
 
         target_file_path = Path.cwd() / self.results_dir / result_dict_name
-        DictWriter.write(result_dict, target_file_path, mode='a')
+        DictWriter.write(result_dict, target_file_path, mode='w')
 
         dump_dict_name = '-'.join([self.title, 'dataFrame.dump'])
         target_file_path = Path.cwd() / self.results_dir / dump_dict_name
