@@ -9,7 +9,7 @@ import shutil
 from argparse import ArgumentParser
 from pathlib import Path
 from time import sleep
-from typing import Union
+from typing import List, Union
 
 from ospx.utils.logging import configure_logging
 from ospx.watch.watchCosim import CosimWatcher
@@ -187,16 +187,24 @@ def _main(
         logger.error(f"file {watch_dict_file} not found.")
         return
 
-    while True:
-        csv_files = list(Path('.').rglob('*.csv'))
-        csv_file_names = (sorted(file.name for file in csv_files))
-        if len(csv_file_names) == 0:
-            logger.info('waiting for csv files being written')  # 1
-            sleep(5)
-        else:
-                                                                # not too fast
-            sleep(1)
+    csv_files: List[Path] = []
+    wait_counter: int = 0
+    while wait_counter < 5:
+        csv_files = list(Path('.').glob('*.csv'))
+        if csv_files:
             break
+        if wait_counter == 0:
+            logger.warning('waiting for csv files..')
+        else:
+            logger.info('waiting for csv files.')
+        wait_counter += 1
+        sleep(1)
+
+    if not csv_files:
+        logger.error('no csv files found.')
+        return
+
+    csv_file_names: List[str] = (sorted(file.name for file in csv_files))
 
     # From the csv file names, identify all data sources for which csv files have been written,
     # and save them as set.
