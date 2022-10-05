@@ -345,5 +345,20 @@
                 "enable": true
             }
         },
+        {
+            "name": "ospCaseBuilder spring_mass_damper --graph",
+            "type": "python",
+            "request": "launch",
+            "cwd": "${workspaceFolder}\\tests\\spring_mass_damper",
+            "program": "${workspaceFolder}\\src\\ospx\\cli\\ospCaseBuilder.py",
+            "args": [
+                "test_caseDict",
+                "--graph",
+            ],
+            "console": "integratedTerminal",
+            "autoReload": {
+                "enable": true
+            }
+        },
     ]
 }

@@ -1,0 +1,12 @@
+#FMU
+*.fmu
+*.FMU
+
+*.csv
+/caseDict_imported_from_*
+/OspSystemStructure.xml
+/statisticsDict
+/SystemStructure.ssd
+/watchDict
+/results
+*callGraph*
