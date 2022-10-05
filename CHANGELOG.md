@@ -7,6 +7,16 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 
 * --
 
+
+## [0.2.3] - 2022-10-05
+
+### Solved
+
+* Importer:<br>
+    * Corrected a bug in OspSystemStructureImporter, where multiple connections between two components would not be imported (but only the last one survived). Now, also more than one connection in between two components are imported correctly.
+    * OspSystemStructureImporter now resolves the type of initial values. I.e. If an initial value in OspSystemStructure is denoted as literal '1' but with Type 'Real', then this initial value will be imported not as integer 1 but as float 1.0
+
+
 ## [0.2.2] - 2022-10-05
 
 ### Solved
@@ -186,7 +196,8 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 * Added support for Python 3.10
 
 <!-- Markdown link & img dfn's -->
-[unreleased]: https://github.com/dnv-opensource/ospx/compare/v0.2.2...HEAD
+[unreleased]: https://github.com/dnv-opensource/ospx/compare/v0.2.3...HEAD
+[0.2.3]: https://github.com/dnv-opensource/ospx/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/dnv-opensource/ospx/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/dnv-opensource/ospx/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/dnv-opensource/ospx/compare/v0.1.1...v0.2.0
