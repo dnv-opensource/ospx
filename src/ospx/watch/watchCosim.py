@@ -125,13 +125,21 @@ class CosimWatcher:
                                matplotlib.axes.SubplotBase] = self.figure.add_subplot(
                                    self.maxRow, self.number_of_columns, index + 1
                                )
-                subplot.plot(
-                    'Time',
-                    current_key,
-                    linewidth=2,
-                    color=cm.get_cmap('gist_rainbow')(index / self.number_of_subplots),
-                    data=df[['Time', current_key]]
-                )
+
+                try:
+                    subplot.plot(
+                        'Time',
+                        current_key,
+                        linewidth=2,
+                        color=cm.get_cmap('gist_rainbow')(index / self.number_of_subplots),
+                        data=df[['Time', current_key]]
+                    )
+                except TypeError:
+                    pass
+                except ValueError:
+                    pass
+                except Exception as e:
+                    logger.exception(e)
                 # subplot.set_title(currentKey,  fontsize=10)
                 subplot.grid(color='#66aa88', linestyle='--')
                 subplot.xaxis.set_tick_params(labelsize=8)
@@ -173,13 +181,31 @@ class CosimWatcher:
         result_dict = {}
         for header in list(df):
             values = df[header].dropna().to_numpy()
+            _first_value = values[0]
+            _last_value = values[-1]
+            try:
+                _mean = np.mean(values)
+            except TypeError:
+                _mean = 'None'
+            try:
+                _stddev = np.std(values)
+            except TypeError:
+                _stddev = 'None'
+            try:
+                _min = np.min(values)
+            except TypeError:
+                _min = 'None'
+            try:
+                _max = np.max(values)
+            except TypeError:
+                _max = 'None'
             result_dict[header] = {
-                'latestValue': values[-1],
-                'firstValue': values[0],
-                'mean': np.mean(values),
-                'stdev': np.std(values),
-                'min': np.min(values),
-                'max': np.max(values)
+                'latestValue': _last_value,
+                'firstValue': _first_value,
+                'mean': _mean,
+                'stdev': _stddev,
+                'min': _min,
+                'max': _max
             }
 
         # debug
