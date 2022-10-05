@@ -317,13 +317,28 @@
             }
         },
         {
-            "name": "importSystemStructure test_OspSystemStructure_spring_mass_damper.xml",
+            "name": "importSystemStructure spring_mass_damper",
             "type": "python",
             "request": "launch",
-            "cwd": "${workspaceFolder}\\tests\\test_dicts",
+            "cwd": "${workspaceFolder}\\tests\\spring_mass_damper",
             "program": "${workspaceFolder}\\src\\ospx\\cli\\importSystemStructure.py",
             "args": [
                 "test_OspSystemStructure_spring_mass_damper.xml",
+            ],
+            "console": "integratedTerminal",
+            "autoReload": {
+                "enable": true
+            }
+        },
+        {
+            "name": "ospCaseBuilder spring_mass_damper --inspect",
+            "type": "python",
+            "request": "launch",
+            "cwd": "${workspaceFolder}\\tests\\spring_mass_damper",
+            "program": "${workspaceFolder}\\src\\ospx\\cli\\ospCaseBuilder.py",
+            "args": [
+                "test_caseDict",
+                "--inspect",
             ],
             "console": "integratedTerminal",
             "autoReload": {
