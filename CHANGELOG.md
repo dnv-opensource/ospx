@@ -7,6 +7,14 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 
 * --
 
+## [0.2.2] - 2022-10-05
+
+### Solved
+
+* Connection:<br>
+    Corrected a bug in Connection.is_variable_connection() and Connection.is_variable_group_connection() which led to Variable Connections not being resolved.
+
+
 ## [0.2.1] - 2022-10-01
 
 ### Changed
@@ -178,7 +186,8 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 * Added support for Python 3.10
 
 <!-- Markdown link & img dfn's -->
-[unreleased]: https://github.com/dnv-opensource/ospx/compare/v0.2.1...HEAD
+[unreleased]: https://github.com/dnv-opensource/ospx/compare/v0.2.2...HEAD
+[0.2.2]: https://github.com/dnv-opensource/ospx/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/dnv-opensource/ospx/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/dnv-opensource/ospx/compare/v0.1.1...v0.2.0
 [0.1.2]: https://github.com/dnv-opensource/ospx/compare/v0.1.1...v0.1.2
