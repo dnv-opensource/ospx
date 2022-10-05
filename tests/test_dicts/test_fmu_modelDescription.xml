@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<fmiModelDescription
+    fmiVersion="2.0"
+    modelName="TestFMU"
+    guid="c273ba761906e5a0d21dadc3c9deb6d2"
+    description="[]"
+    author="claas.rostock"
+    version="0.2.3"
+    generationTool="manual"
+    generationDateAndTime="2022-10-05T18:45:00"
+    variableNamingConvention="structured"
+    numberOfEventIndicators="1">
+
+    <CoSimulation
+        modelIdentifier="TestFMU"
+        canBeInstantiatedOnlyOncePerProcess="false"
+        canNotUseMemoryManagementFunctions="true"
+		canHandleVariableCommunicationStepSize="true">
+    </CoSimulation>
+
+
+    <DefaultExperiment
+        startTime="0.0"
+        stopTime="10.0"
+        stepSize="0.2"
+    />
+
+
+    <ModelVariables>
+
+
+        <ScalarVariable name="Variable_1_IN" valueReference="0"  causality="input">
+            <Real  start="0.0" />
+        </ScalarVariable> <!-- index="1" -->
+
+        <ScalarVariable name="Variable_2_IN" valueReference="1"  causality="input">
+            <Real  start="0.0" />
+        </ScalarVariable> <!-- index="2" -->
+
+        <ScalarVariable name="Variable_3_IN" valueReference="2"  causality="input">
+            <Real  start="0.0" />
+        </ScalarVariable> <!-- index="3" -->
+
+
+        <ScalarVariable name="Variable_4_OUT" valueReference="3"  causality="output">
+            <Real />
+        </ScalarVariable> <!-- index="4" -->
+
+        <ScalarVariable name="Variable_5_OUT" valueReference="4"  causality="output">
+            <Real />
+        </ScalarVariable> <!-- index="5" -->
+
+        <ScalarVariable name="Variable_6_OUT" valueReference="5"  causality="output">
+            <Real />
+        </ScalarVariable> <!-- index="6" -->
+
+
+        <ScalarVariable name="Vector_1_IN[0]" valueReference="6"  causality="input">
+            <Real  start="10.0" />
+        </ScalarVariable> <!-- index="7" -->
+
+        <ScalarVariable name="Vector_1_IN[1]" valueReference="7"  causality="input">
+            <Real  start="11.0" />
+        </ScalarVariable> <!-- index="8" -->
+
+        <ScalarVariable name="Vector_1_IN[2]" valueReference="8"  causality="input">
+            <Real  start="12.0" />
+        </ScalarVariable> <!-- index="9" -->
+
+
+        <ScalarVariable name="Vector_2_OUT[0]" valueReference="9"  causality="output">
+            <Real />
+        </ScalarVariable> <!-- index="10" -->
+
+        <ScalarVariable name="Vector_2_OUT[1]" valueReference="10"  causality="output">
+            <Real />
+        </ScalarVariable> <!-- index="11" -->
+
+        <ScalarVariable name="Vector_2_OUT[2]" valueReference="11"  causality="output">
+            <Real />
+        </ScalarVariable> <!-- index="12" -->
+
+
+        <ScalarVariable name="Parameter_1_Tunable" valueReference="12" variability="tunable" causality="parameter">
+            <Real  start="1.0"/>
+        </ScalarVariable> <!-- index="13" -->
+
+        <ScalarVariable name="Parameter_2_Tunable" valueReference="13" variability="tunable" causality="parameter">
+            <Real  start="2.0"/>
+        </ScalarVariable> <!-- index="14" -->
+
+        <ScalarVariable name="Parameter_3_Tunable" valueReference="14" variability="tunable" causality="parameter">
+            <Real  start="3.0"/>
+        </ScalarVariable> <!-- index="15" -->
+
+
+        <ScalarVariable name="ParameterVector_1_Tunable[0]" valueReference="15" variability="tunable" causality="parameter">
+            <Real  start="10.0"/>
+        </ScalarVariable> <!-- index="16" -->
+
+        <ScalarVariable name="ParameterVector_1_Tunable[1]" valueReference="16" variability="tunable" causality="parameter">
+            <Real  start="11.0"/>
+        </ScalarVariable> <!-- index="17" -->
+
+        <ScalarVariable name="ParameterVector_1_Tunable[2]" valueReference="17" variability="tunable" causality="parameter">
+            <Real  start="12.0"/>
+        </ScalarVariable> <!-- index="18" -->
+
+
+        <ScalarVariable name="Model_1.Component_1.Parameter_1_Tunable" valueReference="18" variability="tunable" causality="parameter">
+            <Real  start="1.0"/>
+        </ScalarVariable> <!-- index="19" -->
+
+        <ScalarVariable name="Model_1.Component_1.Parameter_2_Tunable" valueReference="19" variability="tunable" causality="parameter">
+            <Real  start="2.0"/>
+        </ScalarVariable> <!-- index="20" -->
+
+        <ScalarVariable name="Model_1.Component_1.Parameter_3_Tunable" valueReference="20" variability="tunable" causality="parameter">
+            <Real  start="3.0"/>
+        </ScalarVariable> <!-- index="21" -->
+
+
+        <ScalarVariable name="Model_1.Component_1.ParameterVector_1_Tunable[0]" valueReference="21" variability="tunable" causality="parameter">
+            <Real  start="10.0"/>
+        </ScalarVariable> <!-- index="22" -->
+
+        <ScalarVariable name="Model_1.Component_1.ParameterVector_1_Tunable[1]" valueReference="22" variability="tunable" causality="parameter">
+            <Real  start="11.0"/>
+        </ScalarVariable> <!-- index="23" -->
+
+        <ScalarVariable name="Model_1.Component_1.ParameterVector_1_Tunable[2]" valueReference="23" variability="tunable" causality="parameter">
+            <Real  start="12.0"/>
+        </ScalarVariable> <!-- index="24" -->
+
+
+        <ScalarVariable name="Model_1.Component_2.ParameterVector_1_Tunable[0]" valueReference="24" variability="tunable" causality="parameter">
+            <Real  start="20.0"/>
+        </ScalarVariable> <!-- index="25" -->
+
+        <ScalarVariable name="Model_1.Component_2.ParameterVector_1_Tunable[1]" valueReference="25" variability="tunable" causality="parameter">
+            <Real  start="21.0"/>
+        </ScalarVariable> <!-- index="26" -->
+
+        <ScalarVariable name="Model_1.Component_2.ParameterVector_1_Tunable[2]" valueReference="26" variability="tunable" causality="parameter">
+            <Real  start="22.0"/>
+        </ScalarVariable> <!-- index="27" -->
+
+
+        <ScalarVariable name="Model_1.Component_3.Parameter with Spaces" valueReference="27" variability="tunable" causality="parameter">
+            <Real  start="3.0"/>
+        </ScalarVariable> <!-- index="28" -->
+
+
+        <ScalarVariable name="Model_1.Component_4.ParameterVector with Spaces[0]" valueReference="28" variability="tunable" causality="parameter">
+            <Real  start="40.0"/>
+        </ScalarVariable> <!-- index="29" -->
+
+
+        <ScalarVariable name="Model_1.Component_4.ParameterVector with Spaces[1]" valueReference="29" variability="tunable" causality="parameter">
+            <Real  start="41.0"/>
+        </ScalarVariable> <!-- index="30" -->
+
+
+        <ScalarVariable name="Model_1.Component_4.ParameterVector with Spaces[2]" valueReference="30" variability="tunable" causality="parameter">
+            <Real  start="42.0"/>
+        </ScalarVariable> <!-- index="31" -->
+
+
+    </ModelVariables>
+
+
+</fmiModelDescription>
