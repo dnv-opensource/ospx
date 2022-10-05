@@ -202,6 +202,35 @@
             }
         },
         {
+            "name": "ospCaseBuilder variable_group --inspect multiple_connection_types",
+            "type": "python",
+            "request": "launch",
+            "cwd": "${workspaceFolder}\\tests\\variable_groups",
+            "program": "${workspaceFolder}\\src\\ospx\\cli\\ospCaseBuilder.py",
+            "args": [
+                "caseDict_multiple_connection_types",
+                "--inspect",
+            ],
+            "console": "integratedTerminal",
+            "autoReload": {
+                "enable": true
+            }
+        },
+        {
+            "name": "ospCaseBuilder variable_group multiple_connection_types",
+            "type": "python",
+            "request": "launch",
+            "cwd": "${workspaceFolder}\\tests\\variable_groups",
+            "program": "${workspaceFolder}\\src\\ospx\\cli\\ospCaseBuilder.py",
+            "args": [
+                "caseDict_multiple_connection_types",
+            ],
+            "console": "integratedTerminal",
+            "autoReload": {
+                "enable": true
+            }
+        },
+        {
             "name": "importSystemStructure gunnerus-dp/control-system OspSystemStructure.xml (cwd=gunnerus-dp)",
             "type": "python",
             "request": "launch",
