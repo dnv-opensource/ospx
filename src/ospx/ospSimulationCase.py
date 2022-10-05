@@ -600,15 +600,16 @@ class OspSimulationCase():
             f"Variables defined in the fmu's modelDescription.xml\n"
             f"\tfmu{delim}variable{delim}type{delim}unit"
         )
+        logger.info(log_string + '\n')
         for fmu_name, fmu in self.system_structure.fmus.items():
-            log_string += f'\n\n\t{fmu_name}\n'
+            log_string = f'\n\n\t{fmu_name}\n'
             variable_definitions = '\n'.join(
                 f'\t{delim}{variable_name}{delim}{variable.data_type}{delim}{variable.unit}'
                 for variable_name,
                 variable in fmu.variables.items()
             )
             log_string += variable_definitions
-        logger.info(log_string + '\n')
+            logger.info(log_string + '\n')
 
         log_string = (
             f"Connectors defined in {self.case_dict.name}\n"

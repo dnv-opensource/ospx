@@ -1,8 +1,8 @@
 import logging
 import os
-from pathlib import Path
 import re
-from typing import List, Set, Tuple, Union
+from pathlib import Path
+from typing import List, Union
 
 from dictIO import DictReader, DictWriter
 from dictIO.utils.counter import BorgCounter
@@ -187,8 +187,19 @@ class OspSystemStructureImporter():
                             initial_value = initial_values[initial_value_key]
                             if data_type := find_type_identifier_in_keys(initial_value):
                                 type_key = find_key(initial_value, f'{data_type}$')
+                                if not type_key:
+                                    continue
+                                _type: str = re.sub(r'(^\d{1,6}_)', '', type_key)
                                 referenced_name = initial_value['_attributes']['variable']
-                                value = initial_value[type_key]['_attributes']['value']
+                                value: Union[float, int, bool, str]
+                                if _type == 'Real':
+                                    value = float(initial_value[type_key]['_attributes']['value'])
+                                elif _type == 'Integer':
+                                    value = int(initial_value[type_key]['_attributes']['value'])
+                                elif _type == 'Boolean':
+                                    value = bool(initial_value[type_key]['_attributes']['value'])
+                                else:
+                                    value = initial_value[type_key]['_attributes']['value']
                                 component_initial_values |= {referenced_name: {'start': value}}
                                 # Assemble component
                 component: dict[str, Union[dict, str, float, Path]] = {
