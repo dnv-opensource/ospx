@@ -316,5 +316,19 @@
                 "enable": true
             }
         },
+        {
+            "name": "importSystemStructure test_OspSystemStructure_spring_mass_damper.xml",
+            "type": "python",
+            "request": "launch",
+            "cwd": "${workspaceFolder}\\tests\\test_dicts",
+            "program": "${workspaceFolder}\\src\\ospx\\cli\\importSystemStructure.py",
+            "args": [
+                "test_OspSystemStructure_spring_mass_damper.xml",
+            ],
+            "console": "integratedTerminal",
+            "autoReload": {
+                "enable": true
+            }
+        },
     ]
 }
