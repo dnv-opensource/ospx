@@ -86,11 +86,23 @@ class Connection():
 
     @property
     def is_variable_connection(self) -> bool:
-        return self.source_endpoint.connector.is_single_connector if self.source_endpoint and self.source_endpoint.connector else False
+        if not self.source_endpoint:
+            return False
+        if self.source_endpoint.variable:
+            return True
+        if self.source_endpoint.connector:
+            return self.source_endpoint.connector.is_single_connector
+        return False
 
     @property
     def is_variable_group_connection(self) -> bool:
-        return self.source_endpoint.connector.is_group_connector if self.source_endpoint and self.source_endpoint.connector else False
+        if not self.source_endpoint:
+            return False
+        if self.source_endpoint.variable:
+            return False
+        if self.source_endpoint.connector:
+            return self.source_endpoint.connector.is_group_connector
+        return False
 
     @property
     def is_valid(self) -> bool:
