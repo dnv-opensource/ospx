@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<OspModelDescription xmlns="http://opensimulationplatform.com/MSMI/OSPModelDescription" version="0.1">
+	<UnitDefinitions>
+	</UnitDefinitions>
+	<!-- Input -->
+	<VariableGroups>
+		<Generic name="ColregState">
+			<Variable ref="COLREGState[1]"/>			
+			<Variable ref="COLREGState[2]"/>			
+			<Variable ref="COLREGState[3]"/>						
+		</Generic>
+		<Generic name="PoseAlphaCPA">
+			<Variable ref="PoseAlphaCPA[1]"/>			
+			<Variable ref="PoseAlphaCPA[2]"/>			
+			<Variable ref="PoseAlphaCPA[3]"/>						
+		</Generic>
+		<Generic name="PoseBetaCPA">
+			<Variable ref="PoseBetaCPA[1]"/>			
+			<Variable ref="PoseBetaCPA[2]"/>			
+			<Variable ref="PoseBetaCPA[3]"/>						
+		</Generic>
+		<Generic name="Range">
+			<Variable ref="Range[1]"/>			
+			<Variable ref="Range[2]"/>			
+			<Variable ref="Range[3]"/>						
+		</Generic>
+		<Generic name="RangeCPA">
+			<Variable ref="RangeCPA[1]"/>			
+			<Variable ref="RangeCPA[2]"/>			
+			<Variable ref="RangeCPA[3]"/>						
+		</Generic>
+		<Generic name="StartEvaluation">
+			<Variable ref="StartEvaluation[1]"/>			
+			<Variable ref="StartEvaluation[2]"/>			
+			<Variable ref="StartEvaluation[3]"/>						
+		</Generic>
+		<Generic name="TargetShipPassed">
+			<Variable ref="TargetShipPassed[1]"/>			
+			<Variable ref="TargetShipPassed[2]"/>			
+			<Variable ref="TargetShipPassed[3]"/>						
+		</Generic>
+		<Generic name="TimeCPA">
+			<Variable ref="TimeCPA[1]"/>			
+			<Variable ref="TimeCPA[2]"/>			
+			<Variable ref="TimeCPA[3]"/>						
+		</Generic>
+		<Generic name="ASVStates">
+			<Variable ref="AsvStateLf[1]"/>			
+			<Variable ref="AsvStateLf[2]"/>			
+			<Variable ref="AsvStateLf[3]"/>
+			<Variable ref="AsvStateLf[4]"/>			
+			<Variable ref="AsvStateLf[5]"/>			
+			<Variable ref="AsvStateLf[6]"/>							
+		</Generic>
+	</VariableGroups>
+</OspModelDescription>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<OspModelDescription xmlns="http://opensimulationplatform.com/MSMI/OSPModelDescription" version="0.1">
+	<UnitDefinitions>
+	</UnitDefinitions>
+	<VariableGroups>
+		<!-- Input -->
+		<Generic name="ASVStates">
+			<Variable ref="AsvStates[0]"/>			
+			<Variable ref="AsvStates[1]"/>			
+			<Variable ref="AsvStates[2]"/>
+			<Variable ref="AsvStates[3]"/>			
+			<Variable ref="AsvStates[4]"/>			
+			<Variable ref="AsvStates[5]"/>							
+		</Generic>
+
+		<Generic name="TargetShipsPositionX">
+			<Variable ref="TargetShipsPositionX[0]"/>			
+			<Variable ref="TargetShipsPositionX[1]"/>			
+			<Variable ref="TargetShipsPositionX[2]"/>						
+		</Generic>
+		<Generic name="TargetShipsPositionY">
+			<Variable ref="TargetShipsPositionY[0]"/>			
+			<Variable ref="TargetShipsPositionY[1]"/>			
+			<Variable ref="TargetShipsPositionY[2]"/>						
+		</Generic>
+		<Generic name="TargetShipsVelocityX">
+			<Variable ref="TargetShipsVelocityX[0]"/>			
+			<Variable ref="TargetShipsVelocityX[1]"/>			
+			<Variable ref="TargetShipsVelocityX[2]"/>						
+		</Generic>
+		<Generic name="TargetShipsVelocityY">
+			<Variable ref="TargetShipsVelocityY[0]"/>			
+			<Variable ref="TargetShipsVelocityY[1]"/>			
+			<Variable ref="TargetShipsVelocityY[2]"/>						
+		</Generic>
+		<Generic name="TargetShipsYaw">
+			<Variable ref="TargetShipsYaw[0]"/>			
+			<Variable ref="TargetShipsYaw[1]"/>			
+			<Variable ref="TargetShipsYaw[2]"/>						
+		</Generic>
+	</VariableGroups>
+</OspModelDescription>

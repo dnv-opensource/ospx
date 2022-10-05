@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<OspModelDescription xmlns="http://opensimulationplatform.com/MSMI/OSPModelDescription" version="0.1">
+	<UnitDefinitions>
+	</UnitDefinitions>
+	<!-- Output -->
+	<VariableGroups>
+		<Generic name="ColregState">
+			<Variable ref="ColregState[0]"/>			
+			<Variable ref="ColregState[1]"/>			
+			<Variable ref="ColregState[2]"/>						
+		</Generic>
+		<Generic name="PoseAlphaCPA">
+			<Variable ref="PoseAlphaCPA[0]"/>			
+			<Variable ref="PoseAlphaCPA[1]"/>			
+			<Variable ref="PoseAlphaCPA[2]"/>						
+		</Generic>
+		<Generic name="PoseBetaCPA">
+			<Variable ref="PoseBetaCPA[0]"/>			
+			<Variable ref="PoseBetaCPA[1]"/>			
+			<Variable ref="PoseBetaCPA[2]"/>						
+		</Generic>
+		<Generic name="Range">
+			<Variable ref="Range[0]"/>			
+			<Variable ref="Range[1]"/>			
+			<Variable ref="Range[2]"/>						
+		</Generic>
+		<Generic name="RangeCPA">
+			<Variable ref="RangeCPA[0]"/>			
+			<Variable ref="RangeCPA[1]"/>			
+			<Variable ref="RangeCPA[2]"/>						
+		</Generic>
+		<Generic name="StartEvaluation">
+			<Variable ref="StartEvaluation[0]"/>			
+			<Variable ref="StartEvaluation[1]"/>			
+			<Variable ref="StartEvaluation[2]"/>						
+		</Generic>
+		<Generic name="TargetShipPassed">
+			<Variable ref="TargetShipPassed[0]"/>			
+			<Variable ref="TargetShipPassed[1]"/>			
+			<Variable ref="TargetShipPassed[2]"/>						
+		</Generic>
+		<Generic name="TimeCPA">
+			<Variable ref="TimeCPA[0]"/>			
+			<Variable ref="TimeCPA[1]"/>			
+			<Variable ref="TimeCPA[2]"/>						
+		</Generic>
+		<Generic name="TargetShipsPositionX">
+			<Variable ref="TargetShipsPositionX[0]"/>			
+			<Variable ref="TargetShipsPositionX[1]"/>			
+			<Variable ref="TargetShipsPositionX[2]"/>						
+		</Generic>
+		<Generic name="TargetShipsPositionY">
+			<Variable ref="TargetShipsPositionY[0]"/>			
+			<Variable ref="TargetShipsPositionY[1]"/>			
+			<Variable ref="TargetShipsPositionY[2]"/>						
+		</Generic>
+		<Generic name="TargetShipsVelocityX">
+			<Variable ref="TargetShipsVelocityX[0]"/>			
+			<Variable ref="TargetShipsVelocityX[1]"/>			
+			<Variable ref="TargetShipsVelocityX[2]"/>						
+		</Generic>
+		<Generic name="TargetShipsVelocityY">
+			<Variable ref="TargetShipsVelocityY[0]"/>			
+			<Variable ref="TargetShipsVelocityY[1]"/>			
+			<Variable ref="TargetShipsVelocityY[2]"/>						
+		</Generic>
+		<Generic name="TargetShipsYaw">
+			<Variable ref="TargetShipsYaw[0]"/>			
+			<Variable ref="TargetShipsYaw[1]"/>			
+			<Variable ref="TargetShipsYaw[2]"/>						
+		</Generic>
+
+		<!-- Input -->
+		<Generic name="ASVStates">
+			<Variable ref="AsvStateLf[0]"/>			
+			<Variable ref="AsvStateLf[1]"/>			
+			<Variable ref="AsvStateLf[2]"/>
+			<Variable ref="AsvStateLf[3]"/>			
+			<Variable ref="AsvStateLf[4]"/>			
+			<Variable ref="AsvStateLf[5]"/>							
+		</Generic>
+	</VariableGroups>
+</OspModelDescription>

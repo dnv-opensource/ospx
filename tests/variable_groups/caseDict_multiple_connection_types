@@ -1,0 +1,520 @@
+/*---------------------------------*- C++ -*----------------------------------*\
+filetype dictionary; coding utf-8; version 0.1; local --; purpose --;
+\*----------------------------------------------------------------------------*/
+_environment
+{
+    //libSource                 'C:\Users\CHAVAS\Documents\PYTHON\Safemate\Simulator';
+    libSource                  .\src;
+}
+systemStructure
+{
+    connections
+    {
+        Vessel_to_LOSGuidance
+        {
+            source
+            {
+                component        Vessel;
+                connector        Vessel_ASVStates;
+            }
+            target
+            {
+                component        LOSGuidance;
+                connector        LOSGuidance_ASVStates;
+            }
+        }
+        Vessel_to_VelocityObstacleController
+        {
+            source
+            {
+                component        Vessel;
+                connector        Vessel_ASVStates;
+            }
+            target
+            {
+                component        VelocityObstacleController;
+                connector        VelocityObstacleController_ASVStates;
+            }
+        }
+        Vessel_to_EvaluateEncounterR14
+        {
+            source
+            {
+                component        Vessel;
+                connector        Vessel_ASVStates;
+            }
+            target
+            {
+                component        EvaluateEncounterR14;
+                connector        EvaluateEncounterR14_ASVStates;
+            }
+        }
+        Vessel_to_EncounterEvaluation
+        {
+            source
+            {
+                component        Vessel;
+                connector        Vessel_ASVStates;
+            }
+            target
+            {
+                component        EncounterEvaluation;
+                connector        EncounterEvaluation_ASVStates;
+            }
+        }
+        LOSGuidance_to_VelocityObstacleController
+        {
+            source
+            {
+                component        LOSGuidance;
+                variable        PsiLos;
+            }
+            target
+            {
+                component        VelocityObstacleController;
+                variable        PsiLos;
+            }
+        }
+        VelocityObstacleController_to_LOSGuidance
+        {
+            source
+            {
+                component        VelocityObstacleController;
+                variable        CollisionSituation;
+            }
+            target
+            {
+                component        LOSGuidance;
+                variable        CollisionSituation;
+            }
+        }
+        VelocityObstacleController_to_Vessel
+        {
+            source
+            {
+                component        VelocityObstacleController;
+                variable        PsiDesired;
+            }
+            target
+            {
+                component        Vessel;
+                variable        PsiDesiredCAS;
+            }
+        }
+        EncounterEvaluation_to_EvaluateEncounterR14
+        {
+            source
+            {
+                component        EncounterEvaluation;
+                connector        EncounterEvaluation_TimeCPA;
+            }
+            target
+            {
+                component        EvaluateEncounterR14;
+                connector        EvaluateEncounterR14_TimeCPA;
+            }
+        }
+        EncounterEvaluation_to_SafetyScore
+        {
+            source
+            {
+                component        EncounterEvaluation;
+                connector        EncounterEvaluation_StartEvaluation;
+            }
+            target
+            {
+                component        SafetyScore;
+                connector        SafetyScore_StartEvaluation;
+            }
+        }
+        TargetShipModule_to_EncounterEvaluation
+        {
+            source
+            {
+                component        TargetShipModule;
+                connector        TargetShipModule_TargetShipsYaw;
+            }
+            target
+            {
+                component        EncounterEvaluation;
+                connector        EncounterEvaluation_TargetShipsYaw;
+            }
+        }
+        TargetShipModule_to_VelocityObstacleController
+        {
+            source
+            {
+                component        TargetShipModule;
+                connector        TargetShipModule_TargetShipsVelocityY;
+            }
+            target
+            {
+                component        VelocityObstacleController;
+                connector        VelocityObstacleController_TargetShipsVelocityY;
+            }
+        }
+    }
+    components
+    {
+        Vessel
+        {
+            connectors
+            {
+                Vessel_ASVStates
+                {
+                    variableGroup        ASVStates;
+                    type        output;
+                }
+                Vessel_UDesiredCAS
+                {
+                    variable        UDesiredCAS;
+                    type        input;
+                }
+                Vessel_PsiDesiredCAS
+                {
+                    variable        PsiDesiredCAS;
+                    type        input;
+                }
+            }
+            fmu               Vessel.fmu;
+            stepSize          0.1;
+        }
+        LOSGuidance
+        {
+            connectors
+            {
+                LOSGuidance_ASVStates
+                {
+                    variableGroup        ASVStates;
+                    type        input;
+                }
+                LOSGuidance_ULos
+                {
+                    variable        ULos;
+                    type        output;
+                }
+                LOSGuidance_PsiLos
+                {
+                    variable        PsiLos;
+                    type        output;
+                }
+                LOSGuidance_CollisionSituation
+                {
+                    variable        CollisionSituation;
+                    type        input;
+                }
+            }
+            fmu               LOSGuidance.fmu;
+            stepSize          0.1;
+            initialize
+            {
+                UDesired
+                {
+                    start        1;
+                }
+            }
+        }
+        VelocityObstacleController
+        {
+            connectors
+            {
+                VelocityObstacleController_ASVStates
+                {
+                    variableGroup        ASVStates;
+                    type        input;
+                }
+                VelocityObstacleController_ULos
+                {
+                    variable        ULos;
+                    type        input;
+                }
+                VelocityObstacleController_PsiLos
+                {
+                    variable        PsiLos;
+                    type        input;
+                }
+                VelocityObstacleController_CollisionSituation
+                {
+                    variable        CollisionSituation;
+                    type        output;
+                }
+                VelocityObstacleController_UDesired
+                {
+                    variable        UDesired;
+                    type        output;
+                }
+                VelocityObstacleController_PsiDesired
+                {
+                    variable        PsiDesired;
+                    type        output;
+                }
+                VelocityObstacleController_TargetShipsPositionX
+                {
+                    variableGroup        TargetShipsPositionX;
+                    type        input;
+                }
+                VelocityObstacleController_TargetShipsPositionY
+                {
+                    variableGroup        TargetShipsPositionY;
+                    type        input;
+                }
+                VelocityObstacleController_TargetShipsVelocityX
+                {
+                    variableGroup        TargetShipsVelocityX;
+                    type        input;
+                }
+                VelocityObstacleController_TargetShipsVelocityY
+                {
+                    variableGroup        TargetShipsVelocityY;
+                    type        input;
+                }
+            }
+            fmu               VelocityObstacleController.fmu;
+            stepSize          0.1;
+        }
+        TargetShipModule
+        {
+            connectors
+            {
+                TargetShipModule_TargetShipsPositionX
+                {
+                    variableGroup        TargetShipsPositionX;
+                    type        output;
+                }
+                TargetShipModule_TargetShipsPositionY
+                {
+                    variableGroup        TargetShipsPositionY;
+                    type        output;
+                }
+                TargetShipModule_TargetShipsVelocityX
+                {
+                    variableGroup        TargetShipsVelocityX;
+                    type        output;
+                }
+                TargetShipModule_TargetShipsVelocityY
+                {
+                    variableGroup        TargetShipsVelocityY;
+                    type        output;
+                }
+                TargetShipModule_TargetShipsYaw
+                {
+                    variableGroup        TargetShipsYaw;
+                    type        output;
+                }
+            }
+            fmu               TargetShipModule.fmu;
+            stepSize          0.1;
+            initialize
+            {
+                Parameters.posYNEDInit[0]
+                {
+                    start        1;
+                }
+            }
+        }
+        EncounterEvaluation
+        {
+            connectors
+            {
+                EncounterEvaluation_ASVStates
+                {
+                    variableGroup        ASVStates;
+                    type        input;
+                }
+                EncounterEvaluation_PoseAlphaCPA
+                {
+                    variableGroup        PoseAlphaCPA;
+                    type        output;
+                }
+                EncounterEvaluation_PoseBetaCPA
+                {
+                    variableGroup        PoseBetaCPA;
+                    type        output;
+                }
+                EncounterEvaluation_Range
+                {
+                    variableGroup        Range;
+                    type        output;
+                }
+                EncounterEvaluation_RangeCPA
+                {
+                    variableGroup        RangeCPA;
+                    type        output;
+                }
+                EncounterEvaluation_StartEvaluation
+                {
+                    variableGroup        StartEvaluation;
+                    type        output;
+                }
+                EncounterEvaluation_TargetShipPassed
+                {
+                    variableGroup        TargetShipPassed;
+                    type        output;
+                }
+                EncounterEvaluation_TimeCPA
+                {
+                    variableGroup        TimeCPA;
+                    type        output;
+                }
+                EncounterEvaluation_TargetShipsPositionX
+                {
+                    variableGroup        TargetShipsPositionX;
+                    type        input;
+                }
+                EncounterEvaluation_TargetShipsPositionY
+                {
+                    variableGroup        TargetShipsPositionY;
+                    type        input;
+                }
+                EncounterEvaluation_TargetShipsVelocityX
+                {
+                    variableGroup        TargetShipsVelocityX;
+                    type        input;
+                }
+                EncounterEvaluation_TargetShipsVelocityY
+                {
+                    variableGroup        TargetShipsVelocityY;
+                    type        input;
+                }
+                EncounterEvaluation_TargetShipsYaw
+                {
+                    variableGroup        TargetShipsYaw;
+                    type        input;
+                }
+            }
+            fmu               EncounterEvaluation.fmu;
+            stepSize          0.1;
+            initialize
+            {
+                TargetShipType[0]
+                {
+                    start        3;
+                }
+                TargetShipType[1]
+                {
+                    start        3;
+                }
+                TargetShipType[2]
+                {
+                    start        3;
+                }
+            }
+        }
+        EvaluateEncounterR14
+        {
+            connectors
+            {
+                EvaluateEncounterR14_ASVStates
+                {
+                    variableGroup        ASVStates;
+                    type        input;
+                }
+                EvaluateEncounterR14_PoseAlphaCPA
+                {
+                    variableGroup        PoseAlphaCPA;
+                    type        input;
+                }
+                EvaluateEncounterR14_PoseBetaCPA
+                {
+                    variableGroup        PoseBetaCPA;
+                    type        input;
+                }
+                EvaluateEncounterR14_Range
+                {
+                    variableGroup        Range;
+                    type        input;
+                }
+                EvaluateEncounterR14_RangeCPA
+                {
+                    variableGroup        RangeCPA;
+                    type        input;
+                }
+                EvaluateEncounterR14_StartEvaluation
+                {
+                    variableGroup        StartEvaluation;
+                    type        input;
+                }
+                EvaluateEncounterR14_TargetShipPassed
+                {
+                    variableGroup        TargetShipPassed;
+                    type        input;
+                }
+                EvaluateEncounterR14_TimeCPA
+                {
+                    variableGroup        TimeCPA;
+                    type        input;
+                }
+            }
+            fmu               EvaluateEncounterR14.fmu;
+            stepSize          0.1;
+            initialize
+            {
+                COLREGState[1]
+                {
+                    start        4;
+                }
+                COLREGState[2]
+                {
+                    start        4;
+                }
+                COLREGState[3]
+                {
+                    start        4;
+                }
+            }
+        }
+        SafetyScore
+        {
+            connectors
+            {
+                SafetyScore_PoseAlphaCPA
+                {
+                    variableGroup        PoseAlphaCPA;
+                    type        input;
+                }
+                SafetyScore_PoseBetaCPA
+                {
+                    variableGroup        PoseBetaCPA;
+                    type        input;
+                }
+                SafetyScore_RangeCPA
+                {
+                    variableGroup        RangeCPA;
+                    type        input;
+                }
+                SafetyScore_StartEvaluation
+                {
+                    variableGroup        StartEvaluation;
+                    type        input;
+                }
+            }
+            fmu               SafetyScore.fmu;
+            stepSize          0.1;
+            initialize
+            {
+                TargetShipType[1]
+                {
+                    start        3;
+                }
+                TargetShipType[2]
+                {
+                    start        3;
+                }
+                TargetShipType[3]
+                {
+                    start        3;
+                }
+            }
+        }
+    }
+}
+run
+{
+    simulation
+    {
+        name                  OspSystemStructure;
+        startTime             0.0;
+        baseStepSize          0.01;
+        algorithm             fixedStep;
+    }
+}
