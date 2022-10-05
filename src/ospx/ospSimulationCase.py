@@ -8,7 +8,7 @@ from dictIO import CppDict, DictWriter, XmlFormatter
 from dictIO.utils.counter import BorgCounter
 from dictIO.utils.path import relative_path
 
-from ospx import Simulation, SystemStructure
+from ospx import Simulation, System
 from ospx.utils.dict import find_key
 
 
@@ -30,7 +30,7 @@ class OspSimulationCase():
         self.case_dict: CppDict = case_dict
         self.case_folder: Path = case_dict.source_file.resolve(
         ).parent if case_dict.source_file else Path.cwd()
-        self.system_structure: SystemStructure
+        self.system_structure: System
 
         # Global settings
         self.simulation: Simulation             # general properties of the simulation case
@@ -69,7 +69,7 @@ class OspSimulationCase():
             msg = f"no 'systemStructure' section found in {self.case_dict.name}. Cannot set up OSP simulation case."
             logger.exception(msg)
             raise ValueError(msg)
-        self.system_structure = SystemStructure(self.case_dict['systemStructure'])
+        self.system_structure = System(self.case_dict['systemStructure'])
 
         # Make sure all components have a step size defined
         self._check_components_step_size()

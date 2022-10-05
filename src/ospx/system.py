@@ -5,12 +5,12 @@ from ospx import Component, Connection, Connector, Endpoint
 from ospx.fmi import FMU, ScalarVariable, Unit
 
 
-__ALL__ = ['SystemStructure']
+__ALL__ = ['System']
 
 logger = logging.getLogger(__name__)
 
 
-class SystemStructure():
+class System():
     """The system structure describes the topology of the co-simulated system.
 
     A system structure can contain an arbitrary number of components.

@@ -29,4 +29,4 @@ Submodules
    ospx.ospCaseBuilder
    ospx.ospSimulationCase
    ospx.simulation
-   ospx.systemStructure
+   ospx.system
