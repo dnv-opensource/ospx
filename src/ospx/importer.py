@@ -130,7 +130,16 @@ class OspSystemStructureImporter():
                         _connector_name: _connector
                     }
                 # Save in connections dict
-                connections[connection_name] = connection
+                if connection_name not in connections:
+                    connections[connection_name] = connection
+                else:
+                    suffix_number: int = 2
+                    _connection_name: str = f'{connection_name}_{suffix_number:02d}'
+                    while _connection_name in connections:
+                        suffix_number += 1
+                        _connection_name = f'{connection_name}_{suffix_number:02d}'
+                    connection_name = _connection_name
+                    connections[connection_name] = connection
 
         # Simulators (=Components)
         if simulators_key := find_key(source_dict, 'Simulators$'):
