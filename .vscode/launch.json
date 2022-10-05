@@ -202,6 +202,20 @@
             }
         },
         {
+            "name": "importSystemStructure variable_group OspSystemStructure_original.xml",
+            "type": "python",
+            "request": "launch",
+            "cwd": "${workspaceFolder}\\tests\\variable_groups",
+            "program": "${workspaceFolder}\\src\\ospx\\cli\\importSystemStructure.py",
+            "args": [
+                "OspSystemStructure_original.xml",
+            ],
+            "console": "integratedTerminal",
+            "autoReload": {
+                "enable": true
+            }
+        },
+        {
             "name": "ospCaseBuilder variable_group --inspect multiple_connection_types",
             "type": "python",
             "request": "launch",
