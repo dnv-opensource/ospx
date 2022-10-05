@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8"?>
+<OspSystemStructure xmlns="http://opensimulationplatform.com/MSMI/OSPSystemStructure" version="0.1">
+	<StartTime>0.0</StartTime>
+	<BaseStepSize>0.05</BaseStepSize>
+	<Algorithm>fixedStep</Algorithm>
+	<Simulators>
+		<Simulator name="Vessel" source="Vessel.fmu" stepSize="0.1">
+			<InitialValues>
+			</InitialValues>
+		</Simulator>
+
+		<Simulator name="LOSGuidance" source="LOSGuidance.fmu" stepSize="0.1">
+			<InitialValues>
+				<InitialValue variable="UDesired">
+					<Real value="1"/>					
+				</InitialValue>
+			</InitialValues>
+		</Simulator>
+
+		<Simulator name="VelocityObstacleController" source="VelocityObstacleController.fmu" stepSize="0.1">
+			<InitialValues>
+			</InitialValues>
+		</Simulator>
+
+		<Simulator name="TargetShipModule" source="TargetShipModule.fmu" stepSize="0.1">
+			<InitialValues>
+				<InitialValue variable="Parameters.posYNEDInit[0]">
+					<Real value="1"/>					
+				</InitialValue>
+			</InitialValues>
+		</Simulator>
+
+		<Simulator name="EncounterEvaluation" source="EncounterEvaluation.fmu" stepSize="0.1">
+			<InitialValues>
+				<InitialValue variable="TargetShipType[0]">
+					<Real value="3"/>					
+				</InitialValue>
+				<InitialValue variable="TargetShipType[1]">
+					<Real value="3"/>					
+				</InitialValue>
+				<InitialValue variable="TargetShipType[2]">
+					<Real value="3"/>					
+				</InitialValue>
+			</InitialValues>
+		</Simulator>
+
+		<Simulator name="EvaluateEncounterR14" source="EvaluateEncounterR14.fmu" stepSize="0.1">
+			<InitialValues>
+				<InitialValue variable="COLREGState[1]">
+					<Real value="4"/>					
+				</InitialValue>
+				<InitialValue variable="COLREGState[2]">
+					<Real value="4"/>					
+				</InitialValue>
+				<InitialValue variable="COLREGState[3]">
+					<Real value="4"/>					
+				</InitialValue>
+			</InitialValues>
+		</Simulator>
+
+		<Simulator name="SafetyScore" source="SafetyScore.fmu" stepSize="0.1">
+			<InitialValues>
+				<InitialValue variable="TargetShipType[1]">
+					<Real value="3"/>					
+				</InitialValue>
+				<InitialValue variable="TargetShipType[2]">
+					<Real value="3"/>					
+				</InitialValue>
+				<InitialValue variable="TargetShipType[3]">
+					<Real value="3"/>					
+				</InitialValue>
+			</InitialValues>
+		</Simulator>
+
+
+	</Simulators>
+
+
+
+	
+	
+	
+	<Connections>
+		<!-- BEGIN Vessel -> OutputConn -->
+		<VariableGroupConnection>
+			<VariableGroup simulator="Vessel" name="ASVStates"/>
+			<VariableGroup simulator="LOSGuidance" name="ASVStates"/>
+		</VariableGroupConnection>
+		<VariableGroupConnection>
+			<VariableGroup simulator="Vessel" name="ASVStates"/>
+			<VariableGroup simulator="VelocityObstacleController" name="ASVStates"/>
+		</VariableGroupConnection>
+		<VariableGroupConnection>
+			<VariableGroup simulator="Vessel" name="ASVStates"/>
+			<VariableGroup simulator="EvaluateEncounterR14" name="ASVStates"/>
+		</VariableGroupConnection>
+		<VariableGroupConnection>
+			<VariableGroup simulator="Vessel" name="ASVStates"/>
+			<VariableGroup simulator="EncounterEvaluation" name="ASVStates"/>
+		</VariableGroupConnection>
+
+
+		<VariableConnection>
+			<Variable simulator="LOSGuidance" name="ULos"/>
+			<Variable simulator="VelocityObstacleController" name="ULos"/>
+		</VariableConnection>
+		<VariableConnection>
+			<Variable simulator="LOSGuidance" name="PsiLos"/>
+			<Variable simulator="VelocityObstacleController" name="PsiLos"/>
+		</VariableConnection>
+
+
+		<VariableConnection>
+			<Variable simulator="VelocityObstacleController" name="CollisionSituation"/>
+			<Variable simulator="LOSGuidance" name="CollisionSituation"/>
+		</VariableConnection>
+		<VariableConnection>
+			<Variable simulator="VelocityObstacleController" name="UDesired"/>
+			<Variable simulator="Vessel" name="UDesiredCAS"/>
+		</VariableConnection>
+		<VariableConnection>
+			<Variable simulator="VelocityObstacleController" name="PsiDesired"/>
+			<Variable simulator="Vessel" name="PsiDesiredCAS"/>
+		</VariableConnection>
+
+
+
+
+		<!-- BEGIN EncounterEvaluation -> OutputConn -->
+		<VariableGroupConnection>
+			<VariableGroup simulator="EncounterEvaluation" name="PoseAlphaCPA"/>
+			<VariableGroup simulator="EvaluateEncounterR14" name="PoseAlphaCPA"/>
+		</VariableGroupConnection>
+		<VariableGroupConnection>
+			<VariableGroup simulator="EncounterEvaluation" name="PoseAlphaCPA"/>
+			<VariableGroup simulator="SafetyScore" name="PoseAlphaCPA"/>
+		</VariableGroupConnection>
+		<VariableGroupConnection>
+			<VariableGroup simulator="EncounterEvaluation" name="PoseBetaCPA"/>
+			<VariableGroup simulator="EvaluateEncounterR14" name="PoseBetaCPA"/>
+		</VariableGroupConnection>
+		<VariableGroupConnection>
+			<VariableGroup simulator="EncounterEvaluation" name="PoseBetaCPA"/>
+			<VariableGroup simulator="SafetyScore" name="PoseBetaCPA"/>
+		</VariableGroupConnection>
+		<VariableGroupConnection>
+			<VariableGroup simulator="EncounterEvaluation" name="Range"/>
+			<VariableGroup simulator="EvaluateEncounterR14" name="Range"/>
+		</VariableGroupConnection>
+
+
+		<VariableGroupConnection>
+			<VariableGroup simulator="EncounterEvaluation" name="RangeCPA"/>
+			<VariableGroup simulator="EvaluateEncounterR14" name="RangeCPA"/>
+		</VariableGroupConnection>
+		<VariableGroupConnection>
+			<VariableGroup simulator="EncounterEvaluation" name="RangeCPA"/>
+			<VariableGroup simulator="SafetyScore" name="RangeCPA"/>
+		</VariableGroupConnection>
+		<VariableGroupConnection>
+			<VariableGroup simulator="EncounterEvaluation" name="StartEvaluation"/>
+			<VariableGroup simulator="EvaluateEncounterR14" name="StartEvaluation"/>
+		</VariableGroupConnection>
+		<VariableGroupConnection>
+			<VariableGroup simulator="EncounterEvaluation" name="StartEvaluation"/>
+			<VariableGroup simulator="SafetyScore" name="StartEvaluation"/>
+		</VariableGroupConnection>
+		<VariableGroupConnection>
+			<VariableGroup simulator="EncounterEvaluation" name="TargetShipPassed"/>
+			<VariableGroup simulator="EvaluateEncounterR14" name="TargetShipPassed"/>
+		</VariableGroupConnection>
+		<VariableGroupConnection>
+			<VariableGroup simulator="EncounterEvaluation" name="TimeCPA"/>
+			<VariableGroup simulator="EvaluateEncounterR14" name="TimeCPA"/>
+		</VariableGroupConnection>
+
+		<VariableGroupConnection>
+			<VariableGroup simulator="TargetShipModule" name="TargetShipsPositionX"/>
+			<VariableGroup simulator="EncounterEvaluation" name="TargetShipsPositionX"/>
+		</VariableGroupConnection>
+		<VariableGroupConnection>
+			<VariableGroup simulator="TargetShipModule" name="TargetShipsPositionY"/>
+			<VariableGroup simulator="EncounterEvaluation" name="TargetShipsPositionY"/>
+		</VariableGroupConnection>
+		<VariableGroupConnection>
+			<VariableGroup simulator="TargetShipModule" name="TargetShipsVelocityX"/>
+			<VariableGroup simulator="EncounterEvaluation" name="TargetShipsVelocityX"/>
+		</VariableGroupConnection>
+		<VariableGroupConnection>
+			<VariableGroup simulator="TargetShipModule" name="TargetShipsVelocityY"/>
+			<VariableGroup simulator="EncounterEvaluation" name="TargetShipsVelocityY"/>
+		</VariableGroupConnection>
+		<VariableGroupConnection>
+			<VariableGroup simulator="TargetShipModule" name="TargetShipsYaw"/>
+			<VariableGroup simulator="EncounterEvaluation" name="TargetShipsYaw"/>
+		</VariableGroupConnection>
+
+		<VariableGroupConnection>
+			<VariableGroup simulator="TargetShipModule" name="TargetShipsPositionX"/>
+			<VariableGroup simulator="VelocityObstacleController" name="TargetShipsPositionX"/>
+		</VariableGroupConnection>
+		<VariableGroupConnection>
+			<VariableGroup simulator="TargetShipModule" name="TargetShipsPositionY"/>
+			<VariableGroup simulator="VelocityObstacleController" name="TargetShipsPositionY"/>
+		</VariableGroupConnection>
+		<VariableGroupConnection>
+			<VariableGroup simulator="TargetShipModule" name="TargetShipsVelocityX"/>
+			<VariableGroup simulator="VelocityObstacleController" name="TargetShipsVelocityX"/>
+		</VariableGroupConnection>
+		<VariableGroupConnection>
+			<VariableGroup simulator="TargetShipModule" name="TargetShipsVelocityY"/>
+			<VariableGroup simulator="VelocityObstacleController" name="TargetShipsVelocityY"/>
+		</VariableGroupConnection>
+
+
+	</Connections>
+
+
+
+
+</OspSystemStructure>
