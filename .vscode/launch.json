@@ -87,13 +87,14 @@
             }
         },
         {
-            "name": "ospCaseBuilder test_caseDict",
+            "name": "ospCaseBuilder test_caseDict --graph",
             "type": "python",
             "request": "launch",
             "cwd": "${workspaceFolder}\\tests\\test_dicts",
             "program": "${workspaceFolder}\\src\\ospx\\cli\\ospCaseBuilder.py",
             "args": [
                 "test_caseDict",
+                "--graph",
             ],
             "console": "integratedTerminal",
             "autoReload": {

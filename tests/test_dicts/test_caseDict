@@ -5,174 +5,109 @@ filetype dictionary; coding utf-8; version 0.1; local --; purpose --;
 
 _environment
 {
-    libSource                           ../library;  //adjust this path to point to the library folder containing the fmu's
+    libSource                           .;
 }
 systemStructure
 {
     connections
     {
-        minuend_to_difference
+        component_1_to_component_2
         {
             source
             {
-                component               minuend;
-                connector               minuend_output;
+                component               component_1;
+                connector               output_1;
             }
             target
             {
-                component               difference;
-                connector               difference_input_minuend;
+                component               component_2;
+                connector               input_1;
             }
         }
-        subtrahend_to_difference
+        component_2_to_component_1
         {
             source
             {
-                component               subtrahend;
-                connector               subtrahend_output;
+                component               component_2;
+                connector               output_2;
             }
             target
             {
-                component               difference;
-                connector               difference_input_subtrahend;
-            }
-        }
-        dividend_to_quotient
-        {
-            source
-            {
-                component               dividend;
-                connector               dividend_output;
-            }
-            target
-            {
-                component               quotient;
-                connector               quotient_input_dividend;
-            }
-        }
-        difference_to_divisor
-        {
-            source
-            {
-                component               difference;
-                connector               difference_output;
-            }
-            target
-            {
-                component               quotient;
-                connector               quotient_input_divisor;
+                component               component_1;
+                connector               input_2;
             }
         }
     }
     components
     {
-        difference
+        component_1
         {
             connectors
             {
-                difference_input_minuend
+                input_1
                 {
-                    variable            difference.IN1;
+                    variable            Variable_1_IN;
                     type                input;
                 }
-                difference_input_subtrahend
+                input_2
                 {
-                    variable            difference.IN2;
+                    variableGroup       VariableGroup_1_IN;
                     type                input;
                 }
-                difference_output
+                output_1
                 {
-                    variable            difference.OUT;
+                    variable            Variable_4_OUT;
                     type                output;
                 }
-            }
-            fmu                         simple/difference.fmu;
-        }
-        quotient
-        {
-            connectors
-            {
-                quotient_input_dividend
+                output_2
                 {
-                    variable            quotient.IN1;
-                    type                input;
-                }
-                quotient_input_divisor
-                {
-                    variable            quotient.IN2;
-                    type                input;
-                }
-                quotient_output
-                {
-                    variable            quotient.OUT;
-                    type                output;
-                }
-
-            }
-            fmu                         simple/quotient.fmu;
-        }
-        minuend
-            {
-            connectors
-            {
-                minuend_output
-                {
-                    variable            constVal.OUT;
+                    variableGroup       VariableGroup_2_OUT;
                     type                output;
                 }
             }
             initialize
             {
-                constVal.IN
+                Variable_1_IN
                 {
-                    causality           parameter;
-                    variability         fixed;
-                    start               $minuend;
+                    start               $variable_1;
+                }
+                Variable_2_IN
+                {
+                    start               $variable_2;
+                }
+                Variable_3_IN
+                {
+                    start               $variable_3;
                 }
             }
-            fmu                         simple/constantVal.fmu;
+            fmu                         test_fmu.fmu;
         }
-        subtrahend
+        component_2
         {
             connectors
             {
-                subtrahend_output
+                input_1
                 {
-                    variable            constVal.OUT;
+                    variable            Variable_1_IN;
+                    type                input;
+                }
+                input_2
+                {
+                    variableGroup       VariableGroup_1_IN;
+                    type                input;
+                }
+                output_1
+                {
+                    variable            Variable_4_OUT;
+                    type                output;
+                }
+                output_2
+                {
+                    variableGroup       VariableGroup_2_OUT;
                     type                output;
                 }
             }
-            initialize
-            {
-                constVal.IN
-                {
-                    causality           parameter;
-                    variability         fixed;
-                    start               $subtrahend;
-                }
-            }
-            fmu                         simple/constantVal.fmu;
-        }
-        dividend
-        {
-            connectors
-            {
-                dividend_output
-                {
-                    variable            constVal.OUT;
-                    type                output;
-                }
-            }
-            initialize
-            {
-                constVal.IN
-                {
-                    causality           parameter;
-                    variability         fixed;
-                    start               $dividend;
-                }
-            }
-            fmu                         simple/constantVal.fmu;
+            fmu                         test_fmu.fmu;
         }
     }
 }
@@ -180,7 +115,7 @@ run
 {
     simulation
     {
-        name                            demoCase;
+        name                            testCase;
         startTime                       0;
         stopTime                        10;
         baseStepSize                    0.01;
