@@ -591,7 +591,7 @@ class OspSimulationCase():
             unit_definitions = '\n'.join(
                 f'\t{delim}{unit_name}{delim}{unit.display_unit.name}\t{delim}{unit.display_unit.factor}{delim}{unit.display_unit.offset}'
                 for unit_name,
-                unit in fmu.unit_definitions.items()
+                unit in fmu.units.items()
             )
             log_string += unit_definitions
         logger.info(log_string + '\n')
@@ -626,9 +626,7 @@ class OspSimulationCase():
                 log_string += connector_definitions
         logger.info(log_string + '\n')
 
-        logger.info(
-            f'inspect mode: Stopped after 1 case. You can now detail out the connector and connection elements in {self.case_dict.name} and then continue without --inspect'
-        )
+        logger.info('Inspect mode: Finished.')
 
     def _write_plot_config_json(self):
         """Writes the PlotConfig.json file, containing postprocessing information
