@@ -29,29 +29,29 @@
     <ModelVariables>
 
 
-        <ScalarVariable name="Variable_1_IN" valueReference="0"  causality="input">
+        <ScalarVariable name="Variable_1_IN_Real" valueReference="0"  causality="input">
             <Real  start="0.0" />
         </ScalarVariable> <!-- index="1" -->
 
-        <ScalarVariable name="Variable_2_IN" valueReference="1"  causality="input">
-            <Real  start="0.0" />
+        <ScalarVariable name="Variable_2_IN_Integer" valueReference="1"  causality="input">
+            <Integer  start="0" />
         </ScalarVariable> <!-- index="2" -->
 
-        <ScalarVariable name="Variable_3_IN" valueReference="2"  causality="input">
-            <Real  start="0.0" />
+        <ScalarVariable name="Variable_3_IN_Bool" valueReference="2"  causality="input">
+            <Boolean  start="false" />
         </ScalarVariable> <!-- index="3" -->
 
 
-        <ScalarVariable name="Variable_4_OUT" valueReference="3"  causality="output">
+        <ScalarVariable name="Variable_4_OUT_Real" valueReference="3"  causality="output">
             <Real />
         </ScalarVariable> <!-- index="4" -->
 
-        <ScalarVariable name="Variable_5_OUT" valueReference="4"  causality="output">
-            <Real />
+        <ScalarVariable name="Variable_5_OUT_Integer" valueReference="4"  causality="output">
+            <Integer />
         </ScalarVariable> <!-- index="5" -->
 
-        <ScalarVariable name="Variable_6_OUT" valueReference="5"  causality="output">
-            <Real />
+        <ScalarVariable name="Variable_6_OUT_Bool" valueReference="5"  causality="output">
+            <Boolean />
         </ScalarVariable> <!-- index="6" -->
 
 
@@ -164,6 +164,22 @@
         <ScalarVariable name="Model_1.Component_4.ParameterVector with Spaces[2]" valueReference="30" variability="tunable" causality="parameter">
             <Real  start="42.0"/>
         </ScalarVariable> <!-- index="31" -->
+
+
+        <ScalarVariable name="Parameter_4_Fixed" valueReference="31" variability="fixed" causality="parameter">
+            <Real  start="4.0"/>
+        </ScalarVariable> <!-- index="32" -->
+
+        <ScalarVariable name="Parameter_5_Tunable_Integer" valueReference="32" variability="tunable" causality="parameter">
+            <Integer  start="5"/>
+        </ScalarVariable> <!-- index="33" -->
+
+        <ScalarVariable name="Parameter_6_Fixed_Integer" valueReference="33" variability="fixed" causality="parameter">
+            <Integer  start="6"/>
+        </ScalarVariable> <!-- index="34" -->
+
+
+
 
 
     </ModelVariables>
