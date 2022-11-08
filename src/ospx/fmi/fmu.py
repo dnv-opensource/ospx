@@ -85,7 +85,7 @@ class FMU():
         return
 
     @property
-    def unit_definitions(self) -> dict[str, Unit]:
+    def units(self) -> dict[str, Unit]:
         model_unit_definitions: dict = {}
         if unit_definitions_key := find_key(self.model_description, 'UnitDefinitions$'):
             model_unit_definitions = self.model_description[unit_definitions_key]

@@ -142,7 +142,7 @@ class Component():
             # self.name = self.fmu.file.stem
 
     def _init_units(self):
-        self._units = deepcopy(self.fmu.unit_definitions)
+        self._units = deepcopy(self.fmu.units)
 
     def _init_variables(self):
         self._variables = deepcopy(self.fmu.variables)

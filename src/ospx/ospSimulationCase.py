@@ -8,7 +8,7 @@ from dictIO import CppDict, DictWriter, XmlFormatter
 from dictIO.utils.counter import BorgCounter
 from dictIO.utils.path import relative_path
 
-from ospx import Simulation, SystemStructure
+from ospx import Simulation, System
 from ospx.utils.dict import find_key
 
 
@@ -30,7 +30,7 @@ class OspSimulationCase():
         self.case_dict: CppDict = case_dict
         self.case_folder: Path = case_dict.source_file.resolve(
         ).parent if case_dict.source_file else Path.cwd()
-        self.system_structure: SystemStructure
+        self.system_structure: System
 
         # Global settings
         self.simulation: Simulation             # general properties of the simulation case
@@ -69,7 +69,7 @@ class OspSimulationCase():
             msg = f"no 'systemStructure' section found in {self.case_dict.name}. Cannot set up OSP simulation case."
             logger.exception(msg)
             raise ValueError(msg)
-        self.system_structure = SystemStructure(self.case_dict['systemStructure'])
+        self.system_structure = System(self.case_dict['systemStructure'])
 
         # Make sure all components have a step size defined
         self._check_components_step_size()
@@ -591,7 +591,7 @@ class OspSimulationCase():
             unit_definitions = '\n'.join(
                 f'\t{delim}{unit_name}{delim}{unit.display_unit.name}\t{delim}{unit.display_unit.factor}{delim}{unit.display_unit.offset}'
                 for unit_name,
-                unit in fmu.unit_definitions.items()
+                unit in fmu.units.items()
             )
             log_string += unit_definitions
         logger.info(log_string + '\n')
@@ -626,9 +626,7 @@ class OspSimulationCase():
                 log_string += connector_definitions
         logger.info(log_string + '\n')
 
-        logger.info(
-            f'inspect mode: Stopped after 1 case. You can now detail out the connector and connection elements in {self.case_dict.name} and then continue without --inspect'
-        )
+        logger.info('Inspect mode: Finished.')
 
     def _write_plot_config_json(self):
         """Writes the PlotConfig.json file, containing postprocessing information

@@ -1,0 +1,122 @@
+/*---------------------------------*- C++ -*----------------------------------*\
+filetype dictionary; coding utf-8; version 0.1; local --; purpose --;
+\*----------------------------------------------------------------------------*/
+_environment
+{
+    libSource                 ..\library\spring_mass_damper;
+}
+systemStructure
+{
+    connections
+    {
+        spring_to_mass
+        {
+            source
+            {
+                component        spring;
+                connector        spring_mass_connector;
+            }
+            target
+            {
+                component        mass;
+                connector        mass_spring_connector;
+            }
+        }
+        damper_to_mass
+        {
+            source
+            {
+                component        damper;
+                connector        damper_mass_connector;
+            }
+            target
+            {
+                component        mass;
+                connector        mass_damper_connector;
+            }
+        }
+    }
+    components
+    {
+        spring
+        {
+            connectors
+            {
+                spring_mass_connector
+                {
+                    variableGroup        mass_connector;
+                    type        output;
+                }
+            }
+            fmu               Spring.fmu;
+            initialize
+            {
+                springStiffness
+                {
+                    start        5.0;
+                }
+                zeroForceLength
+                {
+                    start        5.0;
+                }
+            }
+        }
+        damper
+        {
+            connectors
+            {
+                damper_mass_connector
+                {
+                    variableGroup        mass_connector;
+                    type        output;
+                }
+            }
+            fmu               Damper.fmu;
+            initialize
+            {
+                dampingCoefficient
+                {
+                    start        2.0;
+                }
+            }
+        }
+        mass
+        {
+            connectors
+            {
+                mass_spring_connector
+                {
+                    variableGroup        spring_connector;
+                    type        input;
+                }
+                mass_damper_connector
+                {
+                    variableGroup        damper_connector;
+                    type        input;
+                }
+            }
+            fmu               Mass.fmu;
+            initialize
+            {
+                initialPositionX
+                {
+                    start        5.0;
+                }
+                mediumDensity
+                {
+                    start        1.0;
+                }
+            }
+        }
+    }
+}
+run
+{
+    simulation
+    {
+        name                  test_OspSystemStructure_spring_mass_damper;
+        startTime             0.0;
+        baseStepSize          0.01;
+        algorithm             fixedStep;
+    }
+}
