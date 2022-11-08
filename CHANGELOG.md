@@ -8,6 +8,30 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 * --
 
 
+## [0.2.4] - 2022-11-08
+
+### Changed
+
+* Renamed module systemStructure.py to system.py <br>
+  Accordingly, renamed also class SystemStructure to System.
+
+* Renamed some attributes in FMU class
+
+* dependencies:
+    * upgraded to dictIO >= 0.2.2  (now supporting references and expressions in JSON dicts)
+
+### Added
+
+* \tests: Added spring_mass_damper example
+
+* \tests: Added test_fmu.py
+
+### Solved
+
+* watchCosim.py : Added try-except statements to catch TypeErrors and ValueErrors when trying to plot non-numerical variables (i.e. String or None)
+
+
+
 ## [0.2.3] - 2022-10-05
 
 ### Solved
@@ -196,7 +220,8 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 * Added support for Python 3.10
 
 <!-- Markdown link & img dfn's -->
-[unreleased]: https://github.com/dnv-opensource/ospx/compare/v0.2.3...HEAD
+[unreleased]: https://github.com/dnv-opensource/ospx/compare/v0.2.4...HEAD
+[0.2.4]: https://github.com/dnv-opensource/ospx/compare/v0.2.3...v0.2.4
 [0.2.3]: https://github.com/dnv-opensource/ospx/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/dnv-opensource/ospx/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/dnv-opensource/ospx/compare/v0.2.0...v0.2.1
