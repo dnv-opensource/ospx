@@ -26,6 +26,7 @@ class CosimWatcher:
         csv_file_names: MutableSequence,
         skip_values: int,
         latest_values: int,
+        scale_factor: float,
     ):
         self.watch_dict_file = None
         self.watch_dict = None
@@ -38,6 +39,7 @@ class CosimWatcher:
         self.number_of_subplots = 0
         self.skip_values = skip_values
         self.latest_values = latest_values
+        self.scale_factor = scale_factor
 
     def read_watch_dict(self, watch_dict_file: Union[str, os.PathLike[str]]):
         """Reads watchDict file. The watchDict file contains the parameters to be plotted.
@@ -284,7 +286,7 @@ class CosimWatcher:
 
         Collects data and sets plot header line
         """
-        self.figure = plt.figure(figsize=(16, 9), dpi=150)
+        self.figure = plt.figure(figsize=(int(self.scale_factor * 16), int(self.scale_factor * 9)), dpi=150)
         # self.fig.tight_layout() #constraint_layout()
         self.figure.subplots_adjust(
             left=0.1,

@@ -113,7 +113,14 @@ def _argparser() -> argparse.ArgumentParser:
         default='WARNING',
         required=False,
     )
-
+    parser.add_argument(
+        '--scale',
+        action='store',
+        type=int,
+        help='scale image by factor',
+        default=1,
+        required=False,
+    )
     parser.add_argument(
         '--skip',
         action='store',
@@ -152,6 +159,8 @@ def main():
     dump: bool = args.dump
     skip: int = args.skip
     latest: int = args.latest
+    scale_factor = float(args.scale)
+    
     if not converge and not plot and not dump:
         logger.error('give at least one option what to do: --converge, --plot or --dump')
         parser.print_help()
@@ -165,6 +174,7 @@ def main():
         dump=dump,
         skip_values=skip,
         latest_values=latest,
+        scale_factor = scale_factor,
     )
 
 
@@ -175,6 +185,7 @@ def _main(
     dump: bool = False,
     skip_values: int = 0,
     latest_values: int = 0,
+    scale_factor: float = 1,
 ):
     """Entry point for unit tests.
 
@@ -220,7 +231,7 @@ def _main(
         )[-1] for data_source_name in data_source_names
     ]
 
-    watcher = CosimWatcher(latest_csv_file_names, skip_values, latest_values)
+    watcher = CosimWatcher(latest_csv_file_names, skip_values, latest_values, scale_factor)
     watcher.read_watch_dict(watch_dict_file_name)
 
     Path(watcher.results_dir).mkdir(parents=True, exist_ok=True)
