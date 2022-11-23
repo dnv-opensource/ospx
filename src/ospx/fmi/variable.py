@@ -171,8 +171,10 @@ def get_fmi_data_type(arg: Any) -> str:
         return 'Real'
     elif isinstance(arg, bool):
         return 'Boolean'
-    elif isinstance(arg, Sequence):
-        return 'Enumeration'
+    # not regarding the content, sequence is always returned if not int or float, e.g. string.
+    # requires a solution, if xs:enumeration is required.
+    #elif isinstance(arg, Sequence):
+    #    return 'Enumeration'
     else:
         return 'String'
 
