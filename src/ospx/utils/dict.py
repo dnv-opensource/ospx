@@ -42,7 +42,7 @@ def shrink_dict(dict: MutableMapping, unique_key: Union[list[str], None] = None)
     unique_key = unique_key or []
     unique_keys_string: str = "['" + "']['".join(unique_key) + "']"
     # sort an ordered dict for attribute (child) where the dict is to make unique for
-    eval_string = f'sorted(dict.items(), key=lambda x: x[1]{unique_keys_string})'
+    eval_string = f'sorted(dict.items(), key=lambda x: str(x[1]{unique_keys_string}))'
 
     # list doubles and remember for deleting
     seen = set([])

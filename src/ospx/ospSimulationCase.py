@@ -609,7 +609,7 @@ class OspSimulationCase():
                 variable in fmu.variables.items()
             )
             log_string += variable_definitions
-        logger.info(log_string + '\n')
+            logger.info(log_string + '\n')
 
         log_string = (
             f"Connectors defined in {self.case_dict.name}\n"

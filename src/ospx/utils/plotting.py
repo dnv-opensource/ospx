@@ -51,7 +51,11 @@ def save_figure(plt, fig, extension, path: Union[str, os.PathLike[str]], title: 
     ]
     for item in title_string_replacements:
         title_in_file_name = title_in_file_name.replace(item[0], item[1])
-
+        
+    #limit overall length to 128 characters
+    if len(title_in_file_name) >= 80:
+        title_in_file_name = ''.join(list(title_in_file_name[:59]) + ['.', '.'] + list(title_in_file_name[-19:]))
+    
     if path:
         save_file = Path() / path / f'{title_in_file_name}.{extension}'
     else:
