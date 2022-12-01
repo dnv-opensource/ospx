@@ -2,13 +2,12 @@ import logging
 from typing import Union
 
 
-__ALL__ = ['Connector']
+__ALL__ = ["Connector"]
 
 logger = logging.getLogger(__name__)
 
 
-class Connector():
-
+class Connector:
     def __init__(
         self,
         name: str,
@@ -35,9 +34,9 @@ class Connector():
     def variable(self, variable: str):
         if self._variable_group:
             msg = (
-                f'Inconsistency: Connector {self.name} defines both variable and variableGroup.\n'
-                f'variable: {variable}\nvariableGroup: {self._variable_group}\n'
-                'variable is used. variableGroup is omitted.'
+                f"Inconsistency: Connector {self.name} defines both variable and variableGroup.\n"
+                f"variable: {variable}\nvariableGroup: {self._variable_group}\n"
+                "variable is used. variableGroup is omitted."
             )
             logger.warning(msg)
             self._variable_group = None
@@ -51,9 +50,9 @@ class Connector():
     def variable_group(self, variable_group: str):
         if self._variable:
             msg = (
-                f'Inconsistency: Connector {self.name} defines both variable and variableGroup.\n'
-                f'variable: {self._variable}\nvariableGroup: {variable_group}\n'
-                'variable is omitted. variableGroup is used.'
+                f"Inconsistency: Connector {self.name} defines both variable and variableGroup.\n"
+                f"variable: {self._variable}\nvariableGroup: {variable_group}\n"
+                "variable is omitted. variableGroup is used."
             )
             logger.warning(msg)
             self._variable = None
@@ -66,8 +65,8 @@ class Connector():
     @type.setter
     def type(self, type: str):
         valid_types: list[str] = [
-            'input',
-            'output',
+            "input",
+            "output",
         ]
         if type not in valid_types:
             logger.error(f"connector {self.name}: type '{type}' is invalid.")
@@ -90,4 +89,4 @@ class Connector():
         elif self._variable_group:
             return self._variable_group
         else:
-            return 'UNKNOWN'
+            return "UNKNOWN"

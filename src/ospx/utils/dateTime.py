@@ -1,6 +1,6 @@
 from datetime import datetime
 
-__all__ = ['today', 'calc_time']
+__all__ = ["today", "calc_time"]
 
 
 def today():
