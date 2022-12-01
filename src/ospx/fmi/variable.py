@@ -3,12 +3,12 @@ from typing import Any, Sequence, Union
 from dictIO import Parser, Formatter
 
 
-__ALL__ = ['ScalarVariable', 'get_fmi_data_type']
+__ALL__ = ["ScalarVariable", "get_fmi_data_type"]
 
 logger = logging.getLogger(__name__)
 
 
-class ScalarVariable():
+class ScalarVariable:
     """fmi 2.0 ScalarVariable
 
     See https://github.com/modelica/fmi-standard/blob/v2.0.x/schema/fmi2ScalarVariable.xsd
@@ -30,7 +30,7 @@ class ScalarVariable():
         # Attributes
         self.name: str
         self._data_type: Union[str, None] = None
-        self._causality: str = 'local'
+        self._causality: str = "local"
         self._variability: Union[str, None] = None
         self._start: Union[int, float, bool, str, None] = None
         self.value_reference: int = 0
@@ -61,14 +61,16 @@ class ScalarVariable():
     @data_type.setter
     def data_type(self, type: str):
         valid_types: list[str] = [
-            'Real',
-            'Integer',
-            'Boolean',
-            'String',
-            'Enumeration',
+            "Real",
+            "Integer",
+            "Boolean",
+            "String",
+            "Enumeration",
         ]
         if type not in valid_types:
-            logger.error(f"variable {self.name}: value for data_type '{type}' is invalid.")
+            logger.error(
+                f"variable {self.name}: value for data_type '{type}' is invalid."
+            )
             return
         self._data_type = type
         return
@@ -80,13 +82,13 @@ class ScalarVariable():
     @causality.setter
     def causality(self, value: str):
         valid_values: list[str] = [
-            'parameter',
-            'calculatedParameter',
-            'input',
-            'output',
-            'local',
-            'independent',
-            'structuralParameter',
+            "parameter",
+            "calculatedParameter",
+            "input",
+            "output",
+            "local",
+            "independent",
+            "structuralParameter",
         ]
         if value not in valid_values:
             logger.error(f"variable {self.name}: causality value '{value}' is invalid.")
@@ -101,14 +103,16 @@ class ScalarVariable():
     @variability.setter
     def variability(self, value: str):
         valid_values: list[str] = [
-            'constant',
-            'fixed',
-            'tunable',
-            'discrete',
-            'continuous',
+            "constant",
+            "fixed",
+            "tunable",
+            "discrete",
+            "continuous",
         ]
         if value not in valid_values:
-            logger.error(f"variable {self.name}: value for variability '{value}' is invalid.")
+            logger.error(
+                f"variable {self.name}: value for variability '{value}' is invalid."
+            )
             return
         self._variability = value
         return
@@ -166,21 +170,22 @@ def get_fmi_data_type(arg: Any) -> str:
     """
 
     if isinstance(arg, int):
-        return 'Integer'
+        return "Integer"
     elif isinstance(arg, float):
-        return 'Real'
+        return "Real"
     elif isinstance(arg, bool):
-        return 'Boolean'
+        return "Boolean"
     # not regarding the content, sequence is always returned if not int or float, e.g. string.
     # requires a solution, if xs:enumeration is required.
-    #elif isinstance(arg, Sequence):
+    # elif isinstance(arg, Sequence):
     #    return 'Enumeration'
     else:
-        return 'String'
+        return "String"
 
 
-def _cast_to_fmi_data_type(arg: Union[int, float, bool, str, Sequence],
-                           fmi_data_type: str) -> Union[int, float, bool, str, list, None]:
+def _cast_to_fmi_data_type(
+    arg: Union[int, float, bool, str, Sequence], fmi_data_type: str
+) -> Union[int, float, bool, str, list, None]:
     """Casts the passed in argument to a Python data type that matches the requested fmi data type
 
     Parameters
@@ -196,7 +201,7 @@ def _cast_to_fmi_data_type(arg: Union[int, float, bool, str, Sequence],
     Union[int, float, bool, str, list, None]
         The casted value (in a Python data type that matches the requested fmi data type)
     """
-    if fmi_data_type in {'Integer', 'Real', 'Boolean'}:
+    if fmi_data_type in {"Integer", "Real", "Boolean"}:
         if isinstance(arg, Sequence):
             logger.warning(
                 f"_cast_to_fmi_data_type(): argument {arg} of type List/Tuple/Sequence cannot be casted to fmi data type {fmi_data_type}"
@@ -206,17 +211,20 @@ def _cast_to_fmi_data_type(arg: Union[int, float, bool, str, Sequence],
         parsed_value: Union[int, float, bool]
         parsed_value = Parser().parse_type(arg) if isinstance(arg, str) else arg
         # cast to int / float / bool
-        if fmi_data_type == 'Integer':
+        if fmi_data_type == "Integer":
             return int(parsed_value)
-        elif fmi_data_type == 'Real':
+        elif fmi_data_type == "Real":
             return float(parsed_value)
         else:
             return bool(parsed_value)
-    elif fmi_data_type == 'String':
+    elif fmi_data_type == "String":
         # format as string
-        return Formatter().format_dict(arg) if isinstance(arg, Sequence
-                                                          ) else Formatter().format_type(arg)
-    elif fmi_data_type == 'Enumeration':
+        return (
+            Formatter().format_dict(arg)
+            if isinstance(arg, Sequence)
+            else Formatter().format_type(arg)
+        )
+    elif fmi_data_type == "Enumeration":
         # cast to list
         return list(arg) if isinstance(arg, Sequence) else [arg]
     else:

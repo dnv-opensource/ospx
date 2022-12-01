@@ -5,13 +5,12 @@ from ospx.connector import Connector
 from ospx.fmi.variable import ScalarVariable
 
 
-__ALL__ = ['Endpoint', 'Connection']
+__ALL__ = ["Endpoint", "Connection"]
 
 logger = logging.getLogger(__name__)
 
 
-class Endpoint():
-
+class Endpoint:
     def __init__(
         self,
         component: Component,
@@ -34,9 +33,9 @@ class Endpoint():
     def connector(self, connector: Connector):
         if self._variable:
             msg = (
-                f'Inconsistency: Connection endpoint defines both connector and variable.\n'
-                f'connector: {connector.name}\nvariable: {self._variable.name}\n'
-                'connector is used. variable is omitted.'
+                f"Inconsistency: Connection endpoint defines both connector and variable.\n"
+                f"connector: {connector.name}\nvariable: {self._variable.name}\n"
+                "connector is used. variable is omitted."
             )
             logger.warning(msg)
             self._variable = None
@@ -50,9 +49,9 @@ class Endpoint():
     def variable(self, variable: ScalarVariable):
         if self._connector:
             msg = (
-                f'Inconsistency: Connection endpoint defines both connector and variable.\n'
-                f'connector: {self._connector.name}\nvariable: {variable.name}\n'
-                'connector is omitted. variable is used.'
+                f"Inconsistency: Connection endpoint defines both connector and variable.\n"
+                f"connector: {self._connector.name}\nvariable: {variable.name}\n"
+                "connector is omitted. variable is used."
             )
             logger.warning(msg)
             self._connector = None
@@ -65,15 +64,14 @@ class Endpoint():
         elif self._variable:
             return self._variable.name
         else:
-            return 'UNKNOWN'
+            return "UNKNOWN"
 
     @property
     def is_valid(self) -> bool:
         return bool(self.component and (self.connector or self.variable))
 
 
-class Connection():
-
+class Connection:
     def __init__(
         self,
         name: str,
@@ -111,8 +109,14 @@ class Connection():
         if self.source_endpoint.variable and self.target_endpoint.variable:
             return True
         if self.source_endpoint.connector and self.target_endpoint.connector:
-            _both_are_single: bool = self.source_endpoint.connector.is_single_connector and self.target_endpoint.connector.is_single_connector
-            _both_are_group: bool = self.source_endpoint.connector.is_group_connector and self.target_endpoint.connector.is_group_connector
+            _both_are_single: bool = (
+                self.source_endpoint.connector.is_single_connector
+                and self.target_endpoint.connector.is_single_connector
+            )
+            _both_are_group: bool = (
+                self.source_endpoint.connector.is_group_connector
+                and self.target_endpoint.connector.is_group_connector
+            )
             return _both_are_single or _both_are_group
         elif self.source_endpoint.connector:
             return self.source_endpoint.connector.is_single_connector

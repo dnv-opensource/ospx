@@ -8,14 +8,13 @@ from dictIO import CppDict, DictReader
 from ospx import Graph, OspSimulationCase
 
 
-__ALL__ = ['OspCaseBuilder']
+__ALL__ = ["OspCaseBuilder"]
 
 logger = logging.getLogger(__name__)
 
 
-class OspCaseBuilder():
-    """Builder for OSP-specific configuration files needed to run an OSP (co-)simulation case.
-    """
+class OspCaseBuilder:
+    """Builder for OSP-specific configuration files needed to run an OSP (co-)simulation case."""
 
     def __init__(self):
         return
@@ -54,8 +53,9 @@ class OspCaseBuilder():
         """
 
         # Make sure source_file argument is of type Path. If not, cast it to Path type.
-        case_dict_file = case_dict_file if isinstance(case_dict_file,
-                                                      Path) else Path(case_dict_file)
+        case_dict_file = (
+            case_dict_file if isinstance(case_dict_file, Path) else Path(case_dict_file)
+        )
         if not case_dict_file.exists():
             logger.error(f"OspCaseBuilder: File {case_dict_file} not found.")
             raise FileNotFoundError(case_dict_file)
@@ -64,7 +64,7 @@ class OspCaseBuilder():
             case_folder: Path = case_dict_file.resolve().parent
             _clean_case_folder(case_folder)
 
-        logger.info(f'reading {case_dict_file}')    # 0
+        logger.info(f"reading {case_dict_file}")  # 0
 
         case_dict: CppDict = DictReader.read(case_dict_file, comments=False)
 
@@ -84,7 +84,7 @@ class OspCaseBuilder():
         case.write_osp_system_structure_xml()
         case.write_system_structure_ssd()
 
-        if 'postProcessing' in case_dict.keys():
+        if "postProcessing" in case_dict.keys():
             case._write_plot_config_json()
 
         case.write_statistics_dict()
@@ -98,29 +98,28 @@ class OspCaseBuilder():
 
 
 def _clean_case_folder(case_folder: Path):
-    """Cleans up the case folder and deletes any existing ospx files, e.g. modelDescription.xml .fmu .csv etc.
-    """
+    """Cleans up the case folder and deletes any existing ospx files, e.g. modelDescription.xml .fmu .csv etc."""
     import re
     from shutil import rmtree
 
     # specify all files to be deleted (or comment-in / comment-out as needed)
     case_builder_result_files = [
-        '*.csv',
-        '*.out',
-        '*.xml',
-        '*.ssd',
-        '*.fmu',
-        '*callGraph',
-        '*.pdf',
-        '*.png',                    # 'protect results/*.png'
-        'watchDict',
-        'statisticsDict',           # 'results',
-        'zip',
+        "*.csv",
+        "*.out",
+        "*.xml",
+        "*.ssd",
+        "*.fmu",
+        "*callGraph",
+        "*.pdf",
+        "*.png",  # 'protect results/*.png'
+        "watchDict",
+        "statisticsDict",  # 'results',
+        "zip",
     ]
-    except_list = ['src', '^test_', '_OspModelDescription.xml']
-    except_pattern = '(' + '|'.join(except_list) + ')'
+    except_list = ["src", "^test_", "_OspModelDescription.xml"]
+    except_pattern = "(" + "|".join(except_list) + ")"
 
-    logger.info(f'Clean OSP simulation case folder: {case_folder}')
+    logger.info(f"Clean OSP simulation case folder: {case_folder}")
 
     for pattern in case_builder_result_files:
         files = list(case_folder.rglob(pattern))

@@ -5,12 +5,12 @@ from ospx import Component, Connection, Connector, Endpoint
 from ospx.fmi import FMU, ScalarVariable, Unit
 
 
-__ALL__ = ['System']
+__ALL__ = ["System"]
 
 logger = logging.getLogger(__name__)
 
 
-class System():
+class System:
     """The system structure describes the topology of the co-simulated system.
 
     A system structure can contain an arbitrary number of components.
@@ -66,30 +66,28 @@ class System():
         return variables
 
     def _read_components(self, properties: MutableMapping):
-        """Reads components from (case dict) properties
-        """
-        logger.info('read components from case dict')
+        """Reads components from (case dict) properties"""
+        logger.info("read components from case dict")
         self._components.clear()
-        if 'components' not in properties:
+        if "components" not in properties:
             return
-        for component_name, component_properties in properties['components'].items():
+        for component_name, component_properties in properties["components"].items():
             component = Component(component_name, component_properties)
             self._components[component.name] = component
 
     def _read_connections(self, properties: MutableMapping):
-        """Reads connections from (case dict) properties
-        """
-        logger.info('read connections from case dict')
+        """Reads connections from (case dict) properties"""
+        logger.info("read connections from case dict")
         self._connections.clear()
-        if 'connections' not in properties:
+        if "connections" not in properties:
             return
-        for connection_name, connection_properties in properties['connections'].items():
+        for connection_name, connection_properties in properties["connections"].items():
             source_endpoint: Union[Endpoint, None] = None
             target_endpoint: Union[Endpoint, None] = None
-            if 'source' in connection_properties:
-                source_endpoint = self._read_endpoint(connection_properties['source'])
-            if 'target' in connection_properties:
-                target_endpoint = self._read_endpoint(connection_properties['target'])
+            if "source" in connection_properties:
+                source_endpoint = self._read_endpoint(connection_properties["source"])
+            if "target" in connection_properties:
+                target_endpoint = self._read_endpoint(connection_properties["target"])
             if source_endpoint and target_endpoint:
                 connection = Connection(
                     name=connection_name,
@@ -99,23 +97,23 @@ class System():
                 self._connections[connection.name] = connection
             else:
                 logger.error(
-                    f'connection {connection_name}: connection could not be resolved. Please recheck connection properties in case dict.'
+                    f"connection {connection_name}: connection could not be resolved. Please recheck connection properties in case dict."
                 )
         return
 
     def _read_endpoint(self, properties: MutableMapping) -> Union[Endpoint, None]:
-        if 'component' not in properties:
+        if "component" not in properties:
             return None
         component: Union[Component, None] = None
         connector: Union[Connector, None] = None
         variable: Union[ScalarVariable, None] = None
 
-        component_name: str = properties['component']
+        component_name: str = properties["component"]
         if component_name in self.components:
             component = self.components[component_name]
 
-        if 'connector' in properties:
-            connector_name = properties['connector']
+        if "connector" in properties:
+            connector_name = properties["connector"]
             if component and connector_name in component.connectors:
                 connector = component.connectors[connector_name]
             else:
@@ -125,8 +123,8 @@ class System():
                         connector = c.connectors[connector_name]
                         break
 
-        if 'variable' in properties:
-            variable_name = properties['variable']
+        if "variable" in properties:
+            variable_name = properties["variable"]
             if component and variable_name in component.variables:
                 variable = component.variables[variable_name]
 

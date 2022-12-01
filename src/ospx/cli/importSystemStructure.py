@@ -17,58 +17,58 @@ logger = logging.getLogger(__name__)
 def _argparser() -> argparse.ArgumentParser:
 
     parser = ArgumentParser(
-        prog='importSystemStructure',
-        usage='%(prog)s systemStructureFile [options [args]]',
-        epilog='_________________importSystemStructure___________________',
-        prefix_chars='-',
+        prog="importSystemStructure",
+        usage="%(prog)s systemStructureFile [options [args]]",
+        epilog="_________________importSystemStructure___________________",
+        prefix_chars="-",
         add_help=True,
         description=(
-            'Imports an existing OspSystemStructure.xml and translates it into a caseDict.'
-        )
+            "Imports an existing OspSystemStructure.xml and translates it into a caseDict."
+        ),
     )
 
     parser.add_argument(
-        'systemStructureFile',
-        metavar='systemStructureFile',
+        "systemStructureFile",
+        metavar="systemStructureFile",
         type=str,
-        help='name of the system structure file',
-        default='OspSystemStructure.xml'
+        help="name of the system structure file",
+        default="OspSystemStructure.xml",
     )
 
     console_verbosity = parser.add_mutually_exclusive_group(required=False)
 
     console_verbosity.add_argument(
-        '-q',
-        '--quiet',
-        action='store_true',
-        help=('console output will be quiet.'),
+        "-q",
+        "--quiet",
+        action="store_true",
+        help=("console output will be quiet."),
         default=False,
     )
 
     console_verbosity.add_argument(
-        '-v',
-        '--verbose',
-        action='store_true',
-        help=('console output will be verbose.'),
+        "-v",
+        "--verbose",
+        action="store_true",
+        help=("console output will be verbose."),
         default=False,
     )
 
     parser.add_argument(
-        '--log',
-        action='store',
+        "--log",
+        action="store",
         type=str,
-        help='name of log file. If specified, this will activate logging to file.',
+        help="name of log file. If specified, this will activate logging to file.",
         default=None,
         required=False,
     )
 
     parser.add_argument(
-        '--log-level',
-        action='store',
+        "--log-level",
+        action="store",
         type=str,
-        help='log level applied to logging to file.',
-        choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
-        default='WARNING',
+        help="log level applied to logging to file.",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        default="WARNING",
         required=False,
     )
 
@@ -85,10 +85,10 @@ def main():
     args = parser.parse_args()
 
     # Configure Logging
-    log_level_console: str = 'WARNING'
+    log_level_console: str = "WARNING"
     if any([args.quiet, args.verbose]):
-        log_level_console = 'ERROR' if args.quiet else log_level_console
-        log_level_console = 'DEBUG' if args.verbose else log_level_console
+        log_level_console = "ERROR" if args.quiet else log_level_console
+        log_level_console = "DEBUG" if args.verbose else log_level_console
     # ..to file
     log_file: Union[Path, None] = Path(args.log) if args.log else None
     log_level_file: str = args.log_level
@@ -112,6 +112,6 @@ def main():
     return
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     main()

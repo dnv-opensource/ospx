@@ -11,12 +11,12 @@ from ospx import Connector
 from ospx.fmi import FMU, ScalarVariable, Unit
 
 
-__ALL__ = ['Component']
+__ALL__ = ["Component"]
 
 logger = logging.getLogger(__name__)
 
 
-class Component():
+class Component:
     """A component is an instance of a (component-) model.
 
     A component represents an instance of a (component-) model. Any system structure can contain an arbitrary number of components.
@@ -62,64 +62,69 @@ class Component():
         self._read_connectors(properties)
 
     def _read_fmu(self, properties: MutableMapping):
-        if 'fmu' not in properties:
+        if "fmu" not in properties:
             msg = f"component {self.name}: 'fmu' element missing in case dict."
             logger.exception(msg)
             raise ValueError(msg)
         # Read name of fmu file from component properties.
         # Note: Relative paths (if existing) are omitted from the fmu name, as it is by convention expected
         # that the fmu has already been copied from the library into the current working directory (=case folder)
-        fmu_file = Path(properties['fmu'])
+        fmu_file = Path(properties["fmu"])
         if not fmu_file.exists():
-            logger.exception(f'component {self.name}: referenced FMU file {fmu_file} not found.')
+            logger.exception(
+                f"component {self.name}: referenced FMU file {fmu_file} not found."
+            )
             raise FileNotFoundError(fmu_file)
         self.fmu = FMU(fmu_file)
         if self.fmu.default_experiment and not self.step_size:
             self.step_size = self.fmu.default_experiment.step_size
 
     def _read_step_size(self, properties: MutableMapping):
-        if 'stepSize' not in properties:
+        if "stepSize" not in properties:
             return
-        self.step_size = float(properties['stepSize'])
+        self.step_size = float(properties["stepSize"])
 
     def _read_initialize(self, properties: MutableMapping):
-        if 'initialize' not in properties:
+        if "initialize" not in properties:
             return
-        for variable_name, variable_properties in properties['initialize'].items():
+        for variable_name, variable_properties in properties["initialize"].items():
             variable = ScalarVariable(name=variable_name)
-            if 'causality' in variable_properties:
-                variable.causality = variable_properties['causality']
-            if 'variability' in variable_properties:
-                variable.variability = variable_properties['variability']
-            if 'start' in variable_properties:
-                variable.start = variable_properties['start']
+            if "causality" in variable_properties:
+                variable.causality = variable_properties["causality"]
+            if "variability" in variable_properties:
+                variable.variability = variable_properties["variability"]
+            if "start" in variable_properties:
+                variable.start = variable_properties["start"]
             self._initial_values[variable.name] = variable
 
     def _read_connectors(self, properties: MutableMapping):
-        if 'connectors' not in properties:
+        if "connectors" not in properties:
             return
-        for connector_name, connector_properties in properties['connectors'].items():
+        for connector_name, connector_properties in properties["connectors"].items():
             connector = Connector(name=connector_name)
-            if 'variable' in connector_properties:
-                connector.variable = connector_properties['variable']
-            if 'variableGroup' in connector_properties:
-                connector.variable_group = connector_properties['variableGroup']
-            if 'type' in connector_properties:
-                connector.type = connector_properties['type']
+            if "variable" in connector_properties:
+                connector.variable = connector_properties["variable"]
+            if "variableGroup" in connector_properties:
+                connector.variable_group = connector_properties["variableGroup"]
+            if "type" in connector_properties:
+                connector.type = connector_properties["type"]
             self._connectors[connector.name] = connector
 
     def _read_generate_proxy(self, properties: MutableMapping):
-        if 'generate_proxy' not in properties:
+        if "generate_proxy" not in properties:
             return
-        self.generate_proxy = properties['generate_proxy']
+        self.generate_proxy = properties["generate_proxy"]
 
     def _read_remote_access(self, properties: MutableMapping):
-        if 'remoteAccess' not in properties:
+        if "remoteAccess" not in properties:
             return
-        if 'host' in properties['remoteAccess'] and 'port' in properties['remoteAccess']:
+        if (
+            "host" in properties["remoteAccess"]
+            and "port" in properties["remoteAccess"]
+        ):
             self.remote_access = RemoteAccess(
-                host=properties['remoteAccess']['host'],
-                port=properties['remoteAccess']['port'],
+                host=properties["remoteAccess"]["host"],
+                port=properties["remoteAccess"]["port"],
             )
 
     def _generate_proxy(self):
@@ -136,9 +141,11 @@ class Component():
                 f"component {self.name}: 'remoteAccess' element is defined, but port is not specified."
             )
         else:
-            self.fmu = self.fmu.proxify(self.remote_access.host, self.remote_access.port)
+            self.fmu = self.fmu.proxify(
+                self.remote_access.host, self.remote_access.port
+            )
             # if NTNU-IHB fmu-proxy code is used, use '-proxy' reference
-            self.name = f'{self.name}-proxy'
+            self.name = f"{self.name}-proxy"
             # self.name = self.fmu.file.stem
 
     def _init_units(self):
@@ -171,11 +178,11 @@ class Component():
     def connectors(self) -> dict[str, Connector]:
         return self._connectors
 
-    def write_osp_model_description_xml(self):                          # sourcery skip: merge-dict-assign
-        """Writes the <component.name>_OspModelDescription.xml file in the current working directory.
-        """
-        osp_model_description_file = self.fmu.file.parent.absolute(
-        ) / f'{self.name}_OspModelDescription.xml'
+    def write_osp_model_description_xml(self):  # sourcery skip: merge-dict-assign
+        """Writes the <component.name>_OspModelDescription.xml file in the current working directory."""
+        osp_model_description_file = (
+            self.fmu.file.parent.absolute() / f"{self.name}_OspModelDescription.xml"
+        )
         self._clean(osp_model_description_file)
 
         osp_model_description = {}
@@ -183,88 +190,97 @@ class Component():
         # Unit Definitions
         unit_definitions = {}
         for unit in self.units.values():
-            unit_definition = {'_attributes': {}}
-            unit_definition['_attributes']['name'] = unit.name
+            unit_definition = {"_attributes": {}}
+            unit_definition["_attributes"]["name"] = unit.name
             if unit.base_unit:
-                unit_definition['BaseUnit'] = {'_attributes': {}}
+                unit_definition["BaseUnit"] = {"_attributes": {}}
                 if unit.base_unit.kg:
-                    unit_definition['BaseUnit']['_attributes']['kg'] = unit.base_unit.kg
+                    unit_definition["BaseUnit"]["_attributes"]["kg"] = unit.base_unit.kg
                 if unit.base_unit.m:
-                    unit_definition['BaseUnit']['_attributes']['m'] = unit.base_unit.m
+                    unit_definition["BaseUnit"]["_attributes"]["m"] = unit.base_unit.m
                 if unit.base_unit.s:
-                    unit_definition['BaseUnit']['_attributes']['s'] = unit.base_unit.s
+                    unit_definition["BaseUnit"]["_attributes"]["s"] = unit.base_unit.s
                 if unit.base_unit.A:
-                    unit_definition['BaseUnit']['_attributes']['A'] = unit.base_unit.A
+                    unit_definition["BaseUnit"]["_attributes"]["A"] = unit.base_unit.A
                 if unit.base_unit.K:
-                    unit_definition['BaseUnit']['_attributes']['K'] = unit.base_unit.K
+                    unit_definition["BaseUnit"]["_attributes"]["K"] = unit.base_unit.K
                 if unit.base_unit.mol:
-                    unit_definition['BaseUnit']['_attributes']['mol'] = unit.base_unit.mol
+                    unit_definition["BaseUnit"]["_attributes"][
+                        "mol"
+                    ] = unit.base_unit.mol
                 if unit.base_unit.cd:
-                    unit_definition['BaseUnit']['_attributes']['cd'] = unit.base_unit.cd
+                    unit_definition["BaseUnit"]["_attributes"]["cd"] = unit.base_unit.cd
                 if unit.base_unit.rad:
-                    unit_definition['BaseUnit']['_attributes']['rad'] = unit.base_unit.rad
+                    unit_definition["BaseUnit"]["_attributes"][
+                        "rad"
+                    ] = unit.base_unit.rad
                 if unit.base_unit.factor:
-                    unit_definition['BaseUnit']['_attributes']['factor'] = unit.base_unit.factor
+                    unit_definition["BaseUnit"]["_attributes"][
+                        "factor"
+                    ] = unit.base_unit.factor
                 if unit.base_unit.offset:
-                    unit_definition['BaseUnit']['_attributes']['offset'] = unit.base_unit.offset
+                    unit_definition["BaseUnit"]["_attributes"][
+                        "offset"
+                    ] = unit.base_unit.offset
             if unit.display_unit:
-                unit_definition['DisplayUnit'] = {'_attributes': {}}
-                unit_definition['DisplayUnit']['_attributes']['name'] = unit.display_unit.name
-                unit_definition['DisplayUnit']['_attributes']['factor'] = unit.display_unit.factor
-                unit_definition['DisplayUnit']['_attributes']['offset'] = unit.display_unit.offset
-            unit_definitions[f'{self.counter():06d}_Unit'] = unit_definition
-        osp_model_description['UnitDefinitions'] = unit_definitions
+                unit_definition["DisplayUnit"] = {"_attributes": {}}
+                unit_definition["DisplayUnit"]["_attributes"][
+                    "name"
+                ] = unit.display_unit.name
+                unit_definition["DisplayUnit"]["_attributes"][
+                    "factor"
+                ] = unit.display_unit.factor
+                unit_definition["DisplayUnit"]["_attributes"][
+                    "offset"
+                ] = unit.display_unit.offset
+            unit_definitions[f"{self.counter():06d}_Unit"] = unit_definition
+        osp_model_description["UnitDefinitions"] = unit_definitions
 
         # Variable Groups
         variable_groups = {}
         for variable_name, variable in self.variables.items():
             if not variable.quantity:
                 logger.warning(
-                    f'component {self.name}: no quantity defined for variable {variable_name}'
+                    f"component {self.name}: no quantity defined for variable {variable_name}"
                 )
             if not variable.unit:
                 logger.warning(
-                    f'component {self.name}: no unit defined for variable {variable_name}'
+                    f"component {self.name}: no unit defined for variable {variable_name}"
                 )
-            quantity_name = variable.quantity or 'UNKNOWN'
-            quantity_unit = variable.unit or 'UNKNOWN'
-            variable_groups[f'{self.counter():06d}_Generic'] = {
-                '_attributes': {
-                    'name': quantity_name
-                },
+            quantity_name = variable.quantity or "UNKNOWN"
+            quantity_unit = variable.unit or "UNKNOWN"
+            variable_groups[f"{self.counter():06d}_Generic"] = {
+                "_attributes": {"name": quantity_name},
                 quantity_name: {
-                    '_attributes': {
-                        'name': quantity_name
-                    },
-                    'Variable': {
-                        '_attributes': {
-                            'ref': variable_name,
-                            'unit': quantity_unit,
+                    "_attributes": {"name": quantity_name},
+                    "Variable": {
+                        "_attributes": {
+                            "ref": variable_name,
+                            "unit": quantity_unit,
                         }
                     },
                 },
             }
-        osp_model_description['VariableGroups'] = variable_groups
+        osp_model_description["VariableGroups"] = variable_groups
 
         # _xmlOpts
-        osp_model_description['_xmlOpts'] = {
-            '_nameSpaces': {
-                'osp': 'https://opensimulationplatform.com/xsd/OspModelDescription-1.0.0.xsd'
+        osp_model_description["_xmlOpts"] = {
+            "_nameSpaces": {
+                "osp": "https://opensimulationplatform.com/xsd/OspModelDescription-1.0.0.xsd"
             },
-            '_rootTag': 'ospModelDescription',
+            "_rootTag": "ospModelDescription",
         }
 
         DictWriter.write(osp_model_description, osp_model_description_file)
 
     def _clean(self, file_to_remove: Union[str, Path]):
-        """Clean up single file
-        """
+        """Clean up single file"""
         if isinstance(file_to_remove, str):
             file_to_remove = Path.cwd() / file_to_remove
         file_to_remove.unlink(missing_ok=True)
 
 
 @dataclass()
-class RemoteAccess():
-    host: str = ''
+class RemoteAccess:
+    host: str = ""
     port: int = 0

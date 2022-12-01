@@ -3,13 +3,13 @@ from dataclasses import dataclass
 from typing import Union
 
 
-__ALL__ = ['Simulation']
+__ALL__ = ["Simulation"]
 
 logger = logging.getLogger(__name__)
 
 
 @dataclass()
-class Simulation():
+class Simulation:
     name: Union[str, None] = None
     start_time: Union[float, None] = None
     stop_time: Union[float, None] = None
@@ -23,7 +23,7 @@ class Simulation():
     @algorithm.setter
     def algorithm(self, value: str):
         valid_values: list[str] = [
-            'fixedStep',
+            "fixedStep",
         ]
         if value not in valid_values:
             logger.error(f"variable {self.name}: algorithm value '{value}' is invalid.")

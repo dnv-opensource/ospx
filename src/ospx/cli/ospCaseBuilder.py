@@ -16,49 +16,48 @@ logger = logging.getLogger(__name__)
 def _argparser() -> argparse.ArgumentParser:
 
     parser = argparse.ArgumentParser(
-        prog='ospCaseBuilder',
-        usage='%(prog)s caseDict [options [args]]',
-        epilog='_________________ospCaseBuilder___________________',
-        prefix_chars='-',
+        prog="ospCaseBuilder",
+        usage="%(prog)s caseDict [options [args]]",
+        epilog="_________________ospCaseBuilder___________________",
+        prefix_chars="-",
         add_help=True,
-        description=
-        'Builds the OSP-specific configuration files needed to run an OSP (co-)simulation case.'
+        description="Builds the OSP-specific configuration files needed to run an OSP (co-)simulation case.",
     )
 
     parser.add_argument(
-        'caseDict',
-        metavar='caseDict',
+        "caseDict",
+        metavar="caseDict",
         type=str,
-        nargs='?',
-        help='name of the dict file containing the OSP simulation case configuration.',
+        nargs="?",
+        help="name of the dict file containing the OSP simulation case configuration.",
     )
 
     parser.add_argument(
-        '--clean',
-        action='store_true',
+        "--clean",
+        action="store_true",
         help=(
-            'cleans up working directory and deletes any existing ospx files, e.g. modelDescription.xml .fmu .csv etc.'
+            "cleans up working directory and deletes any existing ospx files, e.g. modelDescription.xml .fmu .csv etc."
         ),
         default=False,
         required=False,
     )
 
     parser.add_argument(
-        '-i',
-        '--inspect',
-        action='store_true',
+        "-i",
+        "--inspect",
+        action="store_true",
         help=(
-            'inspect mode: reads all properties from the FMUs but does not actually create the OSP case files.'
+            "inspect mode: reads all properties from the FMUs but does not actually create the OSP case files."
         ),
         default=False,
         required=False,
     )
 
     parser.add_argument(
-        '-g',
-        '--graph',
-        action='store_true',
-        help='creates a dependency graph image using graphviz',
+        "-g",
+        "--graph",
+        action="store_true",
+        help="creates a dependency graph image using graphviz",
         default=False,
         required=False,
     )
@@ -66,37 +65,37 @@ def _argparser() -> argparse.ArgumentParser:
     console_verbosity = parser.add_mutually_exclusive_group(required=False)
 
     console_verbosity.add_argument(
-        '-q',
-        '--quiet',
-        action='store_true',
-        help=('console output will be quiet.'),
+        "-q",
+        "--quiet",
+        action="store_true",
+        help=("console output will be quiet."),
         default=False,
     )
 
     console_verbosity.add_argument(
-        '-v',
-        '--verbose',
-        action='store_true',
-        help=('console output will be verbose.'),
+        "-v",
+        "--verbose",
+        action="store_true",
+        help=("console output will be verbose."),
         default=False,
     )
 
     parser.add_argument(
-        '--log',
-        action='store',
+        "--log",
+        action="store",
         type=str,
-        help='name of log file. If specified, this will activate logging to file.',
+        help="name of log file. If specified, this will activate logging to file.",
         default=None,
         required=False,
     )
 
     parser.add_argument(
-        '--log-level',
-        action='store',
+        "--log-level",
+        action="store",
         type=str,
-        help='log level applied to logging to file.',
-        choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
-        default='WARNING',
+        help="log level applied to logging to file.",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        default="WARNING",
         required=False,
     )
 
@@ -113,10 +112,10 @@ def main():
 
     # Configure Logging
     # ..to console
-    log_level_console: str = 'INFO'
+    log_level_console: str = "INFO"
     if any([args.quiet, args.verbose]):
-        log_level_console = 'ERROR' if args.quiet else log_level_console
-        log_level_console = 'DEBUG' if args.verbose else log_level_console
+        log_level_console = "ERROR" if args.quiet else log_level_console
+        log_level_console = "DEBUG" if args.verbose else log_level_console
 
     # ..to file
     log_file: Union[Path, None] = Path(args.log) if args.log else None
@@ -151,5 +150,5 @@ def main():
     )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
