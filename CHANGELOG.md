@@ -8,6 +8,33 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 * --
 
 
+## [0.2.5] - 2022-12-01
+
+### Changed
+
+* variable.py: get_fmi_data_type():
+    * Removed the elif branch 'isinstance(arg, Sequence)'. <br>
+      It caused problems as it falsely returned the FMI type 'Enumeration' also for strings. <br>
+      The respective elif branch is for the time being commented out. <br>
+      However, a proper solution is needed as soon as xs:enumeration is used in an OSP case. <br>
+      The problem is registered as [Issue #5](https://github.com/dnv-opensource/ospx/issues/5)
+* Code formatting: Changed from yapf to black
+* STYLEGUIDE.md : Adjusted to match black formatting
+* VS Code settings: Updated to use black as formatter
+* requirements.txt: Updated dependencies to their most recent versions
+* GitHub actions (yml files): Updated following actions to their most recent versions:
+    * checkout@v1 -> checkout@v3
+    * setup-python@v2 -> setup-python@v4
+    * cache@v2 -> cache@v3
+
+### Added
+
+* watchCosim: Added commandline option --scale <br>
+    (allows to scale the generated images by a factor)
+* Added sourcery configuration (.sourcery.yaml)
+* Added py.typed file into the package root folder and included it setup.cfg as package_data
+
+
 ## [0.2.4] - 2022-11-08
 
 ### Changed
@@ -220,7 +247,8 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 * Added support for Python 3.10
 
 <!-- Markdown link & img dfn's -->
-[unreleased]: https://github.com/dnv-opensource/ospx/compare/v0.2.4...HEAD
+[unreleased]: https://github.com/dnv-opensource/ospx/compare/v0.2.5...HEAD
+[0.2.5]: https://github.com/dnv-opensource/ospx/compare/v0.2.4...v0.2.5
 [0.2.4]: https://github.com/dnv-opensource/ospx/compare/v0.2.3...v0.2.4
 [0.2.3]: https://github.com/dnv-opensource/ospx/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/dnv-opensource/ospx/compare/v0.2.1...v0.2.2

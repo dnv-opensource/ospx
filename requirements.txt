@@ -17,4 +17,4 @@ matplotlib>=3.6
 graphviz>=0.20
 
 # ../dictIO
-dictIO>=0.2.2
+dictIO>=0.2.3
