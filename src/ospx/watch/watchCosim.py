@@ -1,20 +1,19 @@
 import logging
+import os
 import re
+from math import sqrt as sqrt
 from pathlib import Path
-from typing import List, MutableSequence
+from typing import List, MutableSequence, Union
 
 import matplotlib
 import matplotlib.axes
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from math import sqrt as sqrt
-from matplotlib import cm
 from dictIO import DictReader, DictWriter
-from ospx.utils.plotting import create_meta_dict, save_figure
-from typing import Union
-import os
+from matplotlib import cm
 
+from ospx.utils.plotting import create_meta_dict, save_figure
 
 logger = logging.getLogger(__name__)
 
@@ -401,6 +400,7 @@ class CosimWatcher:
 
         # find latest common start point for skip and latest
         # consider skipping negative values due to wrong inputs
+        start: int = 0
         if df_all_data_sources.shape[0] - self.skip_values < 0:  # safety
             logger.error(
                 f"there will be no data, consider adjusting --skip: {self.skip_values}"
@@ -418,7 +418,8 @@ class CosimWatcher:
             start = 0
 
         # if skip latest n steps is to be implemented, no changes to start, but an additional command option is required
-        return df_all_data_sources.iloc[start : df_all_data_sources.shape[0], :]
+        length: int = df_all_data_sources.shape[0]
+        return df_all_data_sources.iloc[start:length, :]
 
     def _determine_optimum_screen_size(self):
         """Determines the optimum screen size."""
