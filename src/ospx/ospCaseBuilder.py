@@ -7,7 +7,6 @@ from dictIO import CppDict, DictReader
 
 from ospx import Graph, OspSimulationCase
 
-
 __ALL__ = ["OspCaseBuilder"]
 
 logger = logging.getLogger(__name__)

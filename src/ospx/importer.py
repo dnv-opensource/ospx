@@ -10,7 +10,6 @@ from dictIO.utils.path import highest_common_root_folder, relative_path
 
 from ospx.utils.dict import find_key, find_keys, find_type_identifier_in_keys
 
-
 __ALL__ = ["OspSystemStructureImporter"]
 
 logger = logging.getLogger(__name__)

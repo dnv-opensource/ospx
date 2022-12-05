@@ -11,6 +11,7 @@ from zipfile import ZipFile
 
 from dictIO import CppDict, XmlFormatter, XmlParser
 from dictIO.utils.counter import BorgCounter
+
 from ospx.fmi import BaseUnit, DisplayUnit, Experiment, ScalarVariable, Unit
 from ospx.utils.dict import find_key, find_type_identifier_in_keys, shrink_dict
 from ospx.utils.zip import (
@@ -19,7 +20,6 @@ from ospx.utils.zip import (
     remove_files_from_zip,
     rename_file_in_zip,
 )
-
 
 __ALL__ = ["FMU"]
 

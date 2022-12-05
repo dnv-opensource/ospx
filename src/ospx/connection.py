@@ -1,9 +1,9 @@
 import logging
 from typing import Union
+
 from ospx.component import Component
 from ospx.connector import Connector
 from ospx.fmi.variable import ScalarVariable
-
 
 __ALL__ = ["Endpoint", "Connection"]
 

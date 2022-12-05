@@ -2,7 +2,6 @@ import logging
 from dataclasses import dataclass
 from typing import Union
 
-
 __ALL__ = ["Simulation"]
 
 logger = logging.getLogger(__name__)

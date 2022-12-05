@@ -2,10 +2,11 @@ import os
 from glob import glob
 from pathlib import Path
 from shutil import rmtree
-from ospx.utils.zip import add_file_content_to_zip
 from zipfile import ZipFile
 
 import pytest
+
+from ospx.utils.zip import add_file_content_to_zip
 
 
 @pytest.fixture(scope="package", autouse=True)

@@ -1,7 +1,9 @@
-from ospx import OspCaseBuilder
-from dictIO import DictParser
-from pathlib import Path
 from glob import glob
+from pathlib import Path
+
+from dictIO import DictParser
+
+from ospx import OspCaseBuilder
 
 
 def test_build():

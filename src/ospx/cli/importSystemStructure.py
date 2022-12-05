@@ -10,7 +10,6 @@ from typing import Union
 from ospx import OspSystemStructureImporter
 from ospx.utils.logging import configure_logging
 
-
 logger = logging.getLogger(__name__)
 
 

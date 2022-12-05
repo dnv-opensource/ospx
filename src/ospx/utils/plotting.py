@@ -1,10 +1,9 @@
 import logging
 import os
 import re
-from typing import Union
 from datetime import datetime
 from pathlib import Path
-
+from typing import Union
 
 logger = logging.getLogger(__name__)
 

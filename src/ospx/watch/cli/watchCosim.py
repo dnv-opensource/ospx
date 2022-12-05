@@ -14,7 +14,6 @@ from typing import List, Union
 from ospx.utils.logging import configure_logging
 from ospx.watch.watchCosim import CosimWatcher
 
-
 logger = logging.getLogger(__name__)
 
 

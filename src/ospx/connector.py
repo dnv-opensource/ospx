@@ -1,7 +1,6 @@
 import logging
 from typing import Union
 
-
 __ALL__ = ["Connector"]
 
 logger = logging.getLogger(__name__)

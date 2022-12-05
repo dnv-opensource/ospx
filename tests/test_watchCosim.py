@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pytest
+
 from ospx.watch.watchCosim import CosimWatcher
 
 

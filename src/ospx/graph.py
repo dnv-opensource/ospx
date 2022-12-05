@@ -7,7 +7,6 @@ import graphviz as gv
 
 from ospx import Component, Connection, OspSimulationCase
 
-
 __ALL__ = ["Graph"]
 
 logger = logging.getLogger(__name__)

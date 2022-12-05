@@ -1,12 +1,11 @@
+import logging
 import os
 import re
-from tempfile import mkstemp
-from zipfile import ZipFile, ZIP_DEFLATED
 from pathlib import Path
-from typing import Sequence, Union
-import logging
-
 from shutil import copyfile
+from tempfile import mkstemp
+from typing import Sequence, Union
+from zipfile import ZIP_DEFLATED, ZipFile
 
 logger = logging.getLogger(__name__)
 

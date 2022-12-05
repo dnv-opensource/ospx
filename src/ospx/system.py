@@ -4,7 +4,6 @@ from typing import MutableMapping, Union
 from ospx import Component, Connection, Connector, Endpoint
 from ospx.fmi import FMU, ScalarVariable, Unit
 
-
 __ALL__ = ["System"]
 
 logger = logging.getLogger(__name__)

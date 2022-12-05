@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Sequence, Union
-from dictIO import Parser, Formatter
 
+from dictIO import Formatter, Parser
 
 __ALL__ = ["ScalarVariable", "get_fmi_data_type"]
 

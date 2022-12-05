@@ -11,7 +11,6 @@ from dictIO.utils.path import relative_path
 from ospx import Simulation, System
 from ospx.utils.dict import find_key
 
-
 __ALL__ = ["OspSimulationCase"]
 
 logger = logging.getLogger(__name__)
