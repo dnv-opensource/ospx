@@ -3,8 +3,6 @@ from pathlib import Path
 import pytest
 
 from ospx.fmi.fmu import FMU
-from ospx.fmi.unit import Unit
-from ospx.fmi.variable import ScalarVariable
 
 
 def test_conftest_create_test_fmu():

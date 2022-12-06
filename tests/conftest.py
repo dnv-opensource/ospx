@@ -1,8 +1,6 @@
 import os
-from glob import glob
 from pathlib import Path
 from shutil import rmtree
-from zipfile import ZipFile
 
 import pytest
 
