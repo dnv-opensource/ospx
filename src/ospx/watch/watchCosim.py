@@ -6,19 +6,18 @@ import os
 import re
 from math import sqrt as sqrt
 from pathlib import Path
-from typing import List, MutableSequence, Union, Dict, Any, MutableMapping
+from typing import Any, Dict, List, MutableMapping, MutableSequence, Union
 
 import matplotlib
 import matplotlib.axes
 import matplotlib.pyplot as plt
 import numpy as np
-from numpy import ndarray
 import pandas as pd
-from pandas import DataFrame
 from dictIO import DictReader, DictWriter
 from matplotlib import cm
 from matplotlib.figure import Figure
-
+from numpy import ndarray
+from pandas import DataFrame
 
 from ospx.utils.plotting import create_meta_dict, save_figure
 

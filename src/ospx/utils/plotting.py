@@ -2,10 +2,10 @@
 import logging
 import os
 import re
-
 from datetime import datetime as datetime
 from pathlib import Path
-from typing import Union, Dict, MutableMapping
+from typing import Dict, MutableMapping, Union
+
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 
