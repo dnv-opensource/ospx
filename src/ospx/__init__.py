@@ -1,9 +1,12 @@
-from .simulation import Simulation  # noqa: F401
-from .connector import Connector  # noqa: F401
-from .connection import Endpoint, Connection  # noqa: F401
-from .component import Component  # noqa: F401
-from .system import System  # noqa: F401
-from .ospSimulationCase import OspSimulationCase  # noqa: F401
-from .graph import Graph  # noqa: F401
-from .ospCaseBuilder import OspCaseBuilder  # noqa: F401
-from .importer import OspSystemStructureImporter  # noqa: F401
+from ospx.simulation import Simulation as Simulation  # noqa: F401
+from ospx.connector import Connector as Connector  # noqa: F401
+from ospx.connection import (  # noqa: F401
+    Endpoint as Endpoint,
+    Connection as Connection,
+)
+from ospx.component import Component as Component  # noqa: F401
+from ospx.system import System as System  # noqa: F401
+from ospx.ospSimulationCase import OspSimulationCase as OspSimulationCase  # noqa: F401
+from ospx.graph import Graph as Graph  # noqa: F401
+from ospx.ospCaseBuilder import OspCaseBuilder as OspCaseBuilder  # noqa: F401
+from ospx.importer import OspSystemStructureImporter as OspSystemStructureImporter  # noqa: F401
