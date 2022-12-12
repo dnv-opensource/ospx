@@ -6,7 +6,7 @@ from ospx.fmi.fmu import FMU
 
 
 def test_conftest_create_test_fmu():
-    assert True
+    pass
 
 
 def test_fmu_instantiation():

@@ -122,17 +122,14 @@ class OspSystemStructureImporter:
                     #  is later used to complete component properties)
                     temp_connectors[f"{counter():06d}_{component_name}"] = {_connector_name: _connector}
                 # Save in connections dict
-                if connection_name not in connections:
-                    connections[connection_name] = connection
-                else:
+                if connection_name in connections:
                     suffix_number: int = 2
                     _connection_name: str = f"{connection_name}_{suffix_number:02d}"
                     while _connection_name in connections:
                         suffix_number += 1
                         _connection_name = f"{connection_name}_{suffix_number:02d}"
                     connection_name = _connection_name
-                    connections[connection_name] = connection
-
+                connections[connection_name] = connection
         # Simulators (=Components)
         if simulators_key := find_key(source_dict, "Simulators$"):
             # Determine the highest common root folder among all FMU's.
@@ -147,7 +144,7 @@ class OspSystemStructureImporter:
                 else:
                     fmu_folder = (source_folder / fmu_file).resolve().parent.absolute()
                 fmu_folders.append(fmu_folder)
-            if len(fmu_folders) > 0:
+            if fmu_folders:
                 lib_source_folder = highest_common_root_folder(fmu_folders)
 
             for simulator_properties in source_dict[simulators_key].values():
@@ -184,12 +181,12 @@ class OspSystemStructureImporter:
                                 _type: str = re.sub(r"(^\d{1,6}_)", "", type_key)
                                 referenced_name = initial_value["_attributes"]["variable"]
                                 value: Union[float, int, bool, str]
-                                if _type == "Real":
-                                    value = float(initial_value[type_key]["_attributes"]["value"])
+                                if _type == "Boolean":
+                                    value = bool(initial_value[type_key]["_attributes"]["value"])
                                 elif _type == "Integer":
                                     value = int(initial_value[type_key]["_attributes"]["value"])
-                                elif _type == "Boolean":
-                                    value = bool(initial_value[type_key]["_attributes"]["value"])
+                                elif _type == "Real":
+                                    value = float(initial_value[type_key]["_attributes"]["value"])
                                 else:
                                     value = initial_value[type_key]["_attributes"]["value"]
                                 component_initial_values |= {referenced_name: {"start": value}}
