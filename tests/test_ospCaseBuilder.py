@@ -7,29 +7,35 @@ from ospx import OspCaseBuilder
 
 
 def test_build():
+    # sourcery skip: extract-duplicate-method
     # Prepare
-    case_dict_file = Path("test_caseDict")
+    case_dict_file = Path("test_caseDict_simple")
     parsed_case_dict_file = Path(f"parsed.{case_dict_file.name}")
-    DictParser.parse(case_dict_file)
+    _ = DictParser.parse(case_dict_file)
     # Execute
     OspCaseBuilder.build(case_dict_file=parsed_case_dict_file)
     # Assert
     # fmu files
-    assert Path("constantVal.fmu").exists()
-    assert Path("difference.fmu").exists()
-    assert Path("quotient.fmu").exists()
+    assert not Path("constantVal.fmu").exists()
+    assert not Path("difference.fmu").exists()
+    assert not Path("quotient.fmu").exists()
     assert not Path("dividend.fmu").exists()
     assert not Path("subtrahend.fmu").exists()
     assert not Path("minuend.fmu").exists()
     # ModelDescription files-> should NOT have been written
-    assert not glob("*_ModelDescription.xml")
+    assert not Path("constantVal_ModelDescription.xml").exists()
+    assert not Path("difference_ModelDescription.xml").exists()
+    assert not Path("quotient_ModelDescription.xml").exists()
+    assert not Path("dividend_ModelDescription.xml").exists()
+    assert not Path("subtrahend_ModelDescription.xml").exists()
+    assert not Path("minuend_ModelDescription.xml").exists()
     # OspModelDescription files
-    assert Path("difference_OspModelDescription.xml").exists()
-    assert Path("dividend_OspModelDescription.xml").exists()
-    assert Path("minuend_OspModelDescription.xml").exists()
-    assert Path("quotient_OspModelDescription.xml").exists()
-    assert Path("subtrahend_OspModelDescription.xml").exists()
     assert not Path("constantVal_OspModelDescription.xml").exists()
+    assert not Path("difference_OspModelDescription.xml").exists()
+    assert not Path("quotient_OspModelDescription.xml").exists()
+    assert not Path("dividend_OspModelDescription.xml").exists()
+    assert not Path("subtrahend_OspModelDescription.xml").exists()
+    assert not Path("minuend_OspModelDescription.xml").exists()
     # SystemStructure files
     assert Path("OspSystemStructure.xml").exists()
     assert Path("SystemStructure.ssd").exists()
