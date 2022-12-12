@@ -6,7 +6,7 @@ from copy import deepcopy
 from datetime import date, datetime
 from pathlib import Path
 from shutil import copyfile
-from typing import MutableMapping, Union
+from typing import Any, Dict, Mapping, MutableMapping, Union
 from zipfile import ZipFile
 
 from dictIO import CppDict, XmlFormatter, XmlParser
@@ -78,19 +78,19 @@ class FMU:
 
         # Write internal modelDescription.xml (inside FMU)
         if write_inside_fmu:
-            remove_files_from_zip(self.file, "modelDescription.xml")
-            add_file_content_to_zip(self.file, "modelDescription.xml", formatted_xml)
+            _ = remove_files_from_zip(self.file, "modelDescription.xml")
+            _ = add_file_content_to_zip(self.file, "modelDescription.xml", formatted_xml)
 
         # Write external modelDescription.xml (separate file, beside FMU)
         external_file = self.file.parent.absolute() / f"{self.file.stem}_ModelDescription.xml"
         with open(external_file, "w") as f:
-            f.write(formatted_xml)
+            _ = f.write(formatted_xml)
 
         return
 
     @property
-    def units(self) -> dict[str, Unit]:
-        model_unit_definitions: dict = {}
+    def units(self) -> Dict[str, Unit]:
+        model_unit_definitions: MutableMapping[Any, Any] = {}
         if unit_definitions_key := find_key(self.model_description, "UnitDefinitions$"):
             model_unit_definitions = self.model_description[unit_definitions_key]
             # make sure unit definitions are unique (e.g. to keep XML files clean)
@@ -170,8 +170,8 @@ class FMU:
                             variable.unit = v[type_key]["_attributes"]["unit"]
                         if "display_unit" in v[type_key]["_attributes"]:
                             variable.display_unit = v[type_key]["_attributes"]["display_unit"]
-                        if "initial_value" in v[type_key]["_attributes"]:
-                            variable.start = v[type_key]["_attributes"]["initial_value"]
+                        if "start" in v[type_key]["_attributes"]:
+                            variable.start = v[type_key]["_attributes"]["start"]
                 variables[variable.name] = variable
 
         return variables
@@ -217,7 +217,7 @@ class FMU:
         new_file = self.file.parent.absolute() / f"{new_name}.fmu"
 
         # Copy FMU
-        copyfile(self.file, new_file)
+        _ = copyfile(self.file, new_file)
 
         # Rename *.dll files in FMU to match new fmu name
         with ZipFile(new_file, "r") as document:
@@ -229,14 +229,16 @@ class FMU:
         new_dll_file_names = [re.sub(existing_file_name, new_name, dll_file_name) for dll_file_name in dll_file_names]
         for dll_file_name, new_dll_file_name in zip(dll_file_names, new_dll_file_names):
             logger.info(f"{self.file.name} copy: renaming dll {dll_file_name} to {new_dll_file_name}")
-            rename_file_in_zip(new_file, dll_file_name, new_dll_file_name)
+            _ = rename_file_in_zip(new_file, dll_file_name, new_dll_file_name)
 
         # Rename <fmiModelDescription modelName> in modelDescription.xml
         new_model_description["_xmlOpts"]["_rootAttributes"]["modelName"] = new_name
 
         # Rename <CoSimulation modelIdentifier> in modelDescription.xml
         # (STC requires consistency between <fmiModelDescription modelName> and <CoSimulation modelIdentifier>)
-        co_simulation: dict = new_model_description[find_key(new_model_description, "CoSimulation$")]
+        co_simulation: MutableMapping[Any, Any] = new_model_description[
+            find_key(new_model_description, "CoSimulation$")
+        ]
         co_simulation["_attributes"]["modelIdentifier"] = new_name
 
         # Log the update in modelDescription.xml
@@ -271,7 +273,7 @@ class FMU:
         remote_string = f"--remote={host}:{port}"
         command = f"fmu-proxify {self.file.name} {remote_string}"
         try:
-            subprocess.run(command, timeout=60)
+            _ = subprocess.run(command, timeout=60)
         except subprocess.TimeoutExpired:
             logger.exception(f"Timeout occured when calling {command}.")
             return self
@@ -283,7 +285,9 @@ class FMU:
 
         logger.info(f"{self.file.name}: update start values of variables in modelDescription.xml")  # 2
 
-        model_variables: dict = self.model_description[find_key(self.model_description, "ModelVariables$")]
+        model_variables: MutableMapping[Any, Any] = self.model_description[
+            find_key(self.model_description, "ModelVariables$")
+        ]
 
         names_of_variables_with_start_values: list[str] = [
             variable.name for _, variable in variables_with_start_values.items()
@@ -339,9 +343,9 @@ class FMU:
 
     # @TODO: Check when and where this method needs to be called. And why..
     #        CLAROS, 2022-05-24
-    def _clean_solver_internal_variables(self, model_description: MutableMapping):
+    def _clean_solver_internal_variables(self, model_description: MutableMapping[Any, Any]):
         """Clean solver internal variables, such as '_iti_...'"""
-        model_variables: dict = model_description[find_key(model_description, "ModelVariables$")]
+        model_variables: Mapping[Any, Any] = model_description[find_key(model_description, "ModelVariables$")]
         model_name = model_description["_xmlOpts"]["_rootAttributes"]["modelName"]
         for model_variable_key in model_variables:
             if "_origin" in model_variables[model_variable_key]:

@@ -24,7 +24,7 @@ def _argparser() -> argparse.ArgumentParser:
         description=("Imports an existing OspSystemStructure.xml and translates it into a caseDict."),
     )
 
-    parser.add_argument(
+    _ = parser.add_argument(
         "systemStructureFile",
         metavar="systemStructureFile",
         type=str,
@@ -34,7 +34,7 @@ def _argparser() -> argparse.ArgumentParser:
 
     console_verbosity = parser.add_mutually_exclusive_group(required=False)
 
-    console_verbosity.add_argument(
+    _ = console_verbosity.add_argument(
         "-q",
         "--quiet",
         action="store_true",
@@ -42,7 +42,7 @@ def _argparser() -> argparse.ArgumentParser:
         default=False,
     )
 
-    console_verbosity.add_argument(
+    _ = console_verbosity.add_argument(
         "-v",
         "--verbose",
         action="store_true",
@@ -50,7 +50,7 @@ def _argparser() -> argparse.ArgumentParser:
         default=False,
     )
 
-    parser.add_argument(
+    _ = parser.add_argument(
         "--log",
         action="store",
         type=str,
@@ -59,7 +59,7 @@ def _argparser() -> argparse.ArgumentParser:
         required=False,
     )
 
-    parser.add_argument(
+    _ = parser.add_argument(
         "--log-level",
         action="store",
         type=str,

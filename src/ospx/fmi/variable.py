@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Sequence, Union
+from typing import Any, List, Sequence, Union
 
 from dictIO import Formatter, Parser
 
@@ -178,13 +178,13 @@ def get_fmi_data_type(arg: Any) -> str:
 
 
 def _cast_to_fmi_data_type(
-    arg: Union[int, float, bool, str, Sequence], fmi_data_type: str
-) -> Union[int, float, bool, str, list, None]:
+    arg: Union[int, float, bool, str, Sequence[Any]], fmi_data_type: str
+) -> Union[int, float, bool, str, List[Any], None]:
     """Casts the passed in argument to a Python data type that matches the requested fmi data type
 
     Parameters
     ----------
-    arg : Union[int, float, bool, str, Sequence]
+    arg : Union[int, float, bool, str, Sequence[Any]]
         The argument to be casted
     fmi_data_type : str
         The fmi data type the argument shall be casted to.\n
@@ -192,7 +192,7 @@ def _cast_to_fmi_data_type(
 
     Returns
     -------
-    Union[int, float, bool, str, list, None]
+    Union[int, float, bool, str, List[Any], None]
         The casted value (in a Python data type that matches the requested fmi data type)
     """
     if fmi_data_type in {"Integer", "Real", "Boolean"}:

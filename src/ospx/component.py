@@ -2,7 +2,7 @@ import logging
 from copy import deepcopy
 from dataclasses import dataclass
 from pathlib import Path
-from typing import MutableMapping, Union
+from typing import Any, MutableMapping, Union
 
 from dictIO import DictWriter
 from dictIO.utils.counter import BorgCounter
@@ -32,7 +32,7 @@ class Component:
     \t 'Component' in SSP. See https://ssp-standard.org/publications/SSP10/SystemStructureAndParameterization10.pdf
     """
 
-    def __init__(self, name: str, properties: MutableMapping):
+    def __init__(self, name: str, properties: MutableMapping[Any, Any]):
 
         self.name: str = name
         self.generate_proxy = False
@@ -60,7 +60,7 @@ class Component:
 
         self._read_connectors(properties)
 
-    def _read_fmu(self, properties: MutableMapping):
+    def _read_fmu(self, properties: MutableMapping[Any, Any]):
         if "fmu" not in properties:
             msg = f"component {self.name}: 'fmu' element missing in case dict."
             logger.exception(msg)
@@ -76,12 +76,12 @@ class Component:
         if self.fmu.default_experiment and not self.step_size:
             self.step_size = self.fmu.default_experiment.step_size
 
-    def _read_step_size(self, properties: MutableMapping):
+    def _read_step_size(self, properties: MutableMapping[Any, Any]):
         if "stepSize" not in properties:
             return
         self.step_size = float(properties["stepSize"])
 
-    def _read_initialize(self, properties: MutableMapping):
+    def _read_initialize(self, properties: MutableMapping[Any, Any]):
         if "initialize" not in properties:
             return
         for variable_name, variable_properties in properties["initialize"].items():
@@ -94,7 +94,7 @@ class Component:
                 variable.start = variable_properties["start"]
             self._initial_values[variable.name] = variable
 
-    def _read_connectors(self, properties: MutableMapping):
+    def _read_connectors(self, properties: MutableMapping[Any, Any]):
         if "connectors" not in properties:
             return
         for connector_name, connector_properties in properties["connectors"].items():
@@ -107,12 +107,12 @@ class Component:
                 connector.type = connector_properties["type"]
             self._connectors[connector.name] = connector
 
-    def _read_generate_proxy(self, properties: MutableMapping):
+    def _read_generate_proxy(self, properties: MutableMapping[Any, Any]):
         if "generate_proxy" not in properties:
             return
         self.generate_proxy = properties["generate_proxy"]
 
-    def _read_remote_access(self, properties: MutableMapping):
+    def _read_remote_access(self, properties: MutableMapping[Any, Any]):
         if "remoteAccess" not in properties:
             return
         if "host" in properties["remoteAccess"] and "port" in properties["remoteAccess"]:

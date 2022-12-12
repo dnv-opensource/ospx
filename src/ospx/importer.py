@@ -2,7 +2,7 @@ import logging
 import os
 import re
 from pathlib import Path
-from typing import List, Union
+from typing import Any, Dict, List, Union
 
 from dictIO import DictReader, DictWriter
 from dictIO.utils.counter import BorgCounter
@@ -44,8 +44,8 @@ class OspSystemStructureImporter:
         target_folder: Path = Path.cwd().absolute()
 
         # Main subdicts contained in systemStructure
-        connections: dict[str, dict] = {}
-        components: dict[str, dict] = {}
+        connections: Dict[str, Dict[Any, Any]] = {}
+        components: Dict[str, Dict[Any, Any]] = {}
 
         # Connections
         # iterate over the connections first as they contain the variable and component names
@@ -68,7 +68,7 @@ class OspSystemStructureImporter:
                     logger.error(msg)
                     raise TypeError(msg)
 
-                connection: dict[str, dict] = {}
+                connection: Dict[str, Dict[Any, Any]] = {}
                 connection_name: str = ""
                 # following loop has range {0,1}
                 for index, (endpoint_type, endpoint_properties) in enumerate(connection_properties.items()):
@@ -154,7 +154,7 @@ class OspSystemStructureImporter:
                 # Component
                 component_name = simulator_properties["_attributes"]["name"]
                 # Connectors
-                component_connectors: dict[str, dict] = {}
+                component_connectors: Dict[str, Dict[Any, Any]] = {}
                 for temp_connector_key, connector in temp_connectors.items():
                     if component_name in temp_connector_key:
                         component_connectors |= connector
@@ -171,7 +171,7 @@ class OspSystemStructureImporter:
                 if "stepSize" in simulator_properties["_attributes"]:
                     step_size = float(simulator_properties["_attributes"]["stepSize"])
                     # Initial values
-                component_initial_values: dict[str, dict] = {}
+                component_initial_values: Dict[str, Dict[Any, Any]] = {}
                 if initial_values_key := find_key(simulator_properties, "InitialValues$"):
                     initial_values = simulator_properties[initial_values_key]
                     if initial_value_keys := find_keys(initial_values, "InitialValue$"):
@@ -194,7 +194,7 @@ class OspSystemStructureImporter:
                                     value = initial_value[type_key]["_attributes"]["value"]
                                 component_initial_values |= {referenced_name: {"start": value}}
                                 # Assemble component
-                component: dict[str, Union[dict, str, float, Path]] = {
+                component: Dict[str, Union[Dict[Any, Any], str, float, Path]] = {
                     "connectors": component_connectors,
                     "fmu": fmu_file_relative_to_lib_source,
                 }
@@ -206,14 +206,14 @@ class OspSystemStructureImporter:
                 components[component_name] = component
 
         # System Structure
-        system_structure: dict[str, dict] = {
+        system_structure: Dict[str, Dict[str, Any]] = {
             "connections": connections,
             "components": components,
         }
 
         # Global Settings
         # 1: Defaults
-        simulation: dict = {
+        simulation: Dict[str, Any] = {
             "name": system_structure_file.stem,
             "startTime": 0.0,
             "baseStepSize": 0.01,

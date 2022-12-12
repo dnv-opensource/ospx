@@ -2,7 +2,7 @@ import logging
 import re
 from pathlib import Path
 from shutil import copy2
-from typing import Union
+from typing import Any, Dict, List, Union
 
 from dictIO import CppDict, DictWriter, XmlFormatter
 from dictIO.utils.counter import BorgCounter
@@ -93,7 +93,7 @@ class OspSimulationCase:
             f"Write OspSystemStructure.xml file for OSP simulation case '{self.name}' in case folder: {self.case_folder}"
         )
 
-        osp_system_structure: dict = {}
+        osp_system_structure: Dict[str, Any] = {}
         osp_system_structure["_xmlOpts"] = {
             "_nameSpaces": {"osp": "https://opensimulationplatform.com/xsd/OspModelDescription-1.0.0.xsd"},
             "_rootTag": "OspSystemStructure",
@@ -109,10 +109,10 @@ class OspSimulationCase:
                 osp_system_structure["Algorithm"] = self.simulation.algorithm
 
         # Simulators (=Components)
-        simulators: dict = {}
+        simulators: Dict[str, Any] = {}
         for index, (_, component) in enumerate(self.system_structure.components.items()):
             simulator_key = f"{index:06d}_Simulator"
-            simulator_properties: dict[str, dict[str, Union[str, float, dict, Path]]] = {
+            simulator_properties: Dict[str, Dict[str, Union[str, float, Dict[str, Any], Path]]] = {
                 "_attributes": {
                     "name": component.name,
                     "source": relative_path(self.case_folder, component.fmu.file),
@@ -140,19 +140,18 @@ class OspSimulationCase:
                         )
                     else:
                         initial_value_key = f"{index:06d}_InitialValue"
-                        initial_value_properties: dict = {
-                            "_attributes": {"variable": variable.name},
-                            variable.data_type: {
-                                "_attributes": {"value": variable.start},
-                            },
-                        }
+                        initial_value_properties: Dict[str, Any] = {}
+                        initial_value_properties["_attributes"] = {"variable": variable.name}
+                        if variable.data_type:
+                            initial_value_properties[variable.data_type] = {"_attributes": {"value": variable.start}}
+
                         simulator_properties["InitialValues"][initial_value_key] = initial_value_properties
             simulators[simulator_key] = simulator_properties
 
         osp_system_structure["Simulators"] = simulators
 
         # Connections
-        connections: dict = {}
+        connections: Dict[str, Dict[str, Any]] = {}
         for connection in self.system_structure.connections.values():
             if not connection.is_valid:
                 continue
@@ -215,7 +214,7 @@ class OspSimulationCase:
             f"Write SystemStructure.ssd file for OSP simulation case '{self.name}' in case folder: {self.case_folder}"
         )
 
-        system_structure_ssd: dict = {}
+        system_structure_ssd: Dict[str, Any] = {}
         system_structure_ssd["_xmlOpts"] = {
             "_nameSpaces": {
                 "ssd": "file:///C:/Software/OSP/xsd/SystemStructureDescription",
@@ -251,9 +250,9 @@ class OspSimulationCase:
         system_structure_ssd["DefaultExperiment"] = default_experiment
 
         # Components
-        components = {}
+        components: Dict[str, Any] = {}
         for component_name, component in self.system_structure.components.items():
-            connectors: dict = {}
+            connectors: Dict[str, Dict[str, Any]] = {}
             for connector in component.connectors.values():
                 if connector.variable and connector.type:
                     connector_key = f"{self.counter():06d}_Connector"
@@ -276,7 +275,7 @@ class OspSimulationCase:
         system_structure_ssd["System"]["Elements"] = components
 
         # Connections
-        connections: dict = {}
+        connections: Dict[str, Any] = {}
         for connection in self.system_structure.connections.values():
             if connection.source_endpoint and connection.target_endpoint:
                 connection_key = f"{self.counter():06d}_Connection"
@@ -326,10 +325,10 @@ class OspSimulationCase:
             "names": list(self.system_structure.connectors.keys()),
         }
 
-        unit_list = []
-        display_unit_list = []
-        factors_list = []
-        offsets_list = []
+        unit_list: List[str] = []
+        display_unit_list: List[str] = []
+        factors_list: List[float] = []
+        offsets_list: List[float] = []
         for unit in self.system_structure.units.values():
             unit_list.append(unit.name)
             display_unit_list.append(unit.display_unit.name)
@@ -364,7 +363,7 @@ class OspSimulationCase:
 
         logger.info(f"Write watch dict for OSP simulation case '{self.name}' in case folder: {self.case_folder}")
 
-        watch_dict = {
+        watch_dict: Dict[str, Any] = {
             "datasources": {},
             "delimiter": ",",  # 'objects': {},
             "simulation": {"name": self.simulation.name},
@@ -458,10 +457,10 @@ class OspSimulationCase:
 
         logger.debug("Ensure all referenced FMUs are accessible from the case folder via a relative path.")
         components = self.case_dict["systemStructure"]["components"]
-        for component_name, component_properties in components.items():
+        for _, component_properties in components.items():
             fmu_file = self._resolve_fmu_file(component_properties["fmu"])
             try:
-                relative_path(self.case_folder, fmu_file)
+                _ = relative_path(self.case_folder, fmu_file)
             except ValueError:
                 fmu_file = self._copy_fmu_to_case_folder(fmu_file)
             component_properties["fmu"] = fmu_file
@@ -597,9 +596,9 @@ class OspSimulationCase:
         self._clean(plot_config_file)
 
         if "plots" in self.case_dict["postProcessing"].keys():
-            temp_dict = {"plots": []}
+            temp_dict: Dict[str, List[Dict[str, Any]]] = {"plots": []}
             for plot in self.case_dict["postproc"]["plots"].values():
-                variables: list[dict] = []
+                variables: List[Dict[str, Any]] = []
                 for (
                     component_name,
                     component,
@@ -625,7 +624,7 @@ class OspSimulationCase:
 
         return
 
-    def _correct_wrong_xml_namespace(self, file_name, pattern: str, replace: str):
+    def _correct_wrong_xml_namespace(self, file_name: str, pattern: str, replace: str):
         """Substitutes namespace
         (may be obsolete in future)
         """
@@ -634,7 +633,7 @@ class OspSimulationCase:
             buffer = re.sub(pattern, replace, f.read())
 
         with open(file_name, "w") as f:
-            f.write(buffer)
+            _ = f.write(buffer)
 
         return
 

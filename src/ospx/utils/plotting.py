@@ -1,14 +1,18 @@
+# pyright: reportUnnecessaryTypeIgnoreComment=false
 import logging
 import os
 import re
-from datetime import datetime
+
+from datetime import datetime as datetime
 from pathlib import Path
-from typing import Union
+from typing import Union, Dict, MutableMapping
+import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
 
 logger = logging.getLogger(__name__)
 
 
-def create_meta_dict(title):
+def create_meta_dict(title: str) -> Dict[str, str]:
     # sourcery skip: inline-immediately-returned-variable
     meta_dict = {
         "Title": title,
@@ -25,7 +29,13 @@ def create_meta_dict(title):
     return meta_dict
 
 
-def save_figure(plt, fig, extension, path: Union[str, os.PathLike[str]], title: str, meta_dict):
+def save_figure(
+    fig: Figure,  # type: ignore
+    extension: str,
+    path: Union[str, os.PathLike[str]],
+    title: str,
+    meta_dict: MutableMapping[str, str],
+):
 
     # Make sure path argument is of type Path. If not, cast it to Path type.
     path = path if isinstance(path, Path) else Path(path)
@@ -55,12 +65,13 @@ def save_figure(plt, fig, extension, path: Union[str, os.PathLike[str]], title: 
     if len(title_in_file_name) >= 80:
         title_in_file_name = "".join(list(title_in_file_name[:59]) + [".", "."] + list(title_in_file_name[-19:]))
 
+    save_file: str
     if path:
-        save_file = Path() / path / f"{title_in_file_name}.{extension}"
+        save_file = str(path / f"{title_in_file_name}.{extension}")
     else:
         save_file = f"{title_in_file_name}.{extension}"
 
-    fig.savefig(
+    fig.savefig(  # type: ignore
         save_file,
         orientation="landscape",
         # papertype = 'a4',
@@ -68,6 +79,6 @@ def save_figure(plt, fig, extension, path: Union[str, os.PathLike[str]], title: 
         transparent=False,
         metadata=meta_dict,
     )
-    plt.close(fig)
+    plt.close(fig)  # type: ignore
 
     return

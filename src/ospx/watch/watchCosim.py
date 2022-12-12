@@ -1,17 +1,24 @@
+# pyright: reportUnknownMemberType=false
+# pyright: reportUnnecessaryTypeIgnoreComment=false
+import contextlib
 import logging
 import os
 import re
 from math import sqrt as sqrt
 from pathlib import Path
-from typing import List, MutableSequence, Union
+from typing import List, MutableSequence, Union, Dict, Any, MutableMapping
 
 import matplotlib
 import matplotlib.axes
 import matplotlib.pyplot as plt
 import numpy as np
+from numpy import ndarray
 import pandas as pd
+from pandas import DataFrame
 from dictIO import DictReader, DictWriter
 from matplotlib import cm
+from matplotlib.figure import Figure
+
 
 from ospx.utils.plotting import create_meta_dict, save_figure
 
@@ -21,23 +28,27 @@ logger = logging.getLogger(__name__)
 class CosimWatcher:
     def __init__(
         self,
-        csv_file_names: MutableSequence,
+        csv_file_names: MutableSequence[str],
         skip_values: int,
         latest_values: int,
         scale_factor: float,
     ):
-        self.watch_dict_file = None
-        self.watch_dict = None
-        self.csv_file_names = csv_file_names
-        self.title = "watch"
-        self.delimiter = ","  # default
-        self.data_sources = {}
-        self.results_dir = "results"
-        self.number_of_columns = 3
-        self.number_of_subplots = 0
-        self.skip_values = skip_values
-        self.latest_values = latest_values
-        self.scale_factor = scale_factor
+        self.watch_dict_file: Union[Path, None] = None
+        self.watch_dict: MutableMapping[Any, Any] = {}
+        self.csv_file_names: MutableSequence[str] = csv_file_names
+        self.title: str = "watch"
+        self.delimiter: str = ","  # default
+        self.data_sources: Dict[str, Dict[str, Union[List[int], List[str], int, str]]] = {}
+        self.results_dir: str = "results"
+        self.number_of_columns: int = 3
+        self.number_of_subplots: int = 0
+        self.skip_values: int = skip_values
+        self.latest_values: int = latest_values
+        self.scale_factor: float = scale_factor
+        self.figure: Figure
+        self.terminate: bool = False
+        self.max_row: int = 0
+        return
 
     def read_watch_dict(self, watch_dict_file: Union[str, os.PathLike[str]]):
         """Reads watchDict file. The watchDict file contains the parameters to be plotted.
@@ -76,6 +87,7 @@ class CosimWatcher:
             self.title = f"{self.watch_dict_file.name}-{self.watch_dict['simulation']['name']}"
 
         self._define_data_source_properties_for_plotting()
+        return
 
     def plot(self, converge: bool = False):
         """Plotting
@@ -120,20 +132,18 @@ class CosimWatcher:
                 current_key = list(df)[index + 1]  # 0 is Time, StepCount was removed for simplification
 
                 subplot: Union[matplotlib.axes.Axes, matplotlib.axes.SubplotBase] = self.figure.add_subplot(
-                    self.maxRow, self.number_of_columns, index + 1
+                    self.max_row, self.number_of_columns, index + 1
                 )
 
                 try:
-                    subplot.plot(
+                    _ = subplot.plot(
                         "Time",
                         current_key,
                         linewidth=2,
                         color=cm.get_cmap("gist_rainbow")(index / self.number_of_subplots),
                         data=df[["Time", current_key]],
                     )
-                except TypeError:
-                    pass
-                except ValueError:
+                except (TypeError, ValueError):
                     pass
                 except Exception as e:
                     logger.exception(e)
@@ -141,7 +151,7 @@ class CosimWatcher:
                 subplot.grid(color="#66aa88", linestyle="--")
                 subplot.xaxis.set_tick_params(labelsize=8)
                 subplot.yaxis.set_tick_params(labelsize=8)
-                subplot.legend(fontsize=8)
+                _ = subplot.legend(fontsize=8)
                 if isinstance(subplot, matplotlib.axes.SubplotBase):
                     axs.append(subplot)
                 else:
@@ -149,7 +159,7 @@ class CosimWatcher:
                         f"CosimWatcher.plot(): subplot is of type {type(subplot)}. Expected type was matplotlib.axes.SubplotBase ."
                     )
 
-            self.figure.suptitle(self.title)
+            _ = self.figure.suptitle(self.title)
 
             if converge:
                 plt.show(block=False)
@@ -157,7 +167,6 @@ class CosimWatcher:
 
             if terminate_loops >= max_no_change_loops:
                 save_figure(
-                    plt,
                     self.figure,
                     extension="png",
                     path=self.results_dir,
@@ -167,7 +176,9 @@ class CosimWatcher:
                 break
             plt.clf()
 
-            # implement keypress for termination
+            # @TODO: Implement keypress for termination
+
+        return
 
     def dump(self):
         """Write dataframe to dump."""
@@ -176,25 +187,21 @@ class CosimWatcher:
 
         result_dict = {}
         for header in list(df):
-            values = df[header].dropna().to_numpy()
-            _first_value = values[0]
-            _last_value = values[-1]
-            try:
-                _mean = np.mean(values)
-            except TypeError:
-                _mean = "None"
-            try:
-                _stddev = np.std(values)
-            except TypeError:
-                _stddev = "None"
-            try:
+            values: ndarray[Any, Any] = df[header].dropna().to_numpy()
+            _first_value: Any = values[0]
+            _last_value: Any = values[-1]
+            _mean: Union[float, str] = "None"
+            _stddev: Union[float, str] = "None"
+            _min: Union[float, str] = "None"
+            _max: Union[float, str] = "None"
+            with contextlib.suppress(TypeError):
+                _mean = np.mean(values)  # type: ignore
+            with contextlib.suppress(TypeError):
+                _stddev = np.std(values)  # type: ignore
+            with contextlib.suppress(TypeError):
                 _min = np.min(values)
-            except TypeError:
-                _min = "None"
-            try:
+            with contextlib.suppress(TypeError):
                 _max = np.max(values)
-            except TypeError:
-                _max = "None"
             result_dict[header] = {
                 "latestValue": _last_value,
                 "firstValue": _first_value,
@@ -214,6 +221,7 @@ class CosimWatcher:
         dump_dict_name = "-".join([self.title, "dataFrame.dump"])
         target_file_path = Path.cwd() / self.results_dir / dump_dict_name
         df.to_pickle(str(target_file_path.absolute()), compression="gzip")
+        return
 
     def _define_data_source_properties_for_plotting(self):
         """Details out the properties of all data sources for plotting.
@@ -252,20 +260,22 @@ class CosimWatcher:
                     if read_only_shortlisted_columns:
                         # if columns were explicitely specified (shortlisted) in watch dict:
                         # Read only shortlisted columns.
-                        columns = data_source_properties["columns"]
+                        if "columns" in data_source_properties and isinstance(data_source_properties["columns"], List):
+                            columns = [int(col) for col in data_source_properties["columns"]]
                     else:
                         # if columns were not explicitely specified in watch dict:
                         # Read all columns except settings.
-                        for index, col_name in enumerate(data_header):
-                            # if not re.match(r'^(StepCount|settings)', col_name):
-                            if not re.match(r"^(settings)", col_name):
-                                columns.append(index)
+                        columns.extend(
+                            index
+                            for index, col_name in enumerate(data_header)
+                            if not re.match(r"^(settings)", col_name)
+                        )
 
-                    _column_names = [data_header[column] for column in columns]
+                    _column_names: List[str] = [data_header[column] for column in columns]
                     data_source_properties.update({"colNames": _column_names})
 
-                    _display_column_names = [
-                        pattern.sub("", col_name) for col_name in data_source_properties["colNames"]
+                    _display_column_names: List[str] = [
+                        pattern.sub("", col_name) for col_name in data_source_properties["colNames"]  # type: ignore
                     ]
                     _display_column_names = ["Time", "StepCount"] + [
                         data_source_name + "|" + col_name
@@ -276,6 +286,7 @@ class CosimWatcher:
 
                     data_source_properties.update({"xColumn": columns[0]})
                     data_source_properties.update({"yColumns": columns[1:]})
+        return
 
     def _initialize_plot(self):
         """Initializes the plot.
@@ -298,10 +309,11 @@ class CosimWatcher:
 
         self.number_of_subplots = len(list(df)) - 1  # one of the columns is the abscissa
         self.number_of_columns = int(sqrt(self.number_of_subplots - 1)) + 1
-        self.maxRow = int(self.number_of_subplots / self.number_of_columns - 0.1) + 1
+        self.max_row = int(self.number_of_subplots / self.number_of_columns - 0.1) + 1
+        return
 
-    def _read_csv_files_into_dataframe(self):
-        """Reads all csv files into one joint Panda dataframe.
+    def _read_csv_files_into_dataframe(self) -> DataFrame:
+        """Reads all csv files into one joint Pandas dataframe.
 
         Read all csv files (=all data sources, one csv file per data source) into one joint Pandas dataframe.
         The returned dataframe hence contains the data of all datas ources.
@@ -315,12 +327,12 @@ class CosimWatcher:
 
         df_all_data_sources = pd.DataFrame()  # initialize empty df
 
-        for data_source_name, data_source_properties in self.data_sources.items():
+        for _, data_source_properties in self.data_sources.items():
             # mapping dict for display column names
-            column_name_to_display_column_name_mapping = dict(
+            column_name_to_display_column_name_mapping: Dict[str, str] = dict(
                 zip(
-                    data_source_properties["colNames"],
-                    data_source_properties["displayColNames"],
+                    data_source_properties["colNames"],  # type: ignore
+                    data_source_properties["displayColNames"],  # type: ignore
                 )
             )
             """it could be so easy
@@ -330,44 +342,46 @@ class CosimWatcher:
             """
             # for remove_item in ['Time', 'StepCount']:
             #    column_name_to_display_column_name_mapping.pop(remove_item, None)
-
-            _column_names: List[str] = data_source_properties["colNames"]
+            _column_names: List[str] = []
+            if "colNames" in data_source_properties and isinstance(data_source_properties["colNames"], List):
+                _column_names = [str(col_name) for col_name in data_source_properties["colNames"]]
             # Alternative value for _column_names which excludes 'Time' and 'StepCount':
             # _column_names = [col_name for col_name in data_source_properties['colNames'] if col_name not in ['Time', 'StepCount']],
+            if "csvFile" in data_source_properties and isinstance(data_source_properties["csvFile"], str):
+                df_single_data_source: DataFrame
+                df_single_data_source = pd.read_csv(
+                    Path(data_source_properties["csvFile"]),
+                    usecols=_column_names,
+                )
 
-            df_single_data_source = pd.read_csv(
-                Path(data_source_properties["csvFile"]),
-                usecols=_column_names,
-            )
+                df_single_data_source = df_single_data_source.rename(columns=column_name_to_display_column_name_mapping)
 
-            df_single_data_source = df_single_data_source.rename(columns=column_name_to_display_column_name_mapping)
+                if df_all_data_sources.empty:
+                    # first df inherit all columns from single df
+                    df_all_data_sources = df_single_data_source
+                else:
+                    # all subsequent merge row-wise by time column,
+                    # ignoring index
+                    # (after setting individual time steps for each individual component)
 
-            if df_all_data_sources.empty:
-                # first df inherit all columns from single df
-                df_all_data_sources = df_single_data_source
-            else:
-                # all subsequent merge row-wise by time column,
-                # ignoring index
-                # (after setting individual time steps for each individual component)
+                    # concatenate column-wise
+                    # df_all_data_sources = pd.concat([df_all_data_sources, df_single_data_source], axis=1)
 
-                # concatenate column-wise
-                # df_all_data_sources = pd.concat([df_all_data_sources, df_single_data_source], axis=1)
+                    # df_all_data_sources = pd.concat([df_all_data_sources, df_single_data_source], ignore_index=True)
+                    df_all_data_sources = pd.concat([df_all_data_sources, df_single_data_source])
 
-                # df_all_data_sources = pd.concat([df_all_data_sources, df_single_data_source], ignore_index=True)
-                df_all_data_sources = pd.concat([df_all_data_sources, df_single_data_source])
-
-                # potential solution
-                # interpolating non-matching time data
-                # otherwise should component-wise dataframes do a better job
-                # bypass StepCound yielding in big holes, not plotted by mpl.
-                # df_all_data_sources = pd.merge_asof(
-                #    df_all_data_sources,
-                #    df_single_data_source,
-                #    on = 'Time',
-                #    by = 'StepCount',
-                #    direction = 'nearest',
-                #    #tolerance = pd.Timedelta('1ms')
-                # )
+                    # potential solution
+                    # interpolating non-matching time data
+                    # otherwise should component-wise dataframes do a better job
+                    # bypass StepCound yielding in big holes, not plotted by mpl.
+                    # df_all_data_sources = pd.merge_asof(
+                    #    df_all_data_sources,
+                    #    df_single_data_source,
+                    #    on = 'Time',
+                    #    by = 'StepCount',
+                    #    direction = 'nearest',
+                    #    #tolerance = pd.Timedelta('1ms')
+                    # )
 
         # find latest common start point for skip and latest
         # consider skipping negative values due to wrong inputs
@@ -395,3 +409,4 @@ class CosimWatcher:
         mgr.full_screen_toggle()
         self.screenSize = (mgr.canvas.width(), mgr.canvas.height())  # type: ignore
         mgr.window.close()  # type: ignore
+        return

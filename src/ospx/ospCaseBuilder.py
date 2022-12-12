@@ -74,7 +74,7 @@ class OspCaseBuilder:
 
         if inspect:
             # inspect and return
-            case._inspect()
+            case._inspect()  # pyright: ignore
             return
 
         # case.write_osp_model_description_xmls()
@@ -82,7 +82,7 @@ class OspCaseBuilder:
         case.write_system_structure_ssd()
 
         if "postProcessing" in case_dict.keys():
-            case._write_plot_config_json()
+            case._write_plot_config_json()  # pyright: ignore
 
         case.write_statistics_dict()
 

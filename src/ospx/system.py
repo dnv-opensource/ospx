@@ -1,5 +1,5 @@
 import logging
-from typing import MutableMapping, Union
+from typing import Any, MutableMapping, Union
 
 from ospx import Component, Connection, Connector, Endpoint
 from ospx.fmi import FMU, ScalarVariable, Unit
@@ -18,7 +18,7 @@ class System:
     Both component variables and component connectors can be used as endpoints in a connection.
     """
 
-    def __init__(self, properties: MutableMapping):
+    def __init__(self, properties: MutableMapping[Any, Any]):
         self._components: dict[str, Component] = {}
         self._connections: dict[str, Connection] = {}
         self._read_components(properties)
@@ -60,7 +60,7 @@ class System:
                 variables |= component.variables
         return variables
 
-    def _read_components(self, properties: MutableMapping):
+    def _read_components(self, properties: MutableMapping[Any, Any]):
         """Reads components from (case dict) properties"""
         logger.info("read components from case dict")
         self._components.clear()
@@ -70,7 +70,7 @@ class System:
             component = Component(component_name, component_properties)
             self._components[component.name] = component
 
-    def _read_connections(self, properties: MutableMapping):
+    def _read_connections(self, properties: MutableMapping[Any, Any]):
         """Reads connections from (case dict) properties"""
         logger.info("read connections from case dict")
         self._connections.clear()
@@ -96,7 +96,7 @@ class System:
                 )
         return
 
-    def _read_endpoint(self, properties: MutableMapping) -> Union[Endpoint, None]:
+    def _read_endpoint(self, properties: MutableMapping[Any, Any]) -> Union[Endpoint, None]:
         if "component" not in properties:
             return None
         component: Union[Component, None] = None
@@ -112,7 +112,7 @@ class System:
             if component and connector_name in component.connectors:
                 connector = component.connectors[connector_name]
             else:
-                for component_name, c in self.components.items():
+                for _, c in self.components.items():
                     if connector_name in c.connectors:
                         component = c
                         connector = c.connectors[connector_name]

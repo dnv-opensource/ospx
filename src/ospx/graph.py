@@ -1,9 +1,14 @@
+# pyright: reportUnknownMemberType=false
+# pyright: reportUnknownParameterType=false
+# pyright: reportUnnecessaryTypeIgnoreComment=false
+
 import functools
 import logging
 import re
-from typing import Tuple
+from typing import Any, Dict, Tuple, Union
 
-import graphviz as gv
+from graphviz import Digraph
+from graphviz.dot import Dot
 
 from ospx import Component, Connection, OspSimulationCase
 
@@ -26,8 +31,8 @@ class Graph:
         )
 
         # Default styles
-        text_size = "11"
-        styles = {
+        text_size: str = "11"
+        styles: Dict[str, Dict[str, str]] = {
             "graph": {
                 "label": f"{case.simulation.name}",
                 "fontname": "Verdana",
@@ -65,10 +70,11 @@ class Graph:
         basic_op_names: str = "(power|dot|sum|diff|prod|div|quotient)"
         input_names: str = "^(INP|inp)"
 
+        callgraph: Dot
         try:
-            digraph = functools.partial(gv.Digraph, format="png")
-            cg = digraph()
-            cg = _apply_styles(cg, styles)
+            digraph = functools.partial(Digraph, format="png")
+            callgraph = digraph()
+            callgraph = _apply_styles(callgraph, styles)
         except Exception:
             logger.exception(graphiz_not_found_error_mesage)
             return
@@ -102,7 +108,7 @@ class Graph:
                 style = "filled"
                 fillcolor = "#DDDDEE"
 
-            cg.node(
+            callgraph.node(
                 label_key,
                 label=label,
                 fontname="Verdana",
@@ -116,7 +122,7 @@ class Graph:
 
         # Connections
 
-        for key, connection in case.system_structure.connections.items():
+        for _, connection in case.system_structure.connections.items():
 
             if not (connection.source_endpoint and connection.target_endpoint):
                 return
@@ -151,7 +157,7 @@ class Graph:
                 penwidth = ("%i" % int(round((2) ** 1.5, 0)),)
                 weight = ("%i" % int(round((2) ** 1.5, 0)),)
 
-            cg.edge(
+            callgraph.edge(
                 from_key,
                 to_key,
                 style=style,
@@ -170,17 +176,17 @@ class Graph:
         # Create callGraph pdf
 
         try:
-            cg.render(f"{case.simulation.name}_callGraph", format="pdf")
+            callgraph.render(f"{case.simulation.name}_callGraph", format="pdf")  # type: ignore
         except Exception:
             logger.exception(graphiz_not_found_error_mesage)
 
         return
 
 
-def _apply_styles(digraph, styles):
-    digraph.graph_attr.update(("graph" in styles and styles["graph"]) or {})
-    digraph.node_attr.update(("nodes" in styles and styles["nodes"]) or {})
-    digraph.edge_attr.update(("edges" in styles and styles["edges"]) or {})
+def _apply_styles(digraph: Dot, styles: Dict[str, Any]) -> Dot:
+    digraph.graph_attr.update(("graph" in styles and styles["graph"]) or {})  # type: ignore
+    digraph.node_attr.update(("nodes" in styles and styles["nodes"]) or {})  # type: ignore
+    digraph.edge_attr.update(("edges" in styles and styles["edges"]) or {})  # type: ignore
     return digraph
 
 
@@ -200,12 +206,12 @@ def _get_edge_label(connection: Connection) -> str:
     )
 
 
-def _create_table(name, child=None) -> str:
+def _create_table(name: str, child: Union[Dict[str, Any], None] = None) -> str:
 
-    child = child or {" ": " "}
-    n_child = len(child)
+    _child: Dict[str, Any] = child or {" ": " "}
+    n_child = len(_child)
     string: str = f'<\n<TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0">\n<TR>\n<TD COLSPAN="{2 * n_child:d}">{name}</TD>\n</TR>\n'
-    for key, item in child.items():
+    for key, item in _child.items():
         string += f"<TR><TD>{key}</TD><TD>{item}</TD></TR>\n"
     string += "</TABLE>\n>"
 

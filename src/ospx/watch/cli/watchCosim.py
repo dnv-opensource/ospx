@@ -28,14 +28,14 @@ def _argparser() -> argparse.ArgumentParser:
         description="Continuously watches the progress of cosim, and finally saves results as a pandas dataframe.",
     )
 
-    parser.add_argument(
+    _ = parser.add_argument(
         "watchDict",
         metavar="watchDict",
         type=str,
         help="name of the dict file containing the watch configuration (will also be part of the result file names).",
     )
 
-    parser.add_argument(
+    _ = parser.add_argument(
         "-c",
         "--converge",
         action="store_true",
@@ -44,7 +44,7 @@ def _argparser() -> argparse.ArgumentParser:
         required=False,
     )
 
-    parser.add_argument(
+    _ = parser.add_argument(
         "-p",
         "--plot",
         action="store_true",
@@ -53,7 +53,7 @@ def _argparser() -> argparse.ArgumentParser:
         required=False,
     )
 
-    parser.add_argument(
+    _ = parser.add_argument(
         "-d",
         "--dump",
         action="store_true",
@@ -64,7 +64,7 @@ def _argparser() -> argparse.ArgumentParser:
 
     console_verbosity = parser.add_mutually_exclusive_group(required=False)
 
-    console_verbosity.add_argument(
+    _ = console_verbosity.add_argument(
         "-q",
         "--quiet",
         action="store_true",
@@ -72,7 +72,7 @@ def _argparser() -> argparse.ArgumentParser:
         default=False,
     )
 
-    console_verbosity.add_argument(
+    _ = console_verbosity.add_argument(
         "-v",
         "--verbose",
         action="store_true",
@@ -80,7 +80,7 @@ def _argparser() -> argparse.ArgumentParser:
         default=False,
     )
 
-    parser.add_argument(
+    _ = parser.add_argument(
         "--latest",
         action="store",
         type=int,
@@ -89,7 +89,7 @@ def _argparser() -> argparse.ArgumentParser:
         required=False,
     )
 
-    parser.add_argument(
+    _ = parser.add_argument(
         "--log",
         action="store",
         type=str,
@@ -98,7 +98,7 @@ def _argparser() -> argparse.ArgumentParser:
         required=False,
     )
 
-    parser.add_argument(
+    _ = parser.add_argument(
         "--log-level",
         action="store",
         type=str,
@@ -107,7 +107,7 @@ def _argparser() -> argparse.ArgumentParser:
         default="WARNING",
         required=False,
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--scale",
         action="store",
         type=int,
@@ -115,7 +115,7 @@ def _argparser() -> argparse.ArgumentParser:
         default=1,
         required=False,
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--skip",
         action="store",
         type=int,

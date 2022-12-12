@@ -23,7 +23,7 @@ def _argparser() -> argparse.ArgumentParser:
         description="Builds the OSP-specific configuration files needed to run an OSP (co-)simulation case.",
     )
 
-    parser.add_argument(
+    _ = parser.add_argument(
         "caseDict",
         metavar="caseDict",
         type=str,
@@ -31,7 +31,7 @@ def _argparser() -> argparse.ArgumentParser:
         help="name of the dict file containing the OSP simulation case configuration.",
     )
 
-    parser.add_argument(
+    _ = parser.add_argument(
         "--clean",
         action="store_true",
         help=(
@@ -41,7 +41,7 @@ def _argparser() -> argparse.ArgumentParser:
         required=False,
     )
 
-    parser.add_argument(
+    _ = parser.add_argument(
         "-i",
         "--inspect",
         action="store_true",
@@ -50,7 +50,7 @@ def _argparser() -> argparse.ArgumentParser:
         required=False,
     )
 
-    parser.add_argument(
+    _ = parser.add_argument(
         "-g",
         "--graph",
         action="store_true",
@@ -61,7 +61,7 @@ def _argparser() -> argparse.ArgumentParser:
 
     console_verbosity = parser.add_mutually_exclusive_group(required=False)
 
-    console_verbosity.add_argument(
+    _ = console_verbosity.add_argument(
         "-q",
         "--quiet",
         action="store_true",
@@ -69,7 +69,7 @@ def _argparser() -> argparse.ArgumentParser:
         default=False,
     )
 
-    console_verbosity.add_argument(
+    _ = console_verbosity.add_argument(
         "-v",
         "--verbose",
         action="store_true",
@@ -77,7 +77,7 @@ def _argparser() -> argparse.ArgumentParser:
         default=False,
     )
 
-    parser.add_argument(
+    _ = parser.add_argument(
         "--log",
         action="store",
         type=str,
@@ -86,7 +86,7 @@ def _argparser() -> argparse.ArgumentParser:
         required=False,
     )
 
-    parser.add_argument(
+    _ = parser.add_argument(
         "--log-level",
         action="store",
         type=str,

@@ -48,7 +48,7 @@ def rename_file_in_zip(zip_file: Path, file_name: str, new_file_name: str) -> Un
                         data = zip_read.read(item.filename)
                         item.filename = new_file_name
                     zip_write.writestr(item, data)
-        copyfile(temp_name, zip_file)
+        _ = copyfile(temp_name, zip_file)
 
         updated_zip_file = ZipFile(zip_file, mode="a")
 
@@ -76,7 +76,7 @@ def remove_files_from_zip(zip_file: Path, *file_names: str) -> Union[ZipFile, No
                         data = zip_read.read(item.filename)
                         zip_write.writestr(item, data)
 
-        copyfile(temp_name, zip_file)
+        _ = copyfile(temp_name, zip_file)
 
         updated_zip_file = ZipFile(zip_file, mode="a")
 
