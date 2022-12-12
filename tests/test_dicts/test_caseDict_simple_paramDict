@@ -2,6 +2,6 @@
 filetype dictionary; coding utf-8; version 0.1; local --; purpose --;
 \*----------------------------------------------------------------------------*/
 
-variable_1                    1.0;
-variable_2                    2;
-variable_3                    True;
+minuend                    1.0;
+subtrahend                 2.0;
+dividend                   3.0;

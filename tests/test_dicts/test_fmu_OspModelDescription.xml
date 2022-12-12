@@ -26,8 +26,8 @@
 
         <Generic name="VariableGroup_1_IN">
             <Variable name="Variable_2_3_IN">
-                <Variable ref="Variable_2_IN" unit="N"/>
-                <Variable ref="Variable_3_IN" unit="N"/>
+                <Variable ref="Variable_2_IN_Integer" unit="N"/>
+                <Variable ref="Variable_3_IN_Bool" unit="N"/>
             </Variable>
             <Variable name="Vector_1">
                 <Variable ref="Vector_1_IN[0]" unit="N.m"/>
@@ -38,8 +38,8 @@
 
         <Generic name="VariableGroup_2_OUT">
             <Variable name="Variable_5_6_OUT">
-                <Variable ref="Variable_5_OUT" unit="N"/>
-                <Variable ref="Variable_6_OUT" unit="N"/>
+                <Variable ref="Variable_5_OUT_Integer" unit="N"/>
+                <Variable ref="Variable_6_OUT_Bool" unit="N"/>
             </Variable>
             <Variable name="Vector_2_OUT">
                 <Variable ref="Vector_2_OUT[0]" unit="N.m"/>

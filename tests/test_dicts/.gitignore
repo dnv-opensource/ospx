@@ -1,6 +1,7 @@
 #FMU
 *.fmu
 *.FMU
+!test_fmu.fmu
 
 *.csv
 /caseDict_imported_from_*

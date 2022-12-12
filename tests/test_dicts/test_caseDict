@@ -1,7 +1,7 @@
 /*---------------------------------*- C++ -*----------------------------------*\
 filetype dictionary; coding utf-8; version 0.1; local --; purpose --;
 \*----------------------------------------------------------------------------*/
-#include '.\test_caseDict_paramDict'
+#include test_caseDict_paramDict
 
 _environment
 {
@@ -46,7 +46,7 @@ systemStructure
             {
                 input_1
                 {
-                    variable            Variable_1_IN;
+                    variable            Variable_1_IN_Real;
                     type                input;
                 }
                 input_2
@@ -56,7 +56,7 @@ systemStructure
                 }
                 output_1
                 {
-                    variable            Variable_4_OUT;
+                    variable            Variable_4_OUT_Real;
                     type                output;
                 }
                 output_2
@@ -67,15 +67,15 @@ systemStructure
             }
             initialize
             {
-                Variable_1_IN
+                Variable_1_IN_Real
                 {
                     start               $variable_1;
                 }
-                Variable_2_IN
+                Variable_2_IN_Integer
                 {
                     start               $variable_2;
                 }
-                Variable_3_IN
+                Variable_3_IN_Bool
                 {
                     start               $variable_3;
                 }
@@ -88,7 +88,7 @@ systemStructure
             {
                 input_1
                 {
-                    variable            Variable_1_IN;
+                    variable            Variable_1_IN_Real;
                     type                input;
                 }
                 input_2
@@ -98,7 +98,7 @@ systemStructure
                 }
                 output_1
                 {
-                    variable            Variable_4_OUT;
+                    variable            Variable_4_OUT_Real;
                     type                output;
                 }
                 output_2
