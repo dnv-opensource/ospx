@@ -24,31 +24,23 @@ class OspSystemStructureImporter:
 
         # Make sure source_file argument is of type Path. If not, cast it to Path type.
         system_structure_file = (
-            system_structure_file
-            if isinstance(system_structure_file, Path)
-            else Path(system_structure_file)
+            system_structure_file if isinstance(system_structure_file, Path) else Path(system_structure_file)
         )
 
         # Check whether system structure file exists
         if not system_structure_file.exists():
-            logger.error(
-                f"OspSystemStructureImporter: File {system_structure_file} not found."
-            )
+            logger.error(f"OspSystemStructureImporter: File {system_structure_file} not found.")
             raise FileNotFoundError(system_structure_file)
 
         if system_structure_file.suffix != ".xml":
-            logger.error(
-                f"OspSystemStructureImporter: File type {system_structure_file} not implemented yet."
-            )
+            logger.error(f"OspSystemStructureImporter: File type {system_structure_file} not implemented yet.")
             return
 
         counter = BorgCounter()
 
         source_dict = DictReader.read(system_structure_file, comments=False)
         source_folder: Path = system_structure_file.resolve().parent.absolute()
-        lib_source_folder: Path = (
-            source_folder  # setting to source_folder acts as fallback / default
-        )
+        lib_source_folder: Path = source_folder  # setting to source_folder acts as fallback / default
         target_folder: Path = Path.cwd().absolute()
 
         # Main subdicts contained in systemStructure
@@ -59,9 +51,7 @@ class OspSystemStructureImporter:
         # iterate over the connections first as they contain the variable and component names
         temp_connectors = {}
         if connections_key := find_key(source_dict, "Connections$"):
-            for connection_type, connection_properties in source_dict[
-                connections_key
-            ].items():
+            for connection_type, connection_properties in source_dict[connections_key].items():
                 connection_type: str = re.sub(r"(^\d{1,6}_)", "", connection_type)
 
                 if connection_type not in {
@@ -81,9 +71,7 @@ class OspSystemStructureImporter:
                 connection: dict[str, dict] = {}
                 connection_name: str = ""
                 # following loop has range {0,1}
-                for index, (endpoint_type, endpoint_properties) in enumerate(
-                    connection_properties.items()
-                ):
+                for index, (endpoint_type, endpoint_properties) in enumerate(connection_properties.items()):
                     endpoint_type: str = re.sub(r"(^\d{1,6}_)", "", endpoint_type)
 
                     if endpoint_type not in {"Variable", "VariableGroup"}:
@@ -97,16 +85,12 @@ class OspSystemStructureImporter:
                         logger.error(msg)
                         raise TypeError(msg)
 
-                    component_name: str = endpoint_properties["_attributes"][
-                        "simulator"
-                    ]
+                    component_name: str = endpoint_properties["_attributes"]["simulator"]
                     referenced_name: str = endpoint_properties["_attributes"]["name"]
                     # alternator for source <--> target (because there are always 2 entries in VariableConnection in always the same sequence)
                     endpoint_name: str = "source" if index % 2 == 0 else "target"
                     endpoint: dict[str, str] = {}
-                    _connector_type: str = (
-                        "output" if endpoint_name == "source" else "input"
-                    )
+                    _connector_type: str = "output" if endpoint_name == "source" else "input"
                     _connector: dict[str, str] = {}
                     _connector_name: str = f"{component_name}_{referenced_name}"
                     if endpoint_type == "Variable":
@@ -136,9 +120,7 @@ class OspSystemStructureImporter:
                     # Save _connector in temp_connectors dict.
                     # (The variable and component information stored in these connectors
                     #  is later used to complete component properties)
-                    temp_connectors[f"{counter():06d}_{component_name}"] = {
-                        _connector_name: _connector
-                    }
+                    temp_connectors[f"{counter():06d}_{component_name}"] = {_connector_name: _connector}
                 # Save in connections dict
                 if connection_name not in connections:
                     connections[connection_name] = connection
@@ -183,18 +165,14 @@ class OspSystemStructureImporter:
                     fmu_file = fmu_file.resolve()
                 else:
                     fmu_file = (source_folder / fmu_file).resolve()
-                fmu_file_relative_to_lib_source: Path = relative_path(
-                    lib_source_folder, fmu_file
-                )
+                fmu_file_relative_to_lib_source: Path = relative_path(lib_source_folder, fmu_file)
                 # Step Size
                 step_size: Union[float, None] = None
                 if "stepSize" in simulator_properties["_attributes"]:
                     step_size = float(simulator_properties["_attributes"]["stepSize"])
                     # Initial values
                 component_initial_values: dict[str, dict] = {}
-                if initial_values_key := find_key(
-                    simulator_properties, "InitialValues$"
-                ):
+                if initial_values_key := find_key(simulator_properties, "InitialValues$"):
                     initial_values = simulator_properties[initial_values_key]
                     if initial_value_keys := find_keys(initial_values, "InitialValue$"):
                         for initial_value_key in initial_value_keys:
@@ -204,29 +182,17 @@ class OspSystemStructureImporter:
                                 if not type_key:
                                     continue
                                 _type: str = re.sub(r"(^\d{1,6}_)", "", type_key)
-                                referenced_name = initial_value["_attributes"][
-                                    "variable"
-                                ]
+                                referenced_name = initial_value["_attributes"]["variable"]
                                 value: Union[float, int, bool, str]
                                 if _type == "Real":
-                                    value = float(
-                                        initial_value[type_key]["_attributes"]["value"]
-                                    )
+                                    value = float(initial_value[type_key]["_attributes"]["value"])
                                 elif _type == "Integer":
-                                    value = int(
-                                        initial_value[type_key]["_attributes"]["value"]
-                                    )
+                                    value = int(initial_value[type_key]["_attributes"]["value"])
                                 elif _type == "Boolean":
-                                    value = bool(
-                                        initial_value[type_key]["_attributes"]["value"]
-                                    )
+                                    value = bool(initial_value[type_key]["_attributes"]["value"])
                                 else:
-                                    value = initial_value[type_key]["_attributes"][
-                                        "value"
-                                    ]
-                                component_initial_values |= {
-                                    referenced_name: {"start": value}
-                                }
+                                    value = initial_value[type_key]["_attributes"]["value"]
+                                component_initial_values |= {referenced_name: {"start": value}}
                                 # Assemble component
                 component: dict[str, Union[dict, str, float, Path]] = {
                     "connectors": component_connectors,

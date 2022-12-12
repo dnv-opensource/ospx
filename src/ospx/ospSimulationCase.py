@@ -26,19 +26,13 @@ class OspSimulationCase:
 
         self.counter = BorgCounter()
         self.case_dict: CppDict = case_dict
-        self.case_folder: Path = (
-            case_dict.source_file.resolve().parent
-            if case_dict.source_file
-            else Path.cwd()
-        )
+        self.case_folder: Path = case_dict.source_file.resolve().parent if case_dict.source_file else Path.cwd()
         self.system_structure: System
 
         # Global settings
         self.simulation: Simulation  # general properties of the simulation case
         self._read_simulation()
-        self.name: str = (
-            self.case_dict.name
-        )  # initialize conservatively (with fallback path)
+        self.name: str = self.case_dict.name  # initialize conservatively (with fallback path)
         if self.simulation and self.simulation.name:
             self.name = self.simulation.name
 
@@ -56,9 +50,7 @@ class OspSimulationCase:
         FileNotFoundError
             If an FMU file referenced in caseDict does not exist
         """
-        logger.info(
-            f"Set up OSP simulation case '{self.name}' in case folder: {self.case_folder}"
-        )
+        logger.info(f"Set up OSP simulation case '{self.name}' in case folder: {self.case_folder}")
 
         # Check whether all referenced FMUs actually exist
         self._check_all_fmus_exist()
@@ -103,9 +95,7 @@ class OspSimulationCase:
 
         osp_system_structure: dict = {}
         osp_system_structure["_xmlOpts"] = {
-            "_nameSpaces": {
-                "osp": "https://opensimulationplatform.com/xsd/OspModelDescription-1.0.0.xsd"
-            },
+            "_nameSpaces": {"osp": "https://opensimulationplatform.com/xsd/OspModelDescription-1.0.0.xsd"},
             "_rootTag": "OspSystemStructure",
         }
 
@@ -120,13 +110,9 @@ class OspSimulationCase:
 
         # Simulators (=Components)
         simulators: dict = {}
-        for index, (_, component) in enumerate(
-            self.system_structure.components.items()
-        ):
+        for index, (_, component) in enumerate(self.system_structure.components.items()):
             simulator_key = f"{index:06d}_Simulator"
-            simulator_properties: dict[
-                str, dict[str, Union[str, float, dict, Path]]
-            ] = {
+            simulator_properties: dict[str, dict[str, Union[str, float, dict, Path]]] = {
                 "_attributes": {
                     "name": component.name,
                     "source": relative_path(self.case_folder, component.fmu.file),
@@ -137,14 +123,11 @@ class OspSimulationCase:
                 if (
                     component.fmu.default_experiment
                     and component.fmu.default_experiment.step_size
-                    and component.step_size
-                    == component.fmu.default_experiment.step_size
+                    and component.step_size == component.fmu.default_experiment.step_size
                 ):
                     write_step_size_to_osp_system_structure = False
                 if write_step_size_to_osp_system_structure:
-                    simulator_properties["_attributes"][
-                        "stepSize"
-                    ] = component.step_size
+                    simulator_properties["_attributes"]["stepSize"] = component.step_size
 
             if component.initial_values:
                 simulator_properties["InitialValues"] = {}
@@ -163,9 +146,7 @@ class OspSimulationCase:
                                 "_attributes": {"value": variable.start},
                             },
                         }
-                        simulator_properties["InitialValues"][
-                            initial_value_key
-                        ] = initial_value_properties
+                        simulator_properties["InitialValues"][initial_value_key] = initial_value_properties
             simulators[simulator_key] = simulator_properties
 
         osp_system_structure["Simulators"] = simulators
@@ -213,9 +194,7 @@ class OspSimulationCase:
 
         # Write OspSystemStructure.xml
         formatter = XmlFormatter()
-        DictWriter.write(
-            osp_system_structure, osp_system_structure_file, formatter=formatter
-        )
+        DictWriter.write(osp_system_structure, osp_system_structure_file, formatter=formatter)
 
         self._correct_wrong_xml_namespace(
             "OspSystemStructure.xml",
@@ -313,9 +292,7 @@ class OspSimulationCase:
 
         # Write SystemStructure.ssd
         formatter = XmlFormatter(omit_prefix=False)
-        DictWriter.write(
-            system_structure_ssd, system_structure_ssd_file, formatter=formatter
-        )
+        DictWriter.write(system_structure_ssd, system_structure_ssd_file, formatter=formatter)
 
         return
 
@@ -328,9 +305,7 @@ class OspSimulationCase:
         # self._clean(statistics_dict_file)
 
         # sourcery skip: merge-dict-assign, simplify-dictionary-update
-        logger.info(
-            f"Write statistics dict for OSP simulation case '{self.name}' in case folder: {self.case_folder}"
-        )
+        logger.info(f"Write statistics dict for OSP simulation case '{self.name}' in case folder: {self.case_folder}")
 
         statistics_dict = {}
 
@@ -387,9 +362,7 @@ class OspSimulationCase:
         watch_dict_file = self.case_folder / "watchDict"
         # self._clean(watch_dict_file)
 
-        logger.info(
-            f"Write watch dict for OSP simulation case '{self.name}' in case folder: {self.case_folder}"
-        )
+        logger.info(f"Write watch dict for OSP simulation case '{self.name}' in case folder: {self.case_folder}")
 
         watch_dict = {
             "datasources": {},
@@ -404,9 +377,7 @@ class OspSimulationCase:
             # @TODO: Time, StepCount, conn0, conn1, etc from modelDescription.xml ModelVariables
             #        should match connectors in caseDict for respective model. Improvement needed.
             #        FRALUM, 2021-xx-xx
-            columns = [0, 1] + [
-                x + 2 for x in range(no_of_connectors)
-            ]  # f*** StepCount
+            columns = [0, 1] + [x + 2 for x in range(no_of_connectors)]  # f*** StepCount
 
             watch_dict["datasources"].update({component_name: {"columns": columns}})
 
@@ -485,9 +456,7 @@ class OspSimulationCase:
         Note: If multiple components reference the same FMU, these get copied only once.
         """
 
-        logger.debug(
-            "Ensure all referenced FMUs are accessible from the case folder via a relative path."
-        )
+        logger.debug("Ensure all referenced FMUs are accessible from the case folder via a relative path.")
         components = self.case_dict["systemStructure"]["components"]
         for component_name, component_properties in components.items():
             fmu_file = self._resolve_fmu_file(component_properties["fmu"])
@@ -513,21 +482,15 @@ class OspSimulationCase:
         Path
             FMU file copied into the case folder.
         """
-        fmu_file_in_case_folder: Path = (
-            (self.case_folder / fmu_file.name).resolve().absolute()
-        )
+        fmu_file_in_case_folder: Path = (self.case_folder / fmu_file.name).resolve().absolute()
         if not fmu_file_in_case_folder.exists():
             logger.info(f"Copy FMU {fmu_file} --> {fmu_file_in_case_folder}")
             copy2(fmu_file, self.case_folder)
             # Check whether also an <fmu_name>_OspModelDescription.xml file exists.
             # If so, copy also that one.
-            osp_model_description_file = fmu_file.with_name(
-                f"{fmu_file.stem}_OspModelDescription.xml"
-            )
+            osp_model_description_file = fmu_file.with_name(f"{fmu_file.stem}_OspModelDescription.xml")
             if osp_model_description_file.exists():
-                logger.info(
-                    f"Copy OspModelDescription {osp_model_description_file} --> {fmu_file_in_case_folder}"
-                )
+                logger.info(f"Copy OspModelDescription {osp_model_description_file} --> {fmu_file_in_case_folder}")
                 copy2(osp_model_description_file, self.case_folder)
         return fmu_file_in_case_folder
 
@@ -558,40 +521,29 @@ class OspSimulationCase:
 
         Results get logged to the console.
         """
-        logger.info(
-            f"Inspect OSP simulation case '{self.name}' in case folder: {self.case_folder}"
-        )
+        logger.info(f"Inspect OSP simulation case '{self.name}' in case folder: {self.case_folder}")
 
         delim = "\t" * 3
 
         log_string = (
-            f"Components and related FMUs as defined in {self.case_dict.name}\n"
-            f"\tcomponent{delim}fmu{delim}\n\n"
+            f"Components and related FMUs as defined in {self.case_dict.name}\n" f"\tcomponent{delim}fmu{delim}\n\n"
         )
         for component_name, component in self.system_structure.components.items():
             log_string += f"\t{component_name}{delim}{component.fmu.file.name}\n"
         logger.info(log_string + "\n")
 
-        log_string = (
-            f"FMU attributes defined in the fmu's modelDescription.xml\n"
-            f"\tfmu{delim}attributes{delim}"
-        )
+        log_string = f"FMU attributes defined in the fmu's modelDescription.xml\n" f"\tfmu{delim}attributes{delim}"
         for fmu_name, fmu in self.system_structure.fmus.items():
             log_string += f"\n\n\t{fmu_name}\n"
             fmu_attributes = "\n".join(
-                f"\t{delim}{k}{delim}{v}"
-                for k, v in fmu.model_description["_xmlOpts"]["_rootAttributes"].items()
+                f"\t{delim}{k}{delim}{v}" for k, v in fmu.model_description["_xmlOpts"]["_rootAttributes"].items()
             )
             log_string += fmu_attributes
-            if default_experiment_key := find_key(
-                fmu.model_description, "DefaultExperiment$"
-            ):
+            if default_experiment_key := find_key(fmu.model_description, "DefaultExperiment$"):
                 if "_attributes" in fmu.model_description[default_experiment_key]:
                     fmu_default_experiment = "\n".join(
                         f"\t{delim}{k}{delim}{v}"
-                        for k, v in fmu.model_description[default_experiment_key][
-                            "_attributes"
-                        ].items()
+                        for k, v in fmu.model_description[default_experiment_key]["_attributes"].items()
                     )
                     log_string += f"\n{fmu_default_experiment}"
         logger.info(log_string + "\n")
@@ -610,8 +562,7 @@ class OspSimulationCase:
         logger.info(log_string + "\n")
 
         log_string = (
-            f"Variables defined in the fmu's modelDescription.xml\n"
-            f"\tfmu{delim}variable{delim}type{delim}unit"
+            f"Variables defined in the fmu's modelDescription.xml\n" f"\tfmu{delim}variable{delim}type{delim}unit"
         )
         logger.info(log_string + "\n")
         for fmu_name, fmu in self.system_structure.fmus.items():

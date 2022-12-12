@@ -70,9 +70,7 @@ class Component:
         # that the fmu has already been copied from the library into the current working directory (=case folder)
         fmu_file = Path(properties["fmu"])
         if not fmu_file.exists():
-            logger.exception(
-                f"component {self.name}: referenced FMU file {fmu_file} not found."
-            )
+            logger.exception(f"component {self.name}: referenced FMU file {fmu_file} not found.")
             raise FileNotFoundError(fmu_file)
         self.fmu = FMU(fmu_file)
         if self.fmu.default_experiment and not self.step_size:
@@ -117,10 +115,7 @@ class Component:
     def _read_remote_access(self, properties: MutableMapping):
         if "remoteAccess" not in properties:
             return
-        if (
-            "host" in properties["remoteAccess"]
-            and "port" in properties["remoteAccess"]
-        ):
+        if "host" in properties["remoteAccess"] and "port" in properties["remoteAccess"]:
             self.remote_access = RemoteAccess(
                 host=properties["remoteAccess"]["host"],
                 port=properties["remoteAccess"]["port"],
@@ -132,17 +127,11 @@ class Component:
                 f"component {self.name}: 'generate_proxy' set to True, but the 'remoteAccess' element is not correctly defined."
             )
         elif not self.remote_access.host:
-            logger.error(
-                f"component {self.name}: 'remoteAccess' element is defined, but host is not specified."
-            )
+            logger.error(f"component {self.name}: 'remoteAccess' element is defined, but host is not specified.")
         elif not self.remote_access.port:
-            logger.error(
-                f"component {self.name}: 'remoteAccess' element is defined, but port is not specified."
-            )
+            logger.error(f"component {self.name}: 'remoteAccess' element is defined, but port is not specified.")
         else:
-            self.fmu = self.fmu.proxify(
-                self.remote_access.host, self.remote_access.port
-            )
+            self.fmu = self.fmu.proxify(self.remote_access.host, self.remote_access.port)
             # if NTNU-IHB fmu-proxy code is used, use '-proxy' reference
             self.name = f"{self.name}-proxy"
             # self.name = self.fmu.file.stem
@@ -179,9 +168,7 @@ class Component:
 
     def write_osp_model_description_xml(self):  # sourcery skip: merge-dict-assign
         """Writes the <component.name>_OspModelDescription.xml file in the current working directory."""
-        osp_model_description_file = (
-            self.fmu.file.parent.absolute() / f"{self.name}_OspModelDescription.xml"
-        )
+        osp_model_description_file = self.fmu.file.parent.absolute() / f"{self.name}_OspModelDescription.xml"
         self._clean(osp_model_description_file)
 
         osp_model_description = {}
@@ -204,34 +191,20 @@ class Component:
                 if unit.base_unit.K:
                     unit_definition["BaseUnit"]["_attributes"]["K"] = unit.base_unit.K
                 if unit.base_unit.mol:
-                    unit_definition["BaseUnit"]["_attributes"][
-                        "mol"
-                    ] = unit.base_unit.mol
+                    unit_definition["BaseUnit"]["_attributes"]["mol"] = unit.base_unit.mol
                 if unit.base_unit.cd:
                     unit_definition["BaseUnit"]["_attributes"]["cd"] = unit.base_unit.cd
                 if unit.base_unit.rad:
-                    unit_definition["BaseUnit"]["_attributes"][
-                        "rad"
-                    ] = unit.base_unit.rad
+                    unit_definition["BaseUnit"]["_attributes"]["rad"] = unit.base_unit.rad
                 if unit.base_unit.factor:
-                    unit_definition["BaseUnit"]["_attributes"][
-                        "factor"
-                    ] = unit.base_unit.factor
+                    unit_definition["BaseUnit"]["_attributes"]["factor"] = unit.base_unit.factor
                 if unit.base_unit.offset:
-                    unit_definition["BaseUnit"]["_attributes"][
-                        "offset"
-                    ] = unit.base_unit.offset
+                    unit_definition["BaseUnit"]["_attributes"]["offset"] = unit.base_unit.offset
             if unit.display_unit:
                 unit_definition["DisplayUnit"] = {"_attributes": {}}
-                unit_definition["DisplayUnit"]["_attributes"][
-                    "name"
-                ] = unit.display_unit.name
-                unit_definition["DisplayUnit"]["_attributes"][
-                    "factor"
-                ] = unit.display_unit.factor
-                unit_definition["DisplayUnit"]["_attributes"][
-                    "offset"
-                ] = unit.display_unit.offset
+                unit_definition["DisplayUnit"]["_attributes"]["name"] = unit.display_unit.name
+                unit_definition["DisplayUnit"]["_attributes"]["factor"] = unit.display_unit.factor
+                unit_definition["DisplayUnit"]["_attributes"]["offset"] = unit.display_unit.offset
             unit_definitions[f"{self.counter():06d}_Unit"] = unit_definition
         osp_model_description["UnitDefinitions"] = unit_definitions
 
@@ -239,13 +212,9 @@ class Component:
         variable_groups = {}
         for variable_name, variable in self.variables.items():
             if not variable.quantity:
-                logger.warning(
-                    f"component {self.name}: no quantity defined for variable {variable_name}"
-                )
+                logger.warning(f"component {self.name}: no quantity defined for variable {variable_name}")
             if not variable.unit:
-                logger.warning(
-                    f"component {self.name}: no unit defined for variable {variable_name}"
-                )
+                logger.warning(f"component {self.name}: no unit defined for variable {variable_name}")
             quantity_name = variable.quantity or "UNKNOWN"
             quantity_unit = variable.unit or "UNKNOWN"
             variable_groups[f"{self.counter():06d}_Generic"] = {
@@ -264,9 +233,7 @@ class Component:
 
         # _xmlOpts
         osp_model_description["_xmlOpts"] = {
-            "_nameSpaces": {
-                "osp": "https://opensimulationplatform.com/xsd/OspModelDescription-1.0.0.xsd"
-            },
+            "_nameSpaces": {"osp": "https://opensimulationplatform.com/xsd/OspModelDescription-1.0.0.xsd"},
             "_rootTag": "ospModelDescription",
         }
 

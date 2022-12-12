@@ -34,9 +34,7 @@ def find_type_identifier_in_keys(dict: MutableMapping) -> Union[str, None]:
     return type_identifier[0] if type_identifier else None
 
 
-def shrink_dict(
-    dict: MutableMapping, unique_key: Union[list[str], None] = None
-) -> dict:
+def shrink_dict(dict: MutableMapping, unique_key: Union[list[str], None] = None) -> dict:
     """Identifies doubled entries in the passed in dict and returns a new dict with doubled entries removed."""
     unique_key = unique_key or []
     unique_keys_string: str = "['" + "']['".join(unique_key) + "']"

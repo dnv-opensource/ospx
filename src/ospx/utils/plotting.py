@@ -25,9 +25,7 @@ def create_meta_dict(title):
     return meta_dict
 
 
-def save_figure(
-    plt, fig, extension, path: Union[str, os.PathLike[str]], title: str, meta_dict
-):
+def save_figure(plt, fig, extension, path: Union[str, os.PathLike[str]], title: str, meta_dict):
 
     # Make sure path argument is of type Path. If not, cast it to Path type.
     path = path if isinstance(path, Path) else Path(path)
@@ -36,9 +34,7 @@ def save_figure(
         logger.info(f"path {path} does not exist, creating")  # 0
         path.mkdir(parents=True, exist_ok=True)
 
-    title_in_file_name = re.sub(
-        r"[\[\]\{\},]+", "", re.sub(r"[\(\)\:\s,]+", "_", title)
-    )
+    title_in_file_name = re.sub(r"[\[\]\{\},]+", "", re.sub(r"[\(\)\:\s,]+", "_", title))
 
     title_string_replacements = [
         ("==", "_eq_"),
@@ -57,9 +53,7 @@ def save_figure(
 
     # limit overall length to 128 characters
     if len(title_in_file_name) >= 80:
-        title_in_file_name = "".join(
-            list(title_in_file_name[:59]) + [".", "."] + list(title_in_file_name[-19:])
-        )
+        title_in_file_name = "".join(list(title_in_file_name[:59]) + [".", "."] + list(title_in_file_name[-19:]))
 
     if path:
         save_file = Path() / path / f"{title_in_file_name}.{extension}"

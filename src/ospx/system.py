@@ -26,11 +26,7 @@ class System:
 
     @property
     def fmus(self) -> dict[str, FMU]:
-        return {
-            component.fmu.file.name: component.fmu
-            for component in self.components.values()
-            if component.fmu
-        }
+        return {component.fmu.file.name: component.fmu for component in self.components.values() if component.fmu}
 
     @property
     def components(self) -> dict[str, Component]:

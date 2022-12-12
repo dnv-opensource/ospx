@@ -120,10 +120,7 @@ class Graph:
 
             if not (connection.source_endpoint and connection.target_endpoint):
                 return
-            if not (
-                connection.source_endpoint.component
-                and connection.target_endpoint.component
-            ):
+            if not (connection.source_endpoint.component and connection.target_endpoint.component):
                 return
             from_key: str = connection.source_endpoint.component.name
             to_key: str = connection.target_endpoint.component.name

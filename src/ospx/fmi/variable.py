@@ -68,9 +68,7 @@ class ScalarVariable:
             "Enumeration",
         ]
         if type not in valid_types:
-            logger.error(
-                f"variable {self.name}: value for data_type '{type}' is invalid."
-            )
+            logger.error(f"variable {self.name}: value for data_type '{type}' is invalid.")
             return
         self._data_type = type
         return
@@ -110,9 +108,7 @@ class ScalarVariable:
             "continuous",
         ]
         if value not in valid_values:
-            logger.error(
-                f"variable {self.name}: value for variability '{value}' is invalid."
-            )
+            logger.error(f"variable {self.name}: value for variability '{value}' is invalid.")
             return
         self._variability = value
         return
@@ -124,9 +120,7 @@ class ScalarVariable:
     @start.setter
     def start(self, value: Union[int, float, bool, str, None]):
         if value is None:
-            logger.error(
-                f"variable {self.name}: start shall be set to 'None', but 'None' is invalid for start."
-            )
+            logger.error(f"variable {self.name}: start shall be set to 'None', but 'None' is invalid for start.")
             return
         if self.data_type:
             # make sure the data type of the new value does either match or gets casted to the data_type defined for the variable
@@ -219,11 +213,7 @@ def _cast_to_fmi_data_type(
             return bool(parsed_value)
     elif fmi_data_type == "String":
         # format as string
-        return (
-            Formatter().format_dict(arg)
-            if isinstance(arg, Sequence)
-            else Formatter().format_type(arg)
-        )
+        return Formatter().format_dict(arg) if isinstance(arg, Sequence) else Formatter().format_type(arg)
     elif fmi_data_type == "Enumeration":
         # cast to list
         return list(arg) if isinstance(arg, Sequence) else [arg]

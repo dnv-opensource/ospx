@@ -21,9 +21,7 @@ def _argparser() -> argparse.ArgumentParser:
         epilog="_________________importSystemStructure___________________",
         prefix_chars="-",
         add_help=True,
-        description=(
-            "Imports an existing OspSystemStructure.xml and translates it into a caseDict."
-        ),
+        description=("Imports an existing OspSystemStructure.xml and translates it into a caseDict."),
     )
 
     parser.add_argument(

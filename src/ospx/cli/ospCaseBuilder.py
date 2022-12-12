@@ -45,9 +45,7 @@ def _argparser() -> argparse.ArgumentParser:
         "-i",
         "--inspect",
         action="store_true",
-        help=(
-            "inspect mode: reads all properties from the FMUs but does not actually create the OSP case files."
-        ),
+        help=("inspect mode: reads all properties from the FMUs but does not actually create the OSP case files."),
         default=False,
         required=False,
     )

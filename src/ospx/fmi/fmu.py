@@ -49,9 +49,7 @@ class FMU:
 
         logger.info(f"{self.file.name}: read modelDescription.xml")
 
-        if file_content := read_file_content_from_zip(
-            self.file, "modelDescription.xml"
-        ):
+        if file_content := read_file_content_from_zip(self.file, "modelDescription.xml"):
             model_description = xml_parser.parse_string(file_content, model_description)
 
         self._clean_solver_internal_variables(model_description)
@@ -84,9 +82,7 @@ class FMU:
             add_file_content_to_zip(self.file, "modelDescription.xml", formatted_xml)
 
         # Write external modelDescription.xml (separate file, beside FMU)
-        external_file = (
-            self.file.parent.absolute() / f"{self.file.stem}_ModelDescription.xml"
-        )
+        external_file = self.file.parent.absolute() / f"{self.file.stem}_ModelDescription.xml"
         with open(external_file, "w") as f:
             f.write(formatted_xml)
 
@@ -98,9 +94,7 @@ class FMU:
         if unit_definitions_key := find_key(self.model_description, "UnitDefinitions$"):
             model_unit_definitions = self.model_description[unit_definitions_key]
             # make sure unit definitions are unique (e.g. to keep XML files clean)
-            model_unit_definitions = shrink_dict(
-                model_unit_definitions, unique_key=["_attributes", "name"]
-            )
+            model_unit_definitions = shrink_dict(model_unit_definitions, unique_key=["_attributes", "name"])
         unit_definitions: dict[str, Unit] = {}
         for u in model_unit_definitions.values():
             unit = Unit()
@@ -134,13 +128,9 @@ class FMU:
                 if "name" in u[display_unit_key]["_attributes"]:
                     unit.display_unit.name = u[display_unit_key]["_attributes"]["name"]
                 if "factor" in u[display_unit_key]["_attributes"]:
-                    unit.display_unit.factor = u[display_unit_key]["_attributes"][
-                        "factor"
-                    ]
+                    unit.display_unit.factor = u[display_unit_key]["_attributes"]["factor"]
                 if "offset" in u[display_unit_key]["_attributes"]:
-                    unit.display_unit.offset = u[display_unit_key]["_attributes"][
-                        "offset"
-                    ]
+                    unit.display_unit.offset = u[display_unit_key]["_attributes"]["offset"]
             unit_definitions[unit.name] = unit
         return unit_definitions
 
@@ -179,9 +169,7 @@ class FMU:
                         if "unit" in v[type_key]["_attributes"]:
                             variable.unit = v[type_key]["_attributes"]["unit"]
                         if "display_unit" in v[type_key]["_attributes"]:
-                            variable.display_unit = v[type_key]["_attributes"][
-                                "display_unit"
-                            ]
+                            variable.display_unit = v[type_key]["_attributes"]["display_unit"]
                         if "initial_value" in v[type_key]["_attributes"]:
                             variable.start = v[type_key]["_attributes"]["initial_value"]
                 variables[variable.name] = variable
@@ -198,15 +186,11 @@ class FMU:
         if "_attributes" in default_experiment_properties:
             default_experiment_attributes = default_experiment_properties["_attributes"]
             if "startTime" in default_experiment_attributes:
-                default_experiment.start_time = default_experiment_attributes[
-                    "startTime"
-                ]
+                default_experiment.start_time = default_experiment_attributes["startTime"]
             if "stopTime" in default_experiment_attributes:
                 default_experiment.stop_time = default_experiment_attributes["stopTime"]
             if "tolerance" in default_experiment_attributes:
-                default_experiment.tolerance = default_experiment_attributes[
-                    "tolerance"
-                ]
+                default_experiment.tolerance = default_experiment_attributes["tolerance"]
             if "stepSize" in default_experiment_attributes:
                 default_experiment.step_size = default_experiment_attributes["stepSize"]
         return default_experiment
@@ -228,9 +212,7 @@ class FMU:
         new_name = Path(new_name).stem
         existing_file_name = self.file.stem
         if new_name == existing_file_name:
-            logger.error(
-                f"{self.file.name} copy: new name {new_name} is identical with existing name. copy() aborted."
-            )
+            logger.error(f"{self.file.name} copy: new name {new_name} is identical with existing name. copy() aborted.")
         new_model_description: CppDict = deepcopy(self.model_description)
         new_file = self.file.parent.absolute() / f"{new_name}.fmu"
 
@@ -242,17 +224,11 @@ class FMU:
             dll_file_names = [
                 file.filename
                 for file in document.infolist()
-                if re.search(r".*\.dll$", file.filename)
-                and existing_file_name in file.filename
+                if re.search(r".*\.dll$", file.filename) and existing_file_name in file.filename
             ]
-        new_dll_file_names = [
-            re.sub(existing_file_name, new_name, dll_file_name)
-            for dll_file_name in dll_file_names
-        ]
+        new_dll_file_names = [re.sub(existing_file_name, new_name, dll_file_name) for dll_file_name in dll_file_names]
         for dll_file_name, new_dll_file_name in zip(dll_file_names, new_dll_file_names):
-            logger.info(
-                f"{self.file.name} copy: renaming dll {dll_file_name} to {new_dll_file_name}"
-            )
+            logger.info(f"{self.file.name} copy: renaming dll {dll_file_name} to {new_dll_file_name}")
             rename_file_in_zip(new_file, dll_file_name, new_dll_file_name)
 
         # Rename <fmiModelDescription modelName> in modelDescription.xml
@@ -260,9 +236,7 @@ class FMU:
 
         # Rename <CoSimulation modelIdentifier> in modelDescription.xml
         # (STC requires consistency between <fmiModelDescription modelName> and <CoSimulation modelIdentifier>)
-        co_simulation: dict = new_model_description[
-            find_key(new_model_description, "CoSimulation$")
-        ]
+        co_simulation: dict = new_model_description[find_key(new_model_description, "CoSimulation$")]
         co_simulation["_attributes"]["modelIdentifier"] = new_name
 
         # Log the update in modelDescription.xml
@@ -304,18 +278,12 @@ class FMU:
         proxy_fmu_file = self.file.parent.absolute() / f"{self.file.stem}-proxy.fmu"
         return FMU(proxy_fmu_file)
 
-    def _modify_start_values(
-        self, variables_with_start_values: dict[str, ScalarVariable]
-    ):
+    def _modify_start_values(self, variables_with_start_values: dict[str, ScalarVariable]):
         """Modifies the start values of variables inside the FMUs modelDescription.xml"""
 
-        logger.info(
-            f"{self.file.name}: update start values of variables in modelDescription.xml"
-        )  # 2
+        logger.info(f"{self.file.name}: update start values of variables in modelDescription.xml")  # 2
 
-        model_variables: dict = self.model_description[
-            find_key(self.model_description, "ModelVariables$")
-        ]
+        model_variables: dict = self.model_description[find_key(self.model_description, "ModelVariables$")]
 
         names_of_variables_with_start_values: list[str] = [
             variable.name for _, variable in variables_with_start_values.items()
@@ -326,12 +294,8 @@ class FMU:
             model_variable_name: str = model_variable_properties["_attributes"]["name"]
 
             if model_variable_name in names_of_variables_with_start_values:
-                variable_with_start_values = variables_with_start_values[
-                    model_variable_name
-                ]
-                type_identifier = find_type_identifier_in_keys(
-                    model_variable_properties
-                )
+                variable_with_start_values = variables_with_start_values[model_variable_name]
+                type_identifier = find_type_identifier_in_keys(model_variable_properties)
                 type_key = find_key(model_variable_properties, f"{type_identifier}$")
 
                 logger.info(
@@ -341,21 +305,15 @@ class FMU:
                     f"\tvariability:\t{variable_with_start_values.variability}"
                 )
 
-                model_variables[model_variable_key][type_key]["_attributes"][
-                    "start"
-                ] = variable_with_start_values.start
-                model_variables[model_variable_key]["_attributes"][
-                    "causality"
-                ] = variable_with_start_values.causality
+                model_variables[model_variable_key][type_key]["_attributes"]["start"] = variable_with_start_values.start
+                model_variables[model_variable_key]["_attributes"]["causality"] = variable_with_start_values.causality
                 model_variables[model_variable_key]["_attributes"][
                     "variability"
                 ] = variable_with_start_values.variability
 
         self._log_update_in_model_description()
 
-    def _log_update_in_model_description(
-        self, model_description: Union[CppDict, None] = None
-    ):
+    def _log_update_in_model_description(self, model_description: Union[CppDict, None] = None):
 
         model_description = model_description or self.model_description
 
@@ -368,30 +326,22 @@ class FMU:
             new_author = os.environ["USERNAME"]
         model_description["_xmlOpts"]["_rootAttributes"]["author"] = new_author
         # DateAndTime
-        old_date = model_description["_xmlOpts"]["_rootAttributes"][
-            "generationDateAndTime"
-        ]
+        old_date = model_description["_xmlOpts"]["_rootAttributes"]["generationDateAndTime"]
         new_date = str(datetime.now())
-        model_description["_xmlOpts"]["_rootAttributes"][
-            "generationDateAndTime"
-        ] = new_date
+        model_description["_xmlOpts"]["_rootAttributes"]["generationDateAndTime"] = new_date
         # Log modifications in <fmiModelDescription description> attribute
         add_description_string = (
             f"\nmodified {date.today()}:\n"
             f"\tauthor {old_author} to {new_author}\n"
             f"\tgenerationDateAndTime {old_date} to {new_date}\n"
         )
-        model_description["_xmlOpts"]["_rootAttributes"][
-            "description"
-        ] += add_description_string
+        model_description["_xmlOpts"]["_rootAttributes"]["description"] += add_description_string
 
     # @TODO: Check when and where this method needs to be called. And why..
     #        CLAROS, 2022-05-24
     def _clean_solver_internal_variables(self, model_description: MutableMapping):
         """Clean solver internal variables, such as '_iti_...'"""
-        model_variables: dict = model_description[
-            find_key(model_description, "ModelVariables$")
-        ]
+        model_variables: dict = model_description[find_key(model_description, "ModelVariables$")]
         model_name = model_description["_xmlOpts"]["_rootAttributes"]["modelName"]
         for model_variable_key in model_variables:
             if "_origin" in model_variables[model_variable_key]:

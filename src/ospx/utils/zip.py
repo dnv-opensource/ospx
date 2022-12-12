@@ -31,9 +31,7 @@ def read_file_content_from_zip(zip_file: Path, file_name: str) -> Union[str, Non
     return file_content
 
 
-def rename_file_in_zip(
-    zip_file: Path, file_name: str, new_file_name: str
-) -> Union[ZipFile, None]:
+def rename_file_in_zip(zip_file: Path, file_name: str, new_file_name: str) -> Union[ZipFile, None]:
     """
     belongs to zip functions
     rename files
@@ -92,9 +90,7 @@ def remove_files_from_zip(zip_file: Path, *file_names: str) -> Union[ZipFile, No
     return updated_zip_file
 
 
-def add_file_content_to_zip(
-    zip_file: Path, file_name: str, file_content: str
-) -> Union[ZipFile, None]:
+def add_file_content_to_zip(zip_file: Path, file_name: str, file_content: str) -> Union[ZipFile, None]:
     """
     belongs to zip functions
     does add a single file and its ascii content
@@ -134,12 +130,8 @@ def substitute_text_in_zip(
                         temp = zip_read.read(item.filename)
                         source = (re.findall(subst[0], str(temp)))[0]
                         if len(str(source)) == 0:
-                            logger.warning(
-                                f'substitution source is empty:\'{" ".join(source)}\''
-                            )
-                        temp = temp.replace(
-                            bytes(source, "utf-8"), bytes(subst[1], "utf-8")
-                        )
+                            logger.warning(f'substitution source is empty:\'{" ".join(source)}\'')
+                        temp = temp.replace(bytes(source, "utf-8"), bytes(subst[1], "utf-8"))
                         zip_write.writestr(item, temp)
 
         updated_zip_file = ZipFile(zip_file, mode="a")
@@ -153,9 +145,7 @@ def substitute_text_in_zip(
     return updated_zip_file
 
 
-def update_file_content_in_zip(
-    zip_file: Path, file_name: str, file_content: str
-) -> Union[ZipFile, None]:
+def update_file_content_in_zip(zip_file: Path, file_name: str, file_content: str) -> Union[ZipFile, None]:
 
     file_handle, temp_name = mkstemp(dir=zip_file.parent)
     updated_zip_file = None

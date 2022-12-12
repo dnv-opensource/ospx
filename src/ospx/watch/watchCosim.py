@@ -54,11 +54,7 @@ class CosimWatcher:
         """
 
         # Make sure watch_dict_file argument is of type Path. If not, cast it to Path type.
-        watch_dict_file = (
-            watch_dict_file
-            if isinstance(watch_dict_file, Path)
-            else Path(watch_dict_file)
-        )
+        watch_dict_file = watch_dict_file if isinstance(watch_dict_file, Path) else Path(watch_dict_file)
         if not watch_dict_file.exists():
             logger.error(f"CosimWatcher: File {watch_dict_file} not found.")
             raise FileNotFoundError(watch_dict_file)
@@ -77,9 +73,7 @@ class CosimWatcher:
             self.delimiter = self.watch_dict["delimiter"]
 
         if "simulation" in self.watch_dict:
-            self.title = (
-                f"{self.watch_dict_file.name}-{self.watch_dict['simulation']['name']}"
-            )
+            self.title = f"{self.watch_dict_file.name}-{self.watch_dict['simulation']['name']}"
 
         self._define_data_source_properties_for_plotting()
 
@@ -115,9 +109,7 @@ class CosimWatcher:
             else:
                 terminate_loops = 0
             df_row_size = len(df)
-            df_col_size = (
-                len(list(df)) - 1
-            )  # reduced by one because 1st col is to remove from list
+            df_col_size = len(list(df)) - 1  # reduced by one because 1st col is to remove from list
 
             # axs = [None for x in range(df_col_size)]
             axs: MutableSequence[matplotlib.axes.SubplotBase] = []
@@ -125,13 +117,9 @@ class CosimWatcher:
             # for index in range(self.nSubplots):
             for index in range(df_col_size):
 
-                current_key = list(df)[
-                    index + 1
-                ]  # 0 is Time, StepCount was removed for simplification
+                current_key = list(df)[index + 1]  # 0 is Time, StepCount was removed for simplification
 
-                subplot: Union[
-                    matplotlib.axes.Axes, matplotlib.axes.SubplotBase
-                ] = self.figure.add_subplot(
+                subplot: Union[matplotlib.axes.Axes, matplotlib.axes.SubplotBase] = self.figure.add_subplot(
                     self.maxRow, self.number_of_columns, index + 1
                 )
 
@@ -140,9 +128,7 @@ class CosimWatcher:
                         "Time",
                         current_key,
                         linewidth=2,
-                        color=cm.get_cmap("gist_rainbow")(
-                            index / self.number_of_subplots
-                        ),
+                        color=cm.get_cmap("gist_rainbow")(index / self.number_of_subplots),
                         data=df[["Time", current_key]],
                     )
                 except TypeError:
@@ -245,9 +231,7 @@ class CosimWatcher:
             data_source_properties,
         ) in self.data_sources.items():  # loop over all data sources
             for csv_file_name in self.csv_file_names:
-                if re.match(
-                    data_source_name, csv_file_name
-                ):  # find the correct csv file
+                if re.match(data_source_name, csv_file_name):  # find the correct csv file
                     data_source_properties.update({"csvFile": csv_file_name})
 
                     # extract the header row from the csv file to determine the variable names
@@ -281,17 +265,14 @@ class CosimWatcher:
                     data_source_properties.update({"colNames": _column_names})
 
                     _display_column_names = [
-                        pattern.sub("", col_name)
-                        for col_name in data_source_properties["colNames"]
+                        pattern.sub("", col_name) for col_name in data_source_properties["colNames"]
                     ]
                     _display_column_names = ["Time", "StepCount"] + [
                         data_source_name + "|" + col_name
                         for col_name in _display_column_names
                         if col_name not in ["Time", "StepCount"]
                     ]
-                    data_source_properties.update(
-                        {"displayColNames": _display_column_names}
-                    )
+                    data_source_properties.update({"displayColNames": _display_column_names})
 
                     data_source_properties.update({"xColumn": columns[0]})
                     data_source_properties.update({"yColumns": columns[1:]})
@@ -301,9 +282,7 @@ class CosimWatcher:
 
         Collects data and sets plot header line
         """
-        self.figure = plt.figure(
-            figsize=(int(self.scale_factor * 16), int(self.scale_factor * 9)), dpi=150
-        )
+        self.figure = plt.figure(figsize=(int(self.scale_factor * 16), int(self.scale_factor * 9)), dpi=150)
         # self.fig.tight_layout() #constraint_layout()
         self.figure.subplots_adjust(
             left=0.1,
@@ -315,13 +294,9 @@ class CosimWatcher:
         )
         self.terminate = False
 
-        df = (
-            self._read_csv_files_into_dataframe()
-        )  # do it once to find the number of respective columns
+        df = self._read_csv_files_into_dataframe()  # do it once to find the number of respective columns
 
-        self.number_of_subplots = (
-            len(list(df)) - 1
-        )  # one of the columns is the abscissa
+        self.number_of_subplots = len(list(df)) - 1  # one of the columns is the abscissa
         self.number_of_columns = int(sqrt(self.number_of_subplots - 1)) + 1
         self.maxRow = int(self.number_of_subplots / self.number_of_columns - 0.1) + 1
 
@@ -365,9 +340,7 @@ class CosimWatcher:
                 usecols=_column_names,
             )
 
-            df_single_data_source = df_single_data_source.rename(
-                columns=column_name_to_display_column_name_mapping
-            )
+            df_single_data_source = df_single_data_source.rename(columns=column_name_to_display_column_name_mapping)
 
             if df_all_data_sources.empty:
                 # first df inherit all columns from single df
@@ -381,9 +354,7 @@ class CosimWatcher:
                 # df_all_data_sources = pd.concat([df_all_data_sources, df_single_data_source], axis=1)
 
                 # df_all_data_sources = pd.concat([df_all_data_sources, df_single_data_source], ignore_index=True)
-                df_all_data_sources = pd.concat(
-                    [df_all_data_sources, df_single_data_source]
-                )
+                df_all_data_sources = pd.concat([df_all_data_sources, df_single_data_source])
 
                 # potential solution
                 # interpolating non-matching time data
@@ -402,14 +373,10 @@ class CosimWatcher:
         # consider skipping negative values due to wrong inputs
         start: int = 0
         if df_all_data_sources.shape[0] - self.skip_values < 0:  # safety
-            logger.error(
-                f"there will be no data, consider adjusting --skip: {self.skip_values}"
-            )
+            logger.error(f"there will be no data, consider adjusting --skip: {self.skip_values}")
             # cases
         if self.skip_values > 0 and self.latest_values > 0:
-            start = max(
-                self.skip_values, df_all_data_sources.shape[0] - self.latest_values
-            )
+            start = max(self.skip_values, df_all_data_sources.shape[0] - self.latest_values)
         elif self.skip_values > 0 and self.latest_values == 0:
             start = self.skip_values
         elif self.latest_values > 0 and self.skip_values == 0:

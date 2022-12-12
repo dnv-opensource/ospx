@@ -156,9 +156,7 @@ def main():
     scale_factor = float(args.scale)
 
     if not converge and not plot and not dump:
-        logger.error(
-            "give at least one option what to do: --converge, --plot or --dump"
-        )
+        logger.error("give at least one option what to do: --converge, --plot or --dump")
         parser.print_help()
         exit(0)
 
@@ -215,28 +213,20 @@ def _main(
 
     # From the csv file names, identify all data sources for which csv files have been written,
     # and save them as set.
-    data_source_names = {
-        re.sub(r"_\d{8}_\d{6}_\d{6}.*$", "", n) for n in csv_file_names
-    }
+    data_source_names = {re.sub(r"_\d{8}_\d{6}_\d{6}.*$", "", n) for n in csv_file_names}
 
     # For each identified component name:
     # 1. Find all csv files that match the component name
     # 2. From these, collect only the latest (newest) version
     latest_csv_file_names = [
         sorted(
-            [
-                file_name
-                for file_name in csv_file_names
-                if re.match(data_source_name, file_name)
-            ],
+            [file_name for file_name in csv_file_names if re.match(data_source_name, file_name)],
             key=os.path.getmtime,
         )[-1]
         for data_source_name in data_source_names
     ]
 
-    watcher = CosimWatcher(
-        latest_csv_file_names, skip_values, latest_values, scale_factor
-    )
+    watcher = CosimWatcher(latest_csv_file_names, skip_values, latest_values, scale_factor)
     watcher.read_watch_dict(watch_dict_file_name)
 
     Path(watcher.results_dir).mkdir(parents=True, exist_ok=True)

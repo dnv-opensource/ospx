@@ -114,8 +114,7 @@ class Connection:
                 and self.target_endpoint.connector.is_single_connector
             )
             _both_are_group: bool = (
-                self.source_endpoint.connector.is_group_connector
-                and self.target_endpoint.connector.is_group_connector
+                self.source_endpoint.connector.is_group_connector and self.target_endpoint.connector.is_group_connector
             )
             return _both_are_single or _both_are_group
         elif self.source_endpoint.connector:

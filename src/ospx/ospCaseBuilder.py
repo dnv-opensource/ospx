@@ -52,9 +52,7 @@ class OspCaseBuilder:
         """
 
         # Make sure source_file argument is of type Path. If not, cast it to Path type.
-        case_dict_file = (
-            case_dict_file if isinstance(case_dict_file, Path) else Path(case_dict_file)
-        )
+        case_dict_file = case_dict_file if isinstance(case_dict_file, Path) else Path(case_dict_file)
         if not case_dict_file.exists():
             logger.error(f"OspCaseBuilder: File {case_dict_file} not found.")
             raise FileNotFoundError(case_dict_file)
