@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 class FMU:
-    """Class to read and interact with an fmi 2.0 Functional Mockup Unit (FMU)
+    """Class to read and interact with an fmi 2.0 Functional Mockup Unit (FMU).
 
     See also https://github.com/modelica/fmi-standard/blob/v2.0.x/schema/fmi2ModelDescription.xsd
     """
@@ -63,7 +63,7 @@ class FMU:
         model_description: Union[CppDict, None] = None,
         write_inside_fmu: bool = False,
     ):
-        """Save updated model_description both inside FMU as well as separate file in the FMUs directory"""
+        """Save updated model_description both inside FMU as well as separate file in the FMUs directory."""
         if model_description:
             self.model_description = model_description
 
@@ -196,7 +196,7 @@ class FMU:
         return default_experiment
 
     def copy(self, new_name: str):
-        """Saves a copy of the FMU with a new name
+        """Saves a copy of the FMU with a new name.
 
         Parameters
         ----------
@@ -251,7 +251,7 @@ class FMU:
         return new_fmu
 
     def proxify(self, host: str, port: int):
-        """Creates a proxy version of the FMU
+        """Creates a proxy version of the FMU.
 
         For details see https://github.com/NTNU-IHB/FMU-proxy
 
@@ -281,7 +281,7 @@ class FMU:
         return FMU(proxy_fmu_file)
 
     def _modify_start_values(self, variables_with_start_values: dict[str, ScalarVariable]):
-        """Modifies the start values of variables inside the FMUs modelDescription.xml"""
+        """Modifies the start values of variables inside the FMUs modelDescription.xml."""
 
         logger.info(f"{self.file.name}: update start values of variables in modelDescription.xml")  # 2
 
@@ -344,7 +344,7 @@ class FMU:
     # @TODO: Check when and where this method needs to be called. And why..
     #        CLAROS, 2022-05-24
     def _clean_solver_internal_variables(self, model_description: MutableMapping[Any, Any]):
-        """Clean solver internal variables, such as '_iti_...'"""
+        """Clean solver internal variables, such as '_iti_...'."""
         model_variables: Mapping[Any, Any] = model_description[find_key(model_description, "ModelVariables$")]
         model_name = model_description["_xmlOpts"]["_rootAttributes"]["modelName"]
         for model_variable_key in model_variables:

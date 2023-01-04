@@ -3,6 +3,7 @@ from pathlib import Path
 from shutil import rmtree
 
 import pytest
+from pytest import LogCaptureFixture
 
 from ospx.utils.zip import add_file_content_to_zip
 
@@ -43,7 +44,7 @@ def _create_test_fmu():
         model_description = f.read()
     fmu_file: Path = Path("test_fmu.fmu")
     fmu_file.unlink(missing_ok=True)
-    add_file_content_to_zip(
+    _ = add_file_content_to_zip(
         zip_file=fmu_file,
         file_name="modelDescription.xml",
         file_content=model_description,
@@ -55,7 +56,7 @@ def _remove_test_fmu():
 
 
 @pytest.fixture(autouse=True)
-def default_setup_and_teardown(caplog):
+def default_setup_and_teardown(caplog: LogCaptureFixture):
     _remove_ospx_dirs_and_files()
     _create_test_fmu()
     yield
@@ -64,6 +65,6 @@ def default_setup_and_teardown(caplog):
 
 
 @pytest.fixture(autouse=True)
-def setup_logging(caplog):
+def setup_logging(caplog: LogCaptureFixture):
     caplog.set_level("WARNING")
     caplog.clear()

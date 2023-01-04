@@ -1,5 +1,6 @@
 # pyright: reportUnknownMemberType=false
 # pyright: reportUnnecessaryTypeIgnoreComment=false
+# pyright: reportGeneralTypeIssues=false
 import contextlib
 import logging
 import os
@@ -8,13 +9,12 @@ from math import sqrt as sqrt
 from pathlib import Path
 from typing import Any, Dict, List, MutableMapping, MutableSequence, Union
 
-import matplotlib
-import matplotlib.axes
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from dictIO import DictReader, DictWriter
 from matplotlib import cm
+from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from numpy import ndarray
 from pandas import DataFrame
@@ -89,7 +89,7 @@ class CosimWatcher:
         return
 
     def plot(self, converge: bool = False):
-        """Plotting
+        """Plotting.
 
         Plotting + convergence checker (future task)
 
@@ -123,19 +123,17 @@ class CosimWatcher:
             df_col_size = len(list(df)) - 1  # reduced by one because 1st col is to remove from list
 
             # axs = [None for x in range(df_col_size)]
-            axs: MutableSequence[matplotlib.axes.SubplotBase] = []
-
+            axs: MutableSequence[Axes] = []
+            plot: Axes
             # for index in range(self.nSubplots):
             for index in range(df_col_size):
 
                 current_key = list(df)[index + 1]  # 0 is Time, StepCount was removed for simplification
 
-                subplot: Union[matplotlib.axes.Axes, matplotlib.axes.SubplotBase] = self.figure.add_subplot(
-                    self.max_row, self.number_of_columns, index + 1
-                )
+                plot = self.figure.add_subplot(self.max_row, self.number_of_columns, index + 1)
 
                 try:
-                    _ = subplot.plot(
+                    _ = plot.plot(
                         "Time",
                         current_key,
                         linewidth=2,
@@ -147,16 +145,17 @@ class CosimWatcher:
                 except Exception as e:
                     logger.exception(e)
                 # subplot.set_title(currentKey,  fontsize=10)
-                subplot.grid(color="#66aa88", linestyle="--")
-                subplot.xaxis.set_tick_params(labelsize=8)
-                subplot.yaxis.set_tick_params(labelsize=8)
-                _ = subplot.legend(fontsize=8)
-                if isinstance(subplot, matplotlib.axes.SubplotBase):
-                    axs.append(subplot)
-                else:
-                    raise TypeError(
-                        f"CosimWatcher.plot(): subplot is of type {type(subplot)}. Expected type was matplotlib.axes.SubplotBase ."
-                    )
+                plot.grid(color="#66aa88", linestyle="--")
+                plot.xaxis.set_tick_params(labelsize=8)
+                plot.yaxis.set_tick_params(labelsize=8)
+                _ = plot.legend(fontsize=8)
+                axs.append(plot)
+                # if isinstance(plot, Axes):
+                #     axs.append(plot)
+                # else:
+                #     raise TypeError(
+                #         f"CosimWatcher.plot(): plot is of type {type(plot)}. Expected type was matplotlib.axes.Axes ."
+                #     )
 
             _ = self.figure.suptitle(self.title)
 
@@ -292,9 +291,9 @@ class CosimWatcher:
 
         Collects data and sets plot header line
         """
-        self.figure = plt.figure(figsize=(int(self.scale_factor * 16), int(self.scale_factor * 9)), dpi=150)
-        # self.fig.tight_layout() #constraint_layout()
-        self.figure.subplots_adjust(
+        self.figure = plt.figure(figsize=(16 * self.scale_factor, 9 * self.scale_factor), dpi=150)
+        # self.fig.tight_layout()  # constraint_layout()
+        _ = self.figure.subplots_adjust(
             left=0.1,
             bottom=0.05,
             right=0.95,

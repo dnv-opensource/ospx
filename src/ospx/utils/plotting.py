@@ -13,7 +13,6 @@ logger = logging.getLogger(__name__)
 
 
 def create_meta_dict(title: str) -> Dict[str, str]:
-    # sourcery skip: inline-immediately-returned-variable
     meta_dict = {
         "Title": title,
         "Author": "VFW",

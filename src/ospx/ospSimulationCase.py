@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 class OspSimulationCase:
-    """OSP Simulation Case"""
+    """OSP Simulation Case."""
 
     def __init__(
         self,
@@ -72,7 +72,7 @@ class OspSimulationCase:
         self._check_components_step_size()
 
     def _write_osp_model_description_xmls(self):
-        """Writes the <component.name>_OspModelDescription.xml files for all components defined in the system structure"""
+        """Writes the <component.name>_OspModelDescription.xml files for all components defined in the system structure."""
         logger.info(
             f"Write OspModelDescription.xml files for OSP simulation case '{self.name}' in case folder: {self.case_folder}"
         )
@@ -83,7 +83,7 @@ class OspSimulationCase:
         return
 
     def write_osp_system_structure_xml(self):
-        """Writes the OspSystemStructure.xml file"""
+        """Writes the OspSystemStructure.xml file."""
         # sourcery skip: class-extract-method, merge-dict-assign
 
         osp_system_structure_file = self.case_folder / "OspSystemStructure.xml"
@@ -204,7 +204,7 @@ class OspSimulationCase:
         return
 
     def write_system_structure_ssd(self):
-        """Writes the SystemStructure.ssd file"""
+        """Writes the SystemStructure.ssd file."""
 
         system_structure_ssd_file = self.case_folder / "SystemStructure.ssd"
         self._clean(system_structure_ssd_file)
@@ -351,7 +351,7 @@ class OspSimulationCase:
         DictWriter.write(statistics_dict, statistics_dict_file, mode="w")
 
     def write_watch_dict(self):
-        """Writes a case-specific watch dict file
+        """Writes a case-specific watch dict file.
 
         The watch dict file can be used with watchCosim for
             - convergence control
@@ -508,7 +508,7 @@ class OspSimulationCase:
         return
 
     def _set_components_step_size(self, step_size: float):
-        """Overwrites the step size of all components with the passed in value"""
+        """Overwrites the step size of all components with the passed in value."""
         if not self.system_structure or not self.system_structure.components:
             return
         for component in self.system_structure.components.values():
@@ -516,7 +516,7 @@ class OspSimulationCase:
         return
 
     def _inspect(self):
-        """Inspects all components and all FMUs for the public variable names and units they declare, as documented in their modelDescription.xml's
+        """Inspects all components and all FMUs for the public variable names and units they declare, as documented in their modelDescription.xml's.
 
         Results get logged to the console.
         """
@@ -590,7 +590,7 @@ class OspSimulationCase:
         logger.info("Inspect mode: Finished.")
 
     def _write_plot_config_json(self):
-        """Writes the PlotConfig.json file, containing postprocessing information"""
+        """Writes the PlotConfig.json file, containing postprocessing information."""
 
         plot_config_file = self.case_folder / "PlotConfig.json"
         self._clean(plot_config_file)
@@ -626,7 +626,7 @@ class OspSimulationCase:
 
     def _correct_wrong_xml_namespace(self, file_name: str, pattern: str, replace: str):
         """Substitutes namespace
-        (may be obsolete in future)
+        (may be obsolete in future).
         """
         buffer = ""
         with open(file_name, "r") as f:
@@ -638,7 +638,7 @@ class OspSimulationCase:
         return
 
     def _clean(self, file_to_remove: Union[str, Path]):
-        """Clean up single file"""
+        """Clean up single file."""
         if isinstance(file_to_remove, str):
             file_to_remove = self.case_folder / file_to_remove
         file_to_remove.unlink(missing_ok=True)
