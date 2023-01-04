@@ -3,8 +3,9 @@ from pathlib import Path
 from shutil import rmtree
 
 import pytest
-from ospx.utils.zip import add_file_content_to_zip
 from pytest import LogCaptureFixture
+
+from ospx.utils.zip import add_file_content_to_zip
 
 
 @pytest.fixture(scope="package", autouse=True)

@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass()
 class BaseUnit:
-    """fmi 2.0 BaseUnit
+    r"""fmi 2.0 BaseUnit.
 
     Unit definition with reference to SI base units \n
     base unit value = factor * unit value + offset \n
@@ -30,7 +30,7 @@ class BaseUnit:
 
 @dataclass()
 class DisplayUnit:
-    """fmi 2.0 DisplayUnit
+    r"""fmi 2.0 DisplayUnit.
 
     display unit value = factor * unit value + offset \n
     See https://github.com/modelica/fmi-standard/blob/v2.0.x/schema/fmi2Unit.xsd
@@ -47,7 +47,7 @@ class DisplayUnit:
 
 @dataclass()
 class Unit:
-    """fmi 2.0 Unit Definition
+    """fmi 2.0 Unit Definition.
 
     See https://github.com/modelica/fmi-standard/blob/v2.0.x/schema/fmi2Unit.xsd
     """

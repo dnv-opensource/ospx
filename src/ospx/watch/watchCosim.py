@@ -89,7 +89,7 @@ class CosimWatcher:
         return
 
     def plot(self, converge: bool = False):
-        """Plotting
+        """Plotting.
 
         Plotting + convergence checker (future task)
 

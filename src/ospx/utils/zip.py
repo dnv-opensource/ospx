@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 def read_file_content_from_zip(zip_file: Path, file_name: str) -> Union[str, None]:
     """
     belongs to zip functions
-    read a single file
+    read a single file.
     """
     file_handle, temp_name = mkstemp(dir=zip_file.parent)
     file_content = None
@@ -34,7 +34,7 @@ def read_file_content_from_zip(zip_file: Path, file_name: str) -> Union[str, Non
 def rename_file_in_zip(zip_file: Path, file_name: str, new_file_name: str) -> Union[ZipFile, None]:
     """
     belongs to zip functions
-    rename files
+    rename files.
     """
     file_handle, temp_name = mkstemp(dir=zip_file.parent)
     updated_zip_file = None
@@ -64,7 +64,7 @@ def rename_file_in_zip(zip_file: Path, file_name: str, new_file_name: str) -> Un
 def remove_files_from_zip(zip_file: Path, *file_names: str) -> Union[ZipFile, None]:
     """
     belongs to zip functions
-    remove files
+    remove files.
     """
     file_handle, temp_name = mkstemp(dir=zip_file.parent)
     updated_zip_file = None
@@ -93,7 +93,7 @@ def remove_files_from_zip(zip_file: Path, *file_names: str) -> Union[ZipFile, No
 def add_file_content_to_zip(zip_file: Path, file_name: str, file_content: str) -> Union[ZipFile, None]:
     """
     belongs to zip functions
-    does add a single file and its ascii content
+    does add a single file and its ascii content.
     """
     file_handle, temp_name = mkstemp(dir=zip_file.parent)
     updated_zip_file = None

@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class ScalarVariable:
-    """fmi 2.0 ScalarVariable
+    """fmi 2.0 ScalarVariable.
 
     See https://github.com/modelica/fmi-standard/blob/v2.0.x/schema/fmi2ScalarVariable.xsd
     """
@@ -147,7 +147,7 @@ class ScalarVariable:
 
 
 def get_fmi_data_type(arg: Any) -> str:
-    """Returns the fmi 2.0 data type of the passed in argument
+    r"""Returns the fmi 2.0 data type of the passed in argument.
 
     See https://github.com/modelica/fmi-standard/blob/v2.0.x/schema/fmi2Type.xsd
 
@@ -180,7 +180,7 @@ def get_fmi_data_type(arg: Any) -> str:
 def _cast_to_fmi_data_type(
     arg: Union[int, float, bool, str, Sequence[Any]], fmi_data_type: str
 ) -> Union[int, float, bool, str, List[Any], None]:
-    """Casts the passed in argument to a Python data type that matches the requested fmi data type
+    r"""Casts the passed in argument to a Python data type that matches the requested fmi data type.
 
     Parameters
     ----------
