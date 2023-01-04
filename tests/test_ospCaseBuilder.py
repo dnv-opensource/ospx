@@ -1,7 +1,6 @@
 from pathlib import Path
 
 from dictIO import DictParser
-
 from ospx import OspCaseBuilder
 
 
