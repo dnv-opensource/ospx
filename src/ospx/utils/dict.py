@@ -4,7 +4,7 @@ from typing import Any, List, MutableMapping, Set, Union
 
 
 def find_key(dict: MutableMapping[Any, Any], pattern: str) -> Union[str, None]:
-    """Finds the first key in dict that matches the given pattern"""
+    """Finds the first key in dict that matches the given pattern."""
     try:
         return [k for k in dict.keys() if re.search(pattern, k)][0]
     except Exception:
@@ -12,7 +12,7 @@ def find_key(dict: MutableMapping[Any, Any], pattern: str) -> Union[str, None]:
 
 
 def find_keys(dict: MutableMapping[Any, Any], pattern: str) -> Union[List[str], None]:
-    """Finds all keys in dict that match the given pattern"""
+    """Finds all keys in dict that match the given pattern."""
     try:
         return [k for k in dict.keys() if re.search(pattern, k)]
     except Exception:
@@ -21,7 +21,7 @@ def find_keys(dict: MutableMapping[Any, Any], pattern: str) -> Union[List[str], 
 
 def find_type_identifier_in_keys(dict: MutableMapping[Any, Any]) -> Union[str, None]:
     """Finds the first key name in dict that contains one of the following type identifier strings:
-    [Integer|Real|Boolean|Enumeration|String|Unknown]
+    [Integer|Real|Boolean|Enumeration|String|Unknown].
     """
     key_list: List[str] = ["Integer", "Real", "Boolean", "Enumeration", "String", "Unkown"]
     type_identifier: List[str] = []

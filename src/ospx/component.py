@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class Component:
-    """A component is an instance of a (component-) model.
+    r"""A component is an instance of a (component-) model.
 
     A component represents an instance of a (component-) model. Any system structure can contain an arbitrary number of components.
     Important here is, that multiple components in a system structure can be instances of one and the same model.
@@ -240,7 +240,7 @@ class Component:
         DictWriter.write(osp_model_description, osp_model_description_file)
 
     def _clean(self, file_to_remove: Union[str, Path]):
-        """Clean up single file"""
+        """Clean up single file."""
         if isinstance(file_to_remove, str):
             file_to_remove = Path.cwd() / file_to_remove
         file_to_remove.unlink(missing_ok=True)
