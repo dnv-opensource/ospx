@@ -4,7 +4,7 @@ import re
 from pathlib import Path
 from shutil import copyfile
 from tempfile import mkstemp
-from typing import Sequence, Union
+from typing import Tuple, Union
 from zipfile import ZIP_DEFLATED, ZipFile
 
 logger = logging.getLogger(__name__)
@@ -93,7 +93,7 @@ def remove_files_from_zip(zip_file: Path, *file_names: str) -> Union[ZipFile, No
 def add_file_content_to_zip(zip_file: Path, file_name: str, file_content: str) -> Union[ZipFile, None]:
     """
     belongs to zip functions
-    does add a single file and its ascii content.
+    add a single file and its ascii content.
     """
     file_handle, temp_name = mkstemp(dir=zip_file.parent)
     updated_zip_file = None
@@ -113,8 +113,12 @@ def add_file_content_to_zip(zip_file: Path, file_name: str, file_content: str) -
 
 
 def substitute_text_in_zip(
-    zip_file: Path, file_name_pattern: str = "", subst: Sequence[str] = ("", "")
+    zip_file: Path, file_name_pattern: str = "", subst: Tuple[str, str] = ("", "")
 ) -> Union[ZipFile, None]:
+    """
+    belongs to zip functions
+    substitutes a given string in all files matching the passed file name pattern.
+    """
 
     file_handle, temp_name = mkstemp(dir=zip_file.parent)
     updated_zip_file = None
@@ -146,6 +150,10 @@ def substitute_text_in_zip(
 
 
 def update_file_content_in_zip(zip_file: Path, file_name: str, file_content: str) -> Union[ZipFile, None]:
+    """
+    belongs to zip functions
+    updates the ascii content of a single file.
+    """
 
     file_handle, temp_name = mkstemp(dir=zip_file.parent)
     updated_zip_file = None

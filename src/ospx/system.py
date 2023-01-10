@@ -26,18 +26,47 @@ class System:
 
     @property
     def fmus(self) -> dict[str, FMU]:
+        """Returns a dict with all FMUs referenced by components contained in the system.
+
+        Returns
+        -------
+        dict[str, FMU]
+            dict with all FMUs
+        """
         return {component.fmu.file.name: component.fmu for component in self.components.values() if component.fmu}
 
     @property
     def components(self) -> dict[str, Component]:
+        """Returns a dict with all components contained in the system.
+
+        Returns
+        -------
+        dict[str, Component]
+            dict with all components
+        """
         return self._components
 
     @property
     def connections(self) -> dict[str, Connection]:
+        """Returns a dict with all connections defined in the system.
+
+        Returns
+        -------
+        dict[str, Connection]
+            dict with all connections
+        """
         return self._connections
 
     @property
     def units(self) -> dict[str, Unit]:
+        """Returns a combined dict with all units
+        from all components contained in the system.
+
+        Returns
+        -------
+        dict[str, Unit]
+            dict with all units from all components
+        """
         units: dict[str, Unit] = {}
         for component in self.components.values():
             if component.units:
@@ -46,6 +75,14 @@ class System:
 
     @property
     def connectors(self) -> dict[str, Connector]:
+        """Returns a combined dict with all connectors
+        from all components contained in the system.
+
+        Returns
+        -------
+        dict[str, Connector]
+            dict with all connectors from all components
+        """
         connectors: dict[str, Connector] = {}
         for component in self.components.values():
             if component.connectors:
@@ -54,6 +91,14 @@ class System:
 
     @property
     def variables(self) -> dict[str, ScalarVariable]:
+        """Returns a combined dict with all scalar variables
+        from all components contained in the system.
+
+        Returns
+        -------
+        dict[str, ScalarVariable]
+            dict with all scalar variables from all components
+        """
         variables: dict[str, ScalarVariable] = {}
         for component in self.components.values():
             if component.variables:

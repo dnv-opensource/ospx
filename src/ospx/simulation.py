@@ -16,11 +16,11 @@ class Simulation:
     _algorithm: Union[str, None] = None
 
     @property
-    def algorithm(self) -> Union[str, None]:
+    def algorithm(self) -> Union[str, None]:  # noqa: D102
         return self._algorithm
 
     @algorithm.setter
-    def algorithm(self, value: str):
+    def algorithm(self, value: str):  # noqa: D102
         valid_values: list[str] = [
             "fixedStep",
         ]
