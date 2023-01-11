@@ -16,11 +16,43 @@ logger = logging.getLogger(__name__)
 
 
 class OspSystemStructureImporter:
+    """Class providing methods to convert an existing
+    OspSystemStructure.xml file to an ospx caseDict file.
+    """
+
     @staticmethod
     def import_system_structure(
         system_structure_file: Union[str, os.PathLike[str]],
         enter_lib_source_as_relative_path: bool = False,
     ):
+        """Imports an OspSystemStructure.xml file and saves it as an ospx caseDict file.
+
+        Parameters
+        ----------
+        system_structure_file : Union[str, os.PathLike[str]]
+            the OspSystemStructure.xml file to be imported
+        enter_lib_source_as_relative_path : bool, optional
+            whether lib_source shall be entered as relative path in the caseDict, by default False
+
+        Raises
+        ------
+        FileNotFoundError
+            if system_structure_file does not exist
+
+        NotImplementedError
+            if the OspSystemStructure contains connections of OSP-IS type 'SignalConnection' or 'SignalGroupConnection'.
+            These connection types are not implemented yet in ospx.
+
+        NotImplementedError
+            if the OspSystemStructure contains connections with OSP-IS endpoint type 'Signal' or 'SignalGroup'.
+            These endpoint types are not implemented yet in ospx.
+
+        TypeError
+            if the OspSystemStructure contains connections of an unknown type.
+
+        TypeError
+            if the OspSystemStructure contains connections with an unknown endpoint type.
+        """
 
         # Make sure source_file argument is of type Path. If not, cast it to Path type.
         system_structure_file = (
@@ -63,10 +95,12 @@ class OspSystemStructureImporter:
                             f"Import failed: {system_structure_file.name} contains a connection with OSP-IS connection type '{connection_type}'\n"
                             f"The support for connection type '{connection_type}' is not yet implemented in ospx."
                         )
+                        logger.error(msg)
+                        raise NotImplementedError(msg)
                     else:
                         msg: str = f"Import failed: {system_structure_file.name} contains a connection with unknown connection type '{connection_type}'\n"
-                    logger.error(msg)
-                    raise TypeError(msg)
+                        logger.error(msg)
+                        raise TypeError(msg)
 
                 connection: Dict[str, Dict[Any, Any]] = {}
                 connection_name: str = ""
@@ -80,10 +114,12 @@ class OspSystemStructureImporter:
                                 f"Import failed: {system_structure_file.name} contains a connection with OSP-IS endpoint type '{endpoint_type}'\n"
                                 f"The support for endpoint type '{endpoint_type}' is not yet implemented in ospx."
                             )
+                            logger.error(msg)
+                            raise NotImplementedError(msg)
                         else:
                             msg: str = f"Import failed: {system_structure_file.name} contains a connection with unknown endpoint type '{endpoint_type}'\n"
-                        logger.error(msg)
-                        raise TypeError(msg)
+                            logger.error(msg)
+                            raise TypeError(msg)
 
                     component_name: str = endpoint_properties["_attributes"]["simulator"]
                     referenced_name: str = endpoint_properties["_attributes"]["name"]

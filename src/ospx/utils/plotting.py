@@ -13,6 +13,18 @@ logger = logging.getLogger(__name__)
 
 
 def create_meta_dict(title: str) -> Dict[str, str]:
+    """Creates a default of meta dict which can be passed to save_figure().
+
+    Parameters
+    ----------
+    title : str
+        the title of the figure
+
+    Returns
+    -------
+    Dict[str, str]
+        the meta dict
+    """
     meta_dict = {
         "Title": title,
         "Author": "VFW",
@@ -35,6 +47,21 @@ def save_figure(
     title: str,
     meta_dict: MutableMapping[str, str],
 ):
+    """Save a figure object as image file.
+
+    Parameters
+    ----------
+    fig : Figure
+        the Matplotlib figure object
+    extension : str
+        the file extension. Determines the file format.
+    path : Union[str, os.PathLike[str]]
+        the folder to save the file in
+    title : str
+        image title. Will also be used as file name.
+    meta_dict : MutableMapping[str, str]
+        a dict with additional meta properties. Will be passed as-is to figure.savefig()
+    """
 
     # Make sure path argument is of type Path. If not, cast it to Path type.
     path = path if isinstance(path, Path) else Path(path)

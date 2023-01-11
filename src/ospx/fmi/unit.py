@@ -1,5 +1,5 @@
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Union
 
 __ALL__ = ["Unit", "BaseUnit", "DisplayUnit"]
@@ -39,7 +39,7 @@ class DisplayUnit:
     # Name of DisplayUnit element, e.g. <Unit name="rad"/>, <DisplayUnit name="deg" factor="57.29..."/>.
     # Name must be unique with respect to all other DisplayUnits defined inside a Unit element
     # (in contrast, multiple Unit elements may have DisplayUnits with the same name).
-    name: str = "-"
+    name: str = field(default_factory=lambda: "-")
     # display_unit value = factor * unit value + offset
     factor: float = 1.0
     offset: float = 0.0
@@ -54,6 +54,6 @@ class Unit:
 
     # Name of unit, e.g. "N.m", "Nm",  "%/s".
     # "name" must be unique with respect to all other unit elements inside the UnitDefinitions section.
-    name: str = "-"
+    name: str = field(default_factory=lambda: "-")
     base_unit: Union[BaseUnit, None] = None
-    display_unit: DisplayUnit = DisplayUnit()
+    display_unit: DisplayUnit = field(default_factory=lambda: DisplayUnit())

@@ -7,6 +7,19 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 
 * -/-
 
+## [0.2.8] - 2023-01-11
+
+### Changed
+
+* Added missing DocStrings for public classes, methods and functions
+* Changed links to package documentation to open README.html, not the default index page
+* data classes: changed initialisation of mutable types to use default_factory
+* ruff: added rule-set "B" (flake8-bugbear)
+
+### Dependencies
+
+* updated to dictIO>=0.2.6
+
 
 ## [0.2.7] - 2023-01-04
 
@@ -292,7 +305,8 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 * Added support for Python 3.10
 
 <!-- Markdown link & img dfn's -->
-[unreleased]: https://github.com/dnv-opensource/ospx/compare/v0.2.7...HEAD
+[unreleased]: https://github.com/dnv-opensource/ospx/compare/v0.2.8...HEAD
+[0.2.8]: https://github.com/dnv-opensource/ospx/compare/v0.2.7...v0.2.8
 [0.2.7]: https://github.com/dnv-opensource/ospx/compare/v0.2.6...v0.2.7
 [0.2.6]: https://github.com/dnv-opensource/ospx/compare/v0.2.5...v0.2.6
 [0.2.5]: https://github.com/dnv-opensource/ospx/compare/v0.2.4...v0.2.5
