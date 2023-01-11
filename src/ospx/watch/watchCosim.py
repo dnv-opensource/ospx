@@ -25,6 +25,10 @@ logger = logging.getLogger(__name__)
 
 
 class CosimWatcher:
+    """CosimWatcher allows to monitor a running simulation,
+    plot trends and dump simulation results into a resultDict file.
+    """
+
     def __init__(
         self,
         csv_file_names: MutableSequence[str],

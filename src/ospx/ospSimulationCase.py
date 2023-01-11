@@ -129,9 +129,9 @@ class OspSimulationCase:
                 if write_step_size_to_osp_system_structure:
                     simulator_properties["_attributes"]["stepSize"] = component.step_size
 
-            if component.initial_values:
+            if component.variables_with_start_values:
                 simulator_properties["InitialValues"] = {}
-                for index, (_, variable) in enumerate(component.initial_values.items()):
+                for index, (_, variable) in enumerate(component.variables_with_start_values.items()):
                     if variable.start is not None and variable.data_type is None:
                         logger.error(
                             f"component {component.name}: An initial value is defined for variable {variable.name}, but its data type is not defined.\n"

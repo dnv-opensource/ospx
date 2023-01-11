@@ -9,6 +9,8 @@ logger = logging.getLogger(__name__)
 
 @dataclass()
 class Simulation:
+    """Data class holding the attributes of the 'simulation' element inside OspSystemStructure.xml."""
+
     name: Union[str, None] = None
     start_time: Union[float, None] = None
     stop_time: Union[float, None] = None

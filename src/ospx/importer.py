@@ -16,6 +16,10 @@ logger = logging.getLogger(__name__)
 
 
 class OspSystemStructureImporter:
+    """Class providing methods to convert an existing
+    OspSystemStructure.xml file to an ospx caseDict file.
+    """
+
     @staticmethod
     def import_system_structure(
         system_structure_file: Union[str, os.PathLike[str]],

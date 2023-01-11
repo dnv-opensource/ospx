@@ -56,10 +56,20 @@ class ScalarVariable:
 
     @property
     def data_type(self) -> Union[str, None]:
+        """Returns the FMI data type of the scalar Variable."""
         return self._data_type
 
     @data_type.setter
     def data_type(self, type: str):
+        """Sets the FMI data type of the scalar Variable.
+
+        Valid values are:
+            "Real"
+            "Integer"
+            "Boolean"
+            "String"
+            "Enumeration"
+        """
         valid_types: list[str] = [
             "Real",
             "Integer",
@@ -75,10 +85,22 @@ class ScalarVariable:
 
     @property
     def causality(self) -> str:
+        """Returns the causality of the scalar Variable."""
         return self._causality
 
     @causality.setter
     def causality(self, value: str):
+        """Sets the causality of the scalar Variable.
+
+        Valid values are:
+            "parameter"
+            "calculatedParameter"
+            "input"
+            "output"
+            "local"
+            "independent"
+            "structuralParameter"
+        """
         valid_values: list[str] = [
             "parameter",
             "calculatedParameter",
@@ -96,10 +118,20 @@ class ScalarVariable:
 
     @property
     def variability(self) -> Union[str, None]:
+        """Returns the variability of the scalar Variable."""
         return self._variability
 
     @variability.setter
     def variability(self, value: str):
+        """Sets the variability of the scalar Variable.
+
+        Valid values are:
+            "constant"
+            "fixed"
+            "tunable"
+            "discrete"
+            "continuous"
+        """
         valid_values: list[str] = [
             "constant",
             "fixed",
@@ -115,12 +147,14 @@ class ScalarVariable:
 
     @property
     def start(self) -> Union[int, float, bool, str, None]:
+        """Returns the start value (initial value) of the scalar Variable."""
         return self._start
 
     @start.setter
     def start(self, value: Union[int, float, bool, str, None]):
+        """Sets the start value (initial value) of the scalar Variable."""
         if value is None:
-            logger.error(f"variable {self.name}: start shall be set to 'None', but 'None' is invalid for start.")
+            logger.error(f"variable {self.name}: start value shall be set to 'None', but 'None' is invalid for start.")
             return
         if self.data_type:
             # make sure the data type of the new value does either match or gets casted to the data_type defined for the variable
@@ -147,7 +181,7 @@ class ScalarVariable:
 
 
 def get_fmi_data_type(arg: Any) -> str:
-    r"""Returns the fmi 2.0 data type of the passed in argument.
+    r"""Returns the fmi 2.0 data type corresponding to Python type of the passed in argument.
 
     See https://github.com/modelica/fmi-standard/blob/v2.0.x/schema/fmi2Type.xsd
 
@@ -159,7 +193,7 @@ def get_fmi_data_type(arg: Any) -> str:
     Returns
     -------
     str
-        The data type, returned as string literal.\n
+        The fmi 2.0 data type, returned as string literal.\n
         valid fmi 2.0 data types are 'Integer', 'Real', 'Boolean', 'String' and 'Enumeration'
     """
 

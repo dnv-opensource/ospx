@@ -90,6 +90,13 @@ class FMU:
 
     @property
     def units(self) -> Dict[str, Unit]:
+        """Returns a dict with all units defined in the FMU.
+
+        Returns
+        -------
+        Dict[str, Unit]
+            dict with all units
+        """
         model_unit_definitions: MutableMapping[Any, Any] = {}
         if unit_definitions_key := find_key(self.model_description, "UnitDefinitions$"):
             model_unit_definitions = self.model_description[unit_definitions_key]
@@ -136,6 +143,13 @@ class FMU:
 
     @property
     def variables(self) -> dict[str, ScalarVariable]:
+        """Returns a dict with all scalar variables defined in the FMU.
+
+        Returns
+        -------
+        dict[str, ScalarVariable]
+            dict with all scalar variables
+        """
         model_variables_key = find_key(self.model_description, "ModelVariables$")
         if not model_variables_key:
             return {}
@@ -178,6 +192,13 @@ class FMU:
 
     @property
     def default_experiment(self) -> Union[Experiment, None]:
+        """Returns the default experiment, if defined in the FMU.
+
+        Returns
+        -------
+        Union[Experiment, None]
+            the default experiment, if defined. Otherwise None.
+        """
         default_experiment_key = find_key(self.model_description, "DefaultExperiment$")
         if not default_experiment_key:
             return None

@@ -151,19 +151,48 @@ class Component:
                 self._variables[variable_name].start = variable.start
 
     @property
-    def initial_values(self) -> dict[str, ScalarVariable]:
+    def variables_with_start_values(self) -> dict[str, ScalarVariable]:
+        """Returns a dict with all scalar variables for which start values (initial values)
+        are defined in the component.
+
+        Returns
+        -------
+        dict[str, ScalarVariable]
+            dict with all scalar variables with start values defined.
+        """
         return self._initial_values
 
     @property
     def units(self) -> dict[str, Unit]:
+        """Returns a dict with all units defined in the component.
+
+        Returns
+        -------
+        dict[str, Unit]
+            dict with all units
+        """
         return self._units
 
     @property
     def variables(self) -> dict[str, ScalarVariable]:
+        """Returns a dict with all scalar variables defined in the component.
+
+        Returns
+        -------
+        dict[str, ScalarVariable]
+            dict with all scalar variables
+        """
         return self._variables
 
     @property
     def connectors(self) -> dict[str, Connector]:
+        """Returns a dict with all connectors defined by the component.
+
+        Returns
+        -------
+        dict[str, Connector]
+            dict with all connectors
+        """
         return self._connectors
 
     def write_osp_model_description_xml(self):  # sourcery skip: merge-dict-assign
@@ -248,5 +277,7 @@ class Component:
 
 @dataclass()
 class RemoteAccess:
+    """Data class holding the host and port information for a remote connection."""
+
     host: str = ""
     port: int = 0

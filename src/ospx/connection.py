@@ -11,6 +11,13 @@ logger = logging.getLogger(__name__)
 
 
 class Endpoint:
+    """Endpoints relate each side of a connection to distinct variables or connectors.
+
+    An endpoint is for a connection what a connector is for a component.
+    A connection has two endpoints, one for each side.
+    Connection endpoints are hence the 'counterparts' to component's connectors.
+    """
+
     def __init__(
         self,
         component: Component,
@@ -27,10 +34,24 @@ class Endpoint:
 
     @property
     def connector(self) -> Union[Connector, None]:
+        """Returns the connector this endpoint refers to, if defined.
+
+        Returns
+        -------
+        Union[Connector, None]
+            the connector, if defined. Otherwise None.
+        """
         return self._connector
 
     @connector.setter
     def connector(self, connector: Connector):
+        """Sets the connector this endpoint shall refer to.
+
+        Parameters
+        ----------
+        connector : Connector
+            the connector
+        """
         if self._variable:
             msg = (
                 f"Inconsistency: Connection endpoint defines both connector and variable.\n"
@@ -43,10 +64,24 @@ class Endpoint:
 
     @property
     def variable(self) -> Union[ScalarVariable, None]:
+        """Returns the scalar variable this endpoint refers to, if defined.
+
+        Returns
+        -------
+        Union[ScalarVariable, None]
+            the scalar variable, if defined. Otherwise None.
+        """
         return self._variable
 
     @variable.setter
     def variable(self, variable: ScalarVariable):
+        """Sets the scalar variable this endpoint shall refer to.
+
+        Parameters
+        ----------
+        variable : ScalarVariable
+            the scalar variable
+        """
         if self._connector:
             msg = (
                 f"Inconsistency: Connection endpoint defines both connector and variable.\n"
@@ -59,6 +94,13 @@ class Endpoint:
 
     @property
     def variable_name(self) -> str:
+        """Returns the name of the scalar variable this endpoint refers to.
+
+        Returns
+        -------
+        str
+            the name of the scalar variable.
+        """
         if self._connector:
             return self._connector.variable_name
         elif self._variable:
@@ -68,10 +110,22 @@ class Endpoint:
 
     @property
     def is_valid(self) -> bool:
+        """Consistency check. Returns True if endpoint is defined and valid.
+
+        Returns
+        -------
+        bool
+            True if valid. Otherwise False.
+        """
         return bool(self.component and (self.connector or self.variable))
 
 
 class Connection:
+    """A connection is the primary artefact to connect outputs and inputs of componoents in a system.
+
+    A connection connects an output connector of one component with an input connector of another component.
+    """
+
     def __init__(
         self,
         name: str,
@@ -84,6 +138,13 @@ class Connection:
 
     @property
     def is_variable_connection(self) -> bool:
+        """Returns True if connection is a single variable connection.
+
+        Returns
+        -------
+        bool
+            True if single variable connection. Otherwise False.
+        """
         if not self.source_endpoint:
             return False
         if self.source_endpoint.variable:
@@ -94,6 +155,13 @@ class Connection:
 
     @property
     def is_variable_group_connection(self) -> bool:
+        """Returns True if connection is a variable group connection.
+
+        Returns
+        -------
+        bool
+            True if variable group connection. Otherwise False.
+        """
         if not self.source_endpoint:
             return False
         if self.source_endpoint.variable:
@@ -104,6 +172,13 @@ class Connection:
 
     @property
     def is_valid(self) -> bool:
+        """Consistency check. Returns True if connection is found fully defined and valid.
+
+        Returns
+        -------
+        bool
+            True if valid. Otherwise False.
+        """
         if not (self.source_endpoint.is_valid and self.target_endpoint.is_valid):
             return False
         if self.source_endpoint.variable and self.target_endpoint.variable:

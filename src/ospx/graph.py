@@ -18,6 +18,10 @@ logger = logging.getLogger(__name__)
 
 
 class Graph:
+    """Class providing methods to generate a visual dependency graph
+    of a system's components and its connections.
+    """
+
     @staticmethod
     def generate_dependency_graph(case: OspSimulationCase):
         """Generates a dependency graph of the system structure as pdf, for documentation.
