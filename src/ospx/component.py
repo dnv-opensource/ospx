@@ -1,6 +1,6 @@
 import logging
 from copy import deepcopy
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, MutableMapping, Union
 
@@ -279,5 +279,5 @@ class Component:
 class RemoteAccess:
     """Data class holding the host and port information for a remote connection."""
 
-    host: str = ""
+    host: str = field(default_factory=lambda: "")
     port: int = 0
