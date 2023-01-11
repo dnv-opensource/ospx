@@ -14,6 +14,7 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 * Added missing DocStrings for public classes, methods and functions
 * Changed links to package documentation to open README.html, not the default index page
 * data classes: changed initialisation of mutable types to use default_factory
+* ruff: added rule-set "B" (flake8-bugbear)
 
 ### Dependencies
 
