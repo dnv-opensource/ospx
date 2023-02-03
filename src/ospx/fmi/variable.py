@@ -1,4 +1,5 @@
 import logging
+from collections.abc import Iterable
 from typing import Any, List, Sequence, Union
 
 from dictIO import Formatter, Parser
@@ -250,6 +251,6 @@ def _cast_to_fmi_data_type(
         return Formatter().format_dict(arg) if isinstance(arg, Sequence) else Formatter().format_type(arg)
     elif fmi_data_type == "Enumeration":
         # cast to list
-        return list(arg) if isinstance(arg, Sequence) else [arg]
+        return list(arg) if isinstance(arg, Iterable) else [arg]
     else:
         return None
