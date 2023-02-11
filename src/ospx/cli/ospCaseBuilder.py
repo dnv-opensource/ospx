@@ -13,7 +13,6 @@ logger = logging.getLogger(__name__)
 
 
 def _argparser() -> argparse.ArgumentParser:
-
     parser = argparse.ArgumentParser(
         prog="ospCaseBuilder",
         usage="%(prog)s caseDict [options [args]]",

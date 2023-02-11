@@ -24,7 +24,7 @@ class Graph:
 
     @staticmethod
     def generate_dependency_graph(case: OspSimulationCase):
-        """Generates a dependency graph of the system structure as pdf, for documentation.
+        """Generate a dependency graph of the system structure as pdf, for documentation.
 
         Note: This requires graphviz to be installed on the local machine
         """
@@ -85,7 +85,6 @@ class Graph:
 
         # Components
         for component in case.system_structure.components.values():
-
             label_key, label = _get_node_label(component)
             # var_keys = find_key(case.models[key]['InitialValues'], 'InitialValue')
             # variables = {}
@@ -127,7 +126,6 @@ class Graph:
         # Connections
 
         for _, connection in case.system_structure.connections.items():
-
             if not (connection.source_endpoint and connection.target_endpoint):
                 return
             if not (connection.source_endpoint.component and connection.target_endpoint.component):
@@ -146,7 +144,6 @@ class Graph:
                 weight = "%i" % 1
 
             elif re.search(basic_op_names, from_key, re.I):
-
                 style = "filled"
                 color = "#995566"
                 fontcolor = "#663344"
@@ -154,7 +151,6 @@ class Graph:
                 weight = ("%.2f" % 0.66,)
 
             else:
-
                 style = "bold"
                 color = "black"
                 fontcolor = "black"
@@ -211,7 +207,6 @@ def _get_edge_label(connection: Connection) -> str:
 
 
 def _create_table(name: str, child: Union[Dict[str, Any], None] = None) -> str:
-
     _child: Dict[str, Any] = child or {" ": " "}
     n_child = len(_child)
     string: str = f'<\n<TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0">\n<TR>\n<TD COLSPAN="{2 * n_child:d}">{name}</TD>\n</TR>\n'

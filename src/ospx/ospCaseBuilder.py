@@ -25,7 +25,7 @@ class OspCaseBuilder:
         graph: bool = False,
         clean: bool = False,
     ):
-        """Builds the OSP-specific configuration files needed to run an OSP (co-)simulation case.
+        """Build the OSP-specific configuration files needed to run an OSP (co-)simulation case.
 
         Builds following files:
             - OspSystemStructure.xml
@@ -95,7 +95,7 @@ class OspCaseBuilder:
 
 
 def _clean_case_folder(case_folder: Path):
-    """Cleans up the case folder and deletes any existing ospx files, e.g. modelDescription.xml .fmu .csv etc."""
+    """Clean up the case folder and deletes any existing ospx files, e.g. modelDescription.xml .fmu .csv etc."""
     import re
     from shutil import rmtree
 

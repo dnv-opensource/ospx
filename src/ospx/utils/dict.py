@@ -4,7 +4,7 @@ from typing import Any, List, MutableMapping, Set, Union
 
 
 def find_key(dict: MutableMapping[Any, Any], pattern: str) -> Union[str, None]:
-    """Finds the first key in dict that matches the given pattern."""
+    """Find the first key in dict that matches the given pattern."""
     try:
         return [k for k in dict.keys() if re.search(pattern, k)][0]
     except Exception:
@@ -12,7 +12,7 @@ def find_key(dict: MutableMapping[Any, Any], pattern: str) -> Union[str, None]:
 
 
 def find_keys(dict: MutableMapping[Any, Any], pattern: str) -> Union[List[str], None]:
-    """Finds all keys in dict that match the given pattern."""
+    """Find all keys in dict that match the given pattern."""
     try:
         return [k for k in dict.keys() if re.search(pattern, k)]
     except Exception:
@@ -20,7 +20,7 @@ def find_keys(dict: MutableMapping[Any, Any], pattern: str) -> Union[List[str], 
 
 
 def find_type_identifier_in_keys(dict: MutableMapping[Any, Any]) -> Union[str, None]:
-    """Finds the first key name in dict that contains one of the following type identifier strings:
+    """Find the first key name in dict that contains one of the following type identifier strings:
     [Integer|Real|Boolean|Enumeration|String|Unknown].
     """
     key_list: List[str] = ["Integer", "Real", "Boolean", "Enumeration", "String", "Unkown"]
@@ -35,7 +35,7 @@ def find_type_identifier_in_keys(dict: MutableMapping[Any, Any]) -> Union[str, N
 
 
 def shrink_dict(dict: MutableMapping[Any, Any], unique_key: Union[List[str], None] = None) -> MutableMapping[Any, Any]:
-    """Identifies doubled entries in the passed in dict and returns a new dict with doubled entries removed."""
+    """Identify doubled entries in the passed in dict and return a new dict with doubled entries removed."""
     _unique_key: List[str] = unique_key or []
     unique_keys_string: str = "['" + "']['".join(_unique_key) + "']"
     # sort an ordered dict for attribute (child) where the dict is to make unique for

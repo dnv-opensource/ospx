@@ -45,7 +45,7 @@ class Connector:
 
     @variable.setter
     def variable(self, variable: str):
-        """Sets the scalar variable this connector shall be defined for.
+        """Set the scalar variable this connector shall be defined for.
 
         Parameters
         ----------
@@ -75,7 +75,7 @@ class Connector:
 
     @variable_group.setter
     def variable_group(self, variable_group: str):
-        """Sets the variable group this connector shall be defined for.
+        """Set the variable group this connector shall be defined for.
 
         Parameters
         ----------
@@ -99,7 +99,7 @@ class Connector:
 
     @type.setter
     def type(self, type: str):
-        """Sets the type of the connector.
+        """Set the type of the connector.
 
         Valid values are:
             "input"

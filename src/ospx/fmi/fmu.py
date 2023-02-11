@@ -217,7 +217,7 @@ class FMU:
         return default_experiment
 
     def copy(self, new_name: str):
-        """Saves a copy of the FMU with a new name.
+        """Save a copy of the FMU with a new name.
 
         Parameters
         ----------
@@ -272,7 +272,7 @@ class FMU:
         return new_fmu
 
     def proxify(self, host: str, port: int):
-        """Creates a proxy version of the FMU.
+        """Create a proxy version of the FMU.
 
         For details see https://github.com/NTNU-IHB/FMU-proxy
 
@@ -302,7 +302,7 @@ class FMU:
         return FMU(proxy_fmu_file)
 
     def _modify_start_values(self, variables_with_start_values: dict[str, ScalarVariable]):
-        """Modifies the start values of variables inside the FMUs modelDescription.xml."""
+        """Modify the start values of variables inside the FMUs modelDescription.xml."""
 
         logger.info(f"{self.file.name}: update start values of variables in modelDescription.xml")  # 2
 
@@ -315,7 +315,6 @@ class FMU:
         ]
 
         for model_variable_key, model_variable_properties in model_variables.items():
-
             model_variable_name: str = model_variable_properties["_attributes"]["name"]
 
             if model_variable_name in names_of_variables_with_start_values:
@@ -339,7 +338,6 @@ class FMU:
         self._log_update_in_model_description()
 
     def _log_update_in_model_description(self, model_description: Union[CppDict, None] = None):
-
         model_description = model_description or self.model_description
 
         logger.info(f"{self.file.name}: update <fmiModelDescription description>")  # 2

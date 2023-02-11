@@ -127,7 +127,6 @@ def substitute_text_in_zip(
             with ZipFile(temp_name, "w") as zip_write:
                 zip_write.comment = zip_read.comment  # preserve the comment
                 for item in zip_read.infolist():
-
                     if not re.search(file_name_pattern, item.filename):
                         zip_write.writestr(item, zip_read.read(item.filename))
                     else:

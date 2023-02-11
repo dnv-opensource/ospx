@@ -45,7 +45,7 @@ class Endpoint:
 
     @connector.setter
     def connector(self, connector: Connector):
-        """Sets the connector this endpoint shall refer to.
+        """Set the connector this endpoint shall refer to.
 
         Parameters
         ----------
@@ -75,7 +75,7 @@ class Endpoint:
 
     @variable.setter
     def variable(self, variable: ScalarVariable):
-        """Sets the scalar variable this endpoint shall refer to.
+        """Set the scalar variable this endpoint shall refer to.
 
         Parameters
         ----------
