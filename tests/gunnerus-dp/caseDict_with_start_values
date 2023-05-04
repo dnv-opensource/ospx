@@ -1,0 +1,216 @@
+/*---------------------------------*- C++ -*----------------------------------*\
+filetype dictionary; coding utf-8; version 0.1; local --; purpose --;
+\*----------------------------------------------------------------------------*/
+#include paramDict
+_environment
+{
+    libSource                 C:\Dev\ospx\tests\gunnerus-dp\fmus;
+}
+systemStructure
+{
+    connections
+    {
+        box_reference_to_reference_model
+        {
+            source
+            {
+                component        box_reference;
+                connector        box_reference_position_setpoint;
+            }
+            target
+            {
+                component        reference_model;
+                connector        reference_model_position_setpoint;
+            }
+        }
+        reference_model_to_dp_controller
+        {
+            source
+            {
+                component        reference_model;
+                connector        reference_model_desired_acceleration;
+            }
+            target
+            {
+                component        dp_controller;
+                connector        dp_controller_acceleration_setpoint;
+            }
+        }
+        dp_controller_to_simulator_communication
+        {
+            source
+            {
+                component        dp_controller;
+                connector        dp_controller_thrust_command;
+            }
+            target
+            {
+                component        simulator_communication;
+                connector        simulator_communication_thrust_command;
+            }
+        }
+        simulator_communication_to_dp_controller
+        {
+            source
+            {
+                component        simulator_communication;
+                connector        simulator_communication_velocity_3dof;
+            }
+            target
+            {
+                component        dp_controller;
+                connector        dp_controller_velocity_3dof;
+            }
+        }
+    }
+    components
+    {
+        box_reference
+        {
+            connectors
+            {
+                box_reference_position_setpoint
+                {
+                    variableGroup        position_setpoint;
+                    type        output;
+                }
+            }
+            initialize
+            {
+                pos_d1[0]
+                {
+                    start               $box_size_x;
+                }
+                pos_d1[1]
+                {
+                    start               0.0;
+                }
+                pos_d_additional1[0]
+                {
+                    start               0.0;
+                }
+                pos_d_additional1[1]
+                {
+                    start               $box_size_y;
+                }
+                pos_d_additional3[0]
+                {
+                    start               "-1.0 * $box_size_x";
+                }
+                pos_d_additional3[1]
+                {
+                    start               0.0;
+                }
+                pos_d_additional4[0]
+                {
+                    start               0.0;
+                }
+                pos_d_additional4[1]
+                {
+                    start               "-1.0 * $box_size_y";
+                }
+            }
+            fmu               BoxReference.fmu;
+            stepSize          0.1;
+        }
+        reference_model
+        {
+            connectors
+            {
+                reference_model_position_setpoint
+                {
+                    variableGroup        position_setpoint;
+                    type        input;
+                }
+                reference_model_desired_position
+                {
+                    variableGroup        desired_position;
+                    type        output;
+                }
+                reference_model_desired_velocity
+                {
+                    variableGroup        desired_velocity;
+                    type        output;
+                }
+                reference_model_desired_acceleration
+                {
+                    variableGroup        desired_acceleration;
+                    type        output;
+                }
+            }
+            fmu               ReferenceModel.fmu;
+            stepSize          0.1;
+        }
+        dp_controller
+        {
+            connectors
+            {
+                dp_controller_position_setpoint
+                {
+                    variableGroup        position_setpoint;
+                    type        input;
+                }
+                dp_controller_velocity_setpoint
+                {
+                    variableGroup        velocity_setpoint;
+                    type        input;
+                }
+                dp_controller_acceleration_setpoint
+                {
+                    variableGroup        acceleration_setpoint;
+                    type        input;
+                }
+                dp_controller_thrust_command
+                {
+                    variableGroup        thrust_command;
+                    type        output;
+                }
+                dp_controller_position_3dof
+                {
+                    variableGroup        position_3dof;
+                    type        input;
+                }
+                dp_controller_velocity_3dof
+                {
+                    variableGroup        velocity_3dof;
+                    type        input;
+                }
+            }
+            fmu               DPController.fmu;
+            stepSize          0.1;
+        }
+        simulator_communication
+        {
+            connectors
+            {
+                simulator_communication_thrust_command
+                {
+                    variableGroup        thrust_command;
+                    type        input;
+                }
+                simulator_communication_position_3dof
+                {
+                    variableGroup        position_3dof;
+                    type        output;
+                }
+                simulator_communication_velocity_3dof
+                {
+                    variableGroup        velocity_3dof;
+                    type        output;
+                }
+            }
+            fmu               SimulatorCommunication.fmu;
+            stepSize          0.1;
+        }
+    }
+}
+run
+{
+    simulation
+    {
+        name                  OspSystemStructure;
+        startTime             0.0;
+        baseStepSize          0.01;
+        algorithm             fixedStep;
+    }
+}

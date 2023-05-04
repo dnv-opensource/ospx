@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 def create_meta_dict(title: str) -> Dict[str, str]:
-    """Creates a default of meta dict which can be passed to save_figure().
+    """Create a default of meta dict which can be passed to save_figure().
 
     Parameters
     ----------

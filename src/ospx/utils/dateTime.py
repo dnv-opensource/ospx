@@ -5,7 +5,7 @@ __all__ = ["calc_time"]
 
 
 def calc_time(time0: datetime, time1: datetime) -> Tuple[int, int, int, int, int]:
-    """Calculates the time delta between time0 and time1.
+    """Calculate the time delta between time0 and time1.
 
     Calculates the time delta between time0 and time1 and
     returns the result as a tuple of integers representing the number of

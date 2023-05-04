@@ -25,7 +25,7 @@ class OspSystemStructureImporter:
         system_structure_file: Union[str, os.PathLike[str]],
         enter_lib_source_as_relative_path: bool = False,
     ):
-        """Imports an OspSystemStructure.xml file and saves it as an ospx caseDict file.
+        """Import an OspSystemStructure.xml file and save it as an ospx caseDict file.
 
         Parameters
         ----------

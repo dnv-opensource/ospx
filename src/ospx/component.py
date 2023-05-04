@@ -33,7 +33,6 @@ class Component:
     """
 
     def __init__(self, name: str, properties: MutableMapping[Any, Any]):
-
         self.name: str = name
         self.generate_proxy = False
         self.fmu: FMU
@@ -196,7 +195,7 @@ class Component:
         return self._connectors
 
     def write_osp_model_description_xml(self):  # sourcery skip: merge-dict-assign
-        """Writes the <component.name>_OspModelDescription.xml file in the current working directory."""
+        """Write the <component.name>_OspModelDescription.xml file in the current working directory."""
         osp_model_description_file = self.fmu.file.parent.absolute() / f"{self.name}_OspModelDescription.xml"
         self._clean(osp_model_description_file)
 

@@ -23,7 +23,6 @@ class OspSimulationCase:
         self,
         case_dict: CppDict,
     ):
-
         self.counter = BorgCounter()
         self.case_dict: CppDict = case_dict
         self.case_folder: Path = case_dict.source_file.resolve().parent if case_dict.source_file else Path.cwd()
@@ -41,7 +40,7 @@ class OspSimulationCase:
         self._resolve_lib_source_folder()
 
     def setup(self):
-        """Sets up the OSP simulation case folder.
+        """Set up the OSP simulation case folder.
 
         Raises
         ------
@@ -72,7 +71,7 @@ class OspSimulationCase:
         self._check_components_step_size()
 
     def _write_osp_model_description_xmls(self):
-        """Writes the <component.name>_OspModelDescription.xml files for all components defined in the system structure."""
+        """Write the <component.name>_OspModelDescription.xml files for all components defined in the system structure."""
         logger.info(
             f"Write OspModelDescription.xml files for OSP simulation case '{self.name}' in case folder: {self.case_folder}"
         )
@@ -83,7 +82,7 @@ class OspSimulationCase:
         return
 
     def write_osp_system_structure_xml(self):
-        """Writes the OspSystemStructure.xml file."""
+        """Write the OspSystemStructure.xml file."""
         # sourcery skip: class-extract-method, merge-dict-assign
 
         osp_system_structure_file = self.case_folder / "OspSystemStructure.xml"
@@ -204,7 +203,7 @@ class OspSimulationCase:
         return
 
     def write_system_structure_ssd(self):
-        """Writes the SystemStructure.ssd file."""
+        """Write the SystemStructure.ssd file."""
 
         system_structure_ssd_file = self.case_folder / "SystemStructure.ssd"
         self._clean(system_structure_ssd_file)
@@ -296,7 +295,7 @@ class OspSimulationCase:
         return
 
     def write_statistics_dict(self):
-        """Writes selected properties of the system structure into a statistics dict.
+        """Write selected properties of the system structure into a statistics dict.
 
         I.e. for documentation or further statistical analysis.
         """
@@ -351,7 +350,7 @@ class OspSimulationCase:
         DictWriter.write(statistics_dict, statistics_dict_file, mode="w")
 
     def write_watch_dict(self):
-        """Writes a case-specific watch dict file.
+        """Write a case-specific watch dict file.
 
         The watch dict file can be used with watchCosim for
             - convergence control
@@ -385,7 +384,7 @@ class OspSimulationCase:
         return
 
     def _read_simulation(self):
-        """Reads general simulation properties from case dict."""
+        """Read general simulation properties from case dict."""
         logger.info("reading simulation properties")  # 0
 
         if "run" not in self.case_dict:
@@ -407,7 +406,7 @@ class OspSimulationCase:
         self.simulation = simulation
 
     def _resolve_lib_source_folder(self):
-        """Resolves the library source folder."""
+        """Resolve the library source folder."""
         self.lib_source = Path.cwd()  # initialize conservatively (with fallback path)
         if "_environment" in self.case_dict:
             if "libSource" in self.case_dict["_environment"]:
@@ -431,7 +430,7 @@ class OspSimulationCase:
         return fmu_file
 
     def _check_all_fmus_exist(self):
-        """Checks whether all referenced FMUs actually exist."""
+        """Check whether all referenced FMUs actually exist."""
         logger.debug("Check whether all referenced FMUs exist.")
         components = self.case_dict["systemStructure"]["components"]
 
@@ -447,7 +446,7 @@ class OspSimulationCase:
                 raise FileNotFoundError(fmu_file)
 
     def _resolve_all_fmus(self):
-        """Resolves all referenced FMUs and ensures they are accessible from the case folder via a relative path.
+        """Resolve all referenced FMUs and ensures they are accessible from the case folder via a relative path.
 
         This is necessary because OspSystemStructure.xml allows only relative paths
         as 'source' attribute in a <Simulator> element.
@@ -466,7 +465,7 @@ class OspSimulationCase:
             component_properties["fmu"] = fmu_file
 
     def _copy_fmu_to_case_folder(self, fmu_file: Path) -> Path:
-        """Copies the passed in FMU file into the case folder.
+        """Copy the passed in FMU file into the case folder.
 
         If also an accompanying <fmu_name>_OspModelDescription.xml file exists in the same folder as the FMU file,
         then also that OspModelDescription.xml file will be copied into the case folder.
@@ -508,7 +507,7 @@ class OspSimulationCase:
         return
 
     def _set_components_step_size(self, step_size: float):
-        """Overwrites the step size of all components with the passed in value."""
+        """Overwrite the step size of all components with the passed in value."""
         if not self.system_structure or not self.system_structure.components:
             return
         for component in self.system_structure.components.values():
@@ -590,7 +589,7 @@ class OspSimulationCase:
         logger.info("Inspect mode: Finished.")
 
     def _write_plot_config_json(self):
-        """Writes the PlotConfig.json file, containing postprocessing information."""
+        """Write the PlotConfig.json file, containing postprocessing information."""
 
         plot_config_file = self.case_folder / "PlotConfig.json"
         self._clean(plot_config_file)

@@ -106,7 +106,7 @@ class System:
         return variables
 
     def _read_components(self, properties: MutableMapping[Any, Any]):
-        """Reads components from (case dict) properties."""
+        """Read components from (case dict) properties."""
         logger.info("read components from case dict")
         self._components.clear()
         if "components" not in properties:
@@ -116,7 +116,7 @@ class System:
             self._components[component.name] = component
 
     def _read_connections(self, properties: MutableMapping[Any, Any]):
-        """Reads connections from (case dict) properties."""
+        """Read connections from (case dict) properties."""
         logger.info("read connections from case dict")
         self._connections.clear()
         if "connections" not in properties:

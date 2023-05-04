@@ -54,7 +54,9 @@ class CosimWatcher:
         return
 
     def read_watch_dict(self, watch_dict_file: Union[str, os.PathLike[str]]):
-        """Reads watchDict file. The watchDict file contains the parameters to be plotted.
+        """Read watchDict file.
+
+        The watchDict file contains the parameters to be plotted.
 
         Parameters
         ----------
@@ -93,7 +95,7 @@ class CosimWatcher:
         return
 
     def plot(self, converge: bool = False):
-        """Plotting.
+        """Plot trends.
 
         Plotting + convergence checker (future task)
 
@@ -115,7 +117,6 @@ class CosimWatcher:
         df_row_size = 0
 
         while True:  # do as long as not interrupted
-
             df = self._read_csv_files_into_dataframe()
 
             # cumulate counter for termination if no changes
@@ -131,7 +132,6 @@ class CosimWatcher:
             plot: Axes
             # for index in range(self.nSubplots):
             for index in range(df_col_size):
-
                 current_key = list(df)[index + 1]  # 0 is Time, StepCount was removed for simplification
 
                 plot = self.figure.add_subplot(self.max_row, self.number_of_columns, index + 1)
@@ -149,9 +149,9 @@ class CosimWatcher:
                 except Exception as e:
                     logger.exception(e)
                 # subplot.set_title(currentKey,  fontsize=10)
-                plot.grid(color="#66aa88", linestyle="--")
-                plot.xaxis.set_tick_params(labelsize=8)
-                plot.yaxis.set_tick_params(labelsize=8)
+                _ = plot.grid(color="#66aa88", linestyle="--")
+                _ = plot.xaxis.set_tick_params(labelsize=8)
+                _ = plot.yaxis.set_tick_params(labelsize=8)
                 _ = plot.legend(fontsize=8)
                 axs.append(plot)
                 # if isinstance(plot, Axes):
@@ -291,7 +291,7 @@ class CosimWatcher:
         return
 
     def _initialize_plot(self):
-        """Initializes the plot.
+        """Initialize the plot.
 
         Collects data and sets plot header line
         """
@@ -315,7 +315,7 @@ class CosimWatcher:
         return
 
     def _read_csv_files_into_dataframe(self) -> DataFrame:
-        """Reads all csv files into one joint Pandas dataframe.
+        """Read all csv files into one joint Pandas dataframe.
 
         Read all csv files (=all data sources, one csv file per data source) into one joint Pandas dataframe.
         The returned dataframe hence contains the data of all datas ources.
@@ -405,7 +405,7 @@ class CosimWatcher:
         return df_all_data_sources.iloc[start:length, :]
 
     def _determine_optimum_screen_size(self):
-        """Determines the optimum screen size."""
+        """Determine the optimum screen size."""
         # Opening and closing of window may be deprecated when a better solution is found
         mgr = plt.get_current_fig_manager()
         mgr.full_screen_toggle()

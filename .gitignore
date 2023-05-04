@@ -151,3 +151,11 @@ dmypy.json
 
 # modules
 modules.txt
+
+# VS Code Settings
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets

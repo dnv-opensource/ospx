@@ -18,7 +18,6 @@ logger = logging.getLogger(__name__)
 
 
 def _argparser() -> argparse.ArgumentParser:
-
     parser = ArgumentParser(
         prog="watchCosim",
         usage="%(prog)s watchDict [options [args]]",
