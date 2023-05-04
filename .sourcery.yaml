@@ -18,6 +18,9 @@ ignore: # A list of paths or files which Sourcery will ignore.
 - build
 - dist
 - __pycache__
+- tests/library/spring_mass_damper/Damper
+- tests/library/spring_mass_damper/Mass
+- tests/library/spring_mass_damper/Spring
 
 rule_settings:
   enable:
