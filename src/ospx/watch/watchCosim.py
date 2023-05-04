@@ -149,9 +149,9 @@ class CosimWatcher:
                 except Exception as e:
                     logger.exception(e)
                 # subplot.set_title(currentKey,  fontsize=10)
-                plot.grid(color="#66aa88", linestyle="--")
-                plot.xaxis.set_tick_params(labelsize=8)
-                plot.yaxis.set_tick_params(labelsize=8)
+                _ = plot.grid(color="#66aa88", linestyle="--")
+                _ = plot.xaxis.set_tick_params(labelsize=8)
+                _ = plot.yaxis.set_tick_params(labelsize=8)
                 _ = plot.legend(fontsize=8)
                 axs.append(plot)
                 # if isinstance(plot, Axes):
