@@ -4,5 +4,5 @@ pandas>=2.0
 matplotlib>=3.7
 graphviz>=0.20
 
-dictIO>=0.2.7
+dictIO>=0.2.8
 # ../dictIO
