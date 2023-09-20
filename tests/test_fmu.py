@@ -34,7 +34,7 @@ def test_fmu_units_number(test_fmu: FMU):
 
 def test_fmu_variables_fmi_data_type(test_fmu: FMU):
     assert test_fmu.variables["Variable_1_IN_Real"].data_type == "Real"
-    assert type(test_fmu.variables["Variable_1_IN_Real"].start) == float
+    assert isinstance(test_fmu.variables["Variable_1_IN_Real"].start, float)
     assert test_fmu.variables["Variable_2_IN_Integer"].data_type == "Integer"
     assert test_fmu.variables["Variable_3_IN_Bool"].data_type == "Boolean"
     assert test_fmu.variables["Variable_4_OUT_Real"].data_type == "Real"
