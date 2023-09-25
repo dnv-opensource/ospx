@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout active branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 1
           lfs: true
@@ -41,7 +41,7 @@ jobs:
           pip list
 
       # Build documentation
-      - uses: ammaraskar/sphinx-problem-matcher@master
+      - uses: sphinx-doc/github-problem-matcher@master
       - name: Build documentation
         run: |
           cd docs
