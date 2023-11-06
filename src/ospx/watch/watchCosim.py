@@ -412,6 +412,8 @@ class CosimWatcher:
         """Determine the optimum screen size."""
         # Opening and closing of window may be deprecated when a better solution is found
         mgr = plt.get_current_fig_manager()
+        if mgr is None:
+            return
         mgr.full_screen_toggle()
         self.screenSize = (mgr.canvas.width(), mgr.canvas.height())  # type: ignore
         mgr.window.close()  # type: ignore
