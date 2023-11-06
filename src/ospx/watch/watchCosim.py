@@ -35,6 +35,7 @@ class CosimWatcher:
         skip_values: int,
         latest_values: int,
         scale_factor: float,
+        timeline_data: bool,
     ):
         self.watch_dict_file: Union[Path, None] = None
         self.watch_dict: MutableMapping[Any, Any] = {}
@@ -48,6 +49,7 @@ class CosimWatcher:
         self.skip_values: int = skip_values
         self.latest_values: int = latest_values
         self.scale_factor: float = scale_factor
+        self.timeline_data: bool = timeline_data
         self.figure: Figure
         self.terminate: bool = False
         self.max_row: int = 0
@@ -212,7 +214,9 @@ class CosimWatcher:
                 "min": _min,
                 "max": _max,
             }
-
+            if self.timeline_data:
+                result_dict[header].update({'values':values})
+                
         # debug
         # result_dict.update({'_datasources':self.data_sources})
         result_dict_name = "-".join([self.title, "resultDict"])

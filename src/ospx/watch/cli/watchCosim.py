@@ -44,19 +44,19 @@ def _argparser() -> argparse.ArgumentParser:
     )
 
     _ = parser.add_argument(
-        "-p",
-        "--plot",
+        "-d",
+        "--dump",
         action="store_true",
-        help="plot data including --dump (reading watchDict and .csv, creating results/SIMULATIONNAME.png)",
+        help="dump data (reading watchDict and .csv, creating results/{dataFrameDump, resultsDict})",
         default=False,
         required=False,
     )
 
     _ = parser.add_argument(
-        "-d",
-        "--dump",
+        "-p",
+        "--plot",
         action="store_true",
-        help="dump data (reading watchDict and .csv, creating results/{dataFrameDump, resultsDict})",
+        help="plot data including --dump (reading watchDict and .csv, creating results/SIMULATIONNAME.png)",
         default=False,
         required=False,
     )
@@ -68,6 +68,14 @@ def _argparser() -> argparse.ArgumentParser:
         "--quiet",
         action="store_true",
         help=("console output will be quiet."),
+        default=False,
+    )
+    
+    _ = console_verbosity.add_argument(
+        "-t",
+        "--timeline",
+        action="store_true",
+        help=("write all timeline data into resultDict"),
         default=False,
     )
 
@@ -153,6 +161,7 @@ def main():
     skip: int = args.skip
     latest: int = args.latest
     scale_factor = float(args.scale)
+    timeline_data = float(args.timeline)
 
     if not converge and not plot and not dump:
         logger.error("give at least one option what to do: --converge, --plot or --dump")
@@ -162,12 +171,13 @@ def main():
     # Dispatch to _main(), which takes care of processing the arguments and invoking the API.
     _main(
         watch_dict_file_name=watch_dict_file_name,
-        converge=converge,
-        plot=plot,
-        dump=dump,
-        skip_values=skip,
-        latest_values=latest,
-        scale_factor=scale_factor,
+        converge = converge,
+        plot = plot,
+        dump = dump,
+        skip_values = skip,
+        latest_values = latest,
+        scale_factor = scale_factor,
+        timeline_data=  timeline_data,
     )
 
 
@@ -179,6 +189,7 @@ def _main(
     skip_values: int = 0,
     latest_values: int = 0,
     scale_factor: float = 1,
+    timeline_data: bool = False,
 ):
     """Entry point for unit tests.
 
@@ -225,7 +236,7 @@ def _main(
         for data_source_name in data_source_names
     ]
 
-    watcher = CosimWatcher(latest_csv_file_names, skip_values, latest_values, scale_factor)
+    watcher = CosimWatcher(latest_csv_file_names, skip_values, latest_values, scale_factor, timeline_data)
     watcher.read_watch_dict(watch_dict_file_name)
 
     Path(watcher.results_dir).mkdir(parents=True, exist_ok=True)
