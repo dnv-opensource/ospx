@@ -3,17 +3,6 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-#vi & emacs
-*~
-'#'*
-
-#packaging
-*.whl
-*.tar.gz
-
-#doxygen
-html/
-
 # C extensions
 *.so
 
@@ -139,15 +128,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# zip
-*.zip
-*.ZIP
-*.tar.gz
-*.tgz
-*.tar.bz2
-*.tbz
-*.7z
-*.rar
+# PyCharm
+.idea
 
 # modules
 modules.txt
@@ -159,3 +141,4 @@ modules.txt
 !.vscode/launch.json
 !.vscode/extensions.json
 !.vscode/*.code-snippets
+
