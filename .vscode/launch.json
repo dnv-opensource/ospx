@@ -18,10 +18,10 @@
             "cwd": "${fileDirname}", // working dir = dir where current file is
             "program": "${file}",
             "console": "integratedTerminal",
-            "justMyCode": false,
             "autoReload": {
                 "enable": true
             },
+            "justMyCode": false,
             "envFile": "${workspaceFolder}/.env" // specify where .env file is
         },
         {
