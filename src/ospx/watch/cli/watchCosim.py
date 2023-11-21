@@ -161,7 +161,7 @@ def main():
     skip: int = args.skip
     latest: int = args.latest
     scale_factor = float(args.scale)
-    timeline_data = float(args.timeline)
+    timeline_data: bool = args.timeline
 
     if not converge and not plot and not dump:
         logger.error("give at least one option what to do: --converge, --plot or --dump")
@@ -177,7 +177,7 @@ def main():
         skip_values = skip,
         latest_values = latest,
         scale_factor = scale_factor,
-        timeline_data=  timeline_data,
+        timeline_data = timeline_data,
     )
 
 

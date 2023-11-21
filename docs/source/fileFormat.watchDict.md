@@ -20,7 +20,8 @@ The watchDict file serves as configuration for watchCosim, allowing to
 | :-------------------- | :-------- | :---------- |
 | datasources           | dict      | {all, any, none} names of the involved fmu's |
 | &numsp;\<FMU>         | dict      | key matching the name of an FMU to be monitored (without file extension) |
-| &numsp;&numsp;columns | list[int] | columns as they are written in \<FMU>_DATETIME.csv (sub-setting and ordering is free-of-choice)  |
+| &numsp;&numsp;timeColumn | int   | time axis (one column from \<FMU>_DATETIME.csv (free-of-choice)  |
+| &numsp;&numsp;dataColumns | list[int] | ordinate (columns from \<FMU>_DATETIME.csv (sub-setting and ordering is free-of-choice)  |
 | delimiter             | string    | the type of delimiter in \<FMU>_DATETIME.csv |
 | simulation            | dict      | additional information about the monitored simulaton. Used for window decoration. |
 | &numsp;name           | string    | name of the monitored simulation |
@@ -45,9 +46,10 @@ datasources
 {
     myfmu
     {
-        columns
+        timeColumn            0;
+        dataColumns
         (
-            0                 1                 2                 3                 4
+            1                 2                 3                 4
         );
     }
 }

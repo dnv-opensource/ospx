@@ -151,6 +151,7 @@ class CosimWatcher:
                     pass
                 except Exception as e:
                     logger.exception(e)
+                    
                 # subplot.set_title(currentKey,  fontsize=10)
                 _ = plot.grid(color="#66aa88", linestyle="--")
                 _ = plot.xaxis.set_tick_params(labelsize=8)
@@ -317,7 +318,6 @@ class CosimWatcher:
             hspace=0.2,
         )
         self.terminate = False
-
 
         df = self._read_csv_files_into_dataframe()  # do it once to find the number of respective columns of all datasources
         self.number_of_subplots = len(list(df)) - 1  # one of the columns is the abscissa, frl: check if this works for multiple datasources and merged time columns
