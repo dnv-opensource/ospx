@@ -120,23 +120,25 @@ class CosimWatcher:
 
         while True:  # do as long as not interrupted
             df = self._read_csv_files_into_dataframe()
-            
+
             # cumulate counter for termination if no changes
             if df_row_size == len(df):
                 terminate_loops += 1
             else:
                 terminate_loops = 0
-                
+
             df_row_size = len(df)
-            df_col_size = len(list(df)) - 1  # reduced by one because 1st col is time column, frl: check multiple datasources
-            
+            df_col_size = (
+                len(list(df)) - 1
+            )  # reduced by one because 1st col is time column, frl: check multiple datasources
+
             # axs = [None for x in range(df_col_size)]
             axs: MutableSequence[Axes] = []
             plot: Axes
             time_key = list(df)[0]
             for index in range(df_col_size):
                 current_key = list(df)[index + 1]  # 0 is time column and thus removed, frl: check multiple dataframes
-                
+
                 plot = self.figure.add_subplot(self.max_row, self.number_of_columns, index + 1)
 
                 try:
@@ -151,7 +153,7 @@ class CosimWatcher:
                     pass
                 except Exception as e:
                     logger.exception(e)
-                    
+
                 # subplot.set_title(currentKey,  fontsize=10)
                 _ = plot.grid(color="#66aa88", linestyle="--")
                 _ = plot.xaxis.set_tick_params(labelsize=8)
@@ -217,8 +219,8 @@ class CosimWatcher:
                 "max": _max,
             }
             if self.timeline_data:
-                result_dict[header].update({'values':values})
-                
+                result_dict[header].update({"values": values})
+
         # debug
         # result_dict.update({'_datasources':self.data_sources})
         result_dict_name = "-".join([self.title, "resultDict"])
@@ -239,8 +241,10 @@ class CosimWatcher:
             - column names (= variable names)
         """
 
-        #pattern = re.compile(r"(^#|\s+\[.*?\]$)")
-        pattern = re.compile(r"(^#{0,2}\s*|\s+\[.*?\]$)") # frl 2023-11-07 remove all leading #'s and spaces and all trailing [.*]'s
+        # pattern = re.compile(r"(^#|\s+\[.*?\]$)")
+        pattern = re.compile(
+            r"(^#{0,2}\s*|\s+\[.*?\]$)"
+        )  # frl 2023-11-07 remove all leading #'s and spaces and all trailing [.*]'s
 
         for (
             data_source_name,
@@ -256,8 +260,8 @@ class CosimWatcher:
                         data_header = f.readline().strip().split(self.delimiter)
                     if not data_header:
                         continue
-                        
-                    time_column: int = 0 #frl 2023-11-07 default first column
+
+                    time_column: int = 0  # frl 2023-11-07 default first column
                     if "timeColumn" in data_source_properties and isinstance(data_source_properties["timeColumn"], int):
                         time_column = data_source_properties["timeColumn"]
 
@@ -265,17 +269,19 @@ class CosimWatcher:
                     data_source_properties.update({"timeName": _time_name})
                     _display_time_name: str = pattern.sub("", _time_name)
                     data_source_properties.update({"displayTimeName": _display_time_name})
-                    
+
                     data_columns: List[int] = []
-                    #read_only_shortlisted_columns: bool = False #flr 2023-11-07 greedy approach needs to be updated on demand
-                    
-                    read_only_shortlisted_columns = True if 'dataColumns' in data_source_properties else False
+                    # read_only_shortlisted_columns: bool = False #flr 2023-11-07 greedy approach needs to be updated on demand
+
+                    read_only_shortlisted_columns = True if "dataColumns" in data_source_properties else False
                     if read_only_shortlisted_columns:
                         # if columns were explicitely specified (shortlisted) in watch dict:
                         # Read only shortlisted columns.
-                        if "dataColumns" in data_source_properties and isinstance(data_source_properties["dataColumns"], List):
+                        if "dataColumns" in data_source_properties and isinstance(
+                            data_source_properties["dataColumns"], List
+                        ):
                             data_columns = [int(col) for col in data_source_properties["dataColumns"]]
-                    #else: frl 2023-11-07 simx heritage?
+                    # else: frl 2023-11-07 simx heritage?
                     #    # if columns were not explicitely specified in watch dict:
                     #    # Read all columns except settings.
                     #    columns.extend(
@@ -283,23 +289,23 @@ class CosimWatcher:
                     #        for index, col_name in enumerate(data_header)
                     #        if not re.match(r"^(settings)", col_name)
                     #    )
-                    
+
                     _column_names: List[str] = [data_header[column] for column in data_columns]
                     data_source_properties.update({"colNames": _column_names})
                     _display_column_names: List[str] = [
                         pattern.sub("", col_name) for col_name in data_source_properties["colNames"]  # type: ignore
                     ]
-                    #_display_column_names = ["Time", "StepCount"] + [
+                    # _display_column_names = ["Time", "StepCount"] + [
                     _display_column_names = [
                         data_source_name + "|" + col_name
                         for col_name in _display_column_names
                         # if col_name not in ["Time", "StepCount"] frl 2023-11-07
                     ]
-        
+
                     data_source_properties.update({"displayColNames": _display_column_names})
                     data_source_properties.update({"xColumn": time_column})
                     data_source_properties.update({"yColumns": data_columns})
-                   
+
         return
 
     def _initialize_plot(self):
@@ -319,9 +325,13 @@ class CosimWatcher:
         )
         self.terminate = False
 
-        df = self._read_csv_files_into_dataframe()  # do it once to find the number of respective columns of all datasources
-        self.number_of_subplots = len(list(df)) - 1  # one of the columns is the abscissa, frl: check if this works for multiple datasources and merged time columns
-        
+        df = (
+            self._read_csv_files_into_dataframe()
+        )  # do it once to find the number of respective columns of all datasources
+        self.number_of_subplots = (
+            len(list(df)) - 1
+        )  # one of the columns is the abscissa, frl: check if this works for multiple datasources and merged time columns
+
         self.number_of_columns = int(sqrt(self.number_of_subplots - 1)) + 1
         self.max_row = int(self.number_of_subplots / self.number_of_columns - 0.1) + 1
         return
@@ -349,13 +359,13 @@ class CosimWatcher:
                     [data_source_properties["displayTimeName"]] + data_source_properties["displayColNames"],  # type: ignore
                 )
             )
-            
+
             _column_names: List[str] = []
             if "colNames" in data_source_properties and isinstance(data_source_properties["colNames"], List):
                 _column_names = [str(col_name) for col_name in data_source_properties["colNames"]]
             if "timeName" in data_source_properties and isinstance(data_source_properties["timeName"], str):
                 _column_names = [data_source_properties["timeName"]] + _column_names
-            
+
             if "csvFile" in data_source_properties and isinstance(data_source_properties["csvFile"], str):
                 df_single_data_source: DataFrame
                 df_single_data_source = pd.read_csv(
@@ -377,7 +387,9 @@ class CosimWatcher:
                     # df_all_data_sources = pd.concat([df_all_data_sources, df_single_data_source], axis=1)
 
                     # df_all_data_sources = pd.concat([df_all_data_sources, df_single_data_source], ignore_index=True)
-                    df_all_data_sources = pd.concat([df_all_data_sources, df_single_data_source]) #frl check for duplicated timeName columns for multiple datasources
+                    df_all_data_sources = pd.concat(
+                        [df_all_data_sources, df_single_data_source]
+                    )  # frl check for duplicated timeName columns for multiple datasources
 
                     # potential solution
                     # interpolating non-matching time data

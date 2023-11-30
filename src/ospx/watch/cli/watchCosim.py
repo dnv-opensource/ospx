@@ -70,7 +70,7 @@ def _argparser() -> argparse.ArgumentParser:
         help=("console output will be quiet."),
         default=False,
     )
-    
+
     _ = console_verbosity.add_argument(
         "-t",
         "--timeline",
@@ -171,13 +171,13 @@ def main():
     # Dispatch to _main(), which takes care of processing the arguments and invoking the API.
     _main(
         watch_dict_file_name=watch_dict_file_name,
-        converge = converge,
-        plot = plot,
-        dump = dump,
-        skip_values = skip,
-        latest_values = latest,
-        scale_factor = scale_factor,
-        timeline_data = timeline_data,
+        converge=converge,
+        plot=plot,
+        dump=dump,
+        skip_values=skip,
+        latest_values=latest,
+        scale_factor=scale_factor,
+        timeline_data=timeline_data,
     )
 
 
