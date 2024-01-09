@@ -5,33 +5,47 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug Unit Test",
+            "name": "Python: Debug Tests",
             "type": "python",
-            "request": "test",
+            "request": "launch",
+            "program": "${file}",
+            "purpose": [
+                "debug-test"
+            ],
+            "console": "integratedTerminal",
+            "env": {
+                "PYTEST_ADDOPTS": "--no-cov"
+            },
+            "autoReload": {
+                "enable": true
+            },
             "justMyCode": false,
         },
         {
-            "name": "Python: Current File",
+            "name": "Python: Current File, cwd = file dir, envFile",
             "type": "python",
             "request": "launch",
-            "cwd": "${fileDirname}",
+            "cwd": "${fileDirname}", // working dir = dir where current file is
             "program": "${file}",
             "console": "integratedTerminal",
-            "justMyCode": true,
             "autoReload": {
                 "enable": true
-            }
+            },
+            "justMyCode": false,
+            "envFile": "${workspaceFolder}/.env" // specify where .env file is
         },
         {
-            "name": "Python: Current File, cwd = workspace root folder",
+            "name": "Python: Current File, cwd = workspace root folder, envFile",
             "type": "python",
             "request": "launch",
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}", // working dir = workspace (mvx) dir
             "program": "${file}",
             "console": "integratedTerminal",
             "autoReload": {
                 "enable": true
-            }
+            },
+            "justMyCode": false,
+            "envFile": "${workspaceFolder}/.env" // specify where .env file is
         },
         {
             "name": "ospCaseBuilder test_caseDict --inspect",
@@ -46,7 +60,9 @@
             "console": "integratedTerminal",
             "autoReload": {
                 "enable": true
-            }
+            },
+            "justMyCode": false,
+            "envFile": "${workspaceFolder}/.env" // specify where .env file is
         },
         {
             "name": "ospCaseBuilder test_caseDict_minimal_inspect --inspect",
@@ -61,7 +77,9 @@
             "console": "integratedTerminal",
             "autoReload": {
                 "enable": true
-            }
+            },
+            "justMyCode": false,
+            "envFile": "${workspaceFolder}/.env" // specify where .env file is
         },
         {
             "name": "importSystemStructure test_import_OspSystemStructure.xml",
@@ -75,7 +93,9 @@
             "console": "integratedTerminal",
             "autoReload": {
                 "enable": true
-            }
+            },
+            "justMyCode": false,
+            "envFile": "${workspaceFolder}/.env" // specify where .env file is
         },
         {
             "name": "ospCaseBuilder test_caseDict_imported_test_graph",
@@ -90,7 +110,9 @@
             "console": "integratedTerminal",
             "autoReload": {
                 "enable": true
-            }
+            },
+            "justMyCode": false,
+            "envFile": "${workspaceFolder}/.env" // specify where .env file is
         },
         {
             "name": "ospCaseBuilder test_caseDict --graph",
@@ -105,7 +127,9 @@
             "console": "integratedTerminal",
             "autoReload": {
                 "enable": true
-            }
+            },
+            "justMyCode": false,
+            "envFile": "${workspaceFolder}/.env" // specify where .env file is
         },
         {
             "name": "watchCosim test_caseDict",
@@ -120,7 +144,9 @@
             "console": "integratedTerminal",
             "autoReload": {
                 "enable": true
-            }
+            },
+            "justMyCode": false,
+            "envFile": "${workspaceFolder}/.env" // specify where .env file is
         },
         {
             "name": "ospCaseBuilder test_caseDict_minimal_set_int_for_real",
@@ -134,7 +160,9 @@
             "console": "integratedTerminal",
             "autoReload": {
                 "enable": true
-            }
+            },
+            "justMyCode": false,
+            "envFile": "${workspaceFolder}/.env" // specify where .env file is
         },
         {
             "name": "ospCaseBuilder house",
@@ -148,7 +176,9 @@
             "console": "integratedTerminal",
             "autoReload": {
                 "enable": true
-            }
+            },
+            "justMyCode": false,
+            "envFile": "${workspaceFolder}/.env" // specify where .env file is
         },
         {
             "name": "ospCaseBuilder variable_group --inspect",
@@ -163,7 +193,9 @@
             "console": "integratedTerminal",
             "autoReload": {
                 "enable": true
-            }
+            },
+            "justMyCode": false,
+            "envFile": "${workspaceFolder}/.env" // specify where .env file is
         },
         {
             "name": "importSystemStructure variable_group OspSystemStructure.xml",
@@ -177,7 +209,9 @@
             "console": "integratedTerminal",
             "autoReload": {
                 "enable": true
-            }
+            },
+            "justMyCode": false,
+            "envFile": "${workspaceFolder}/.env" // specify where .env file is
         },
         {
             "name": "ospCaseBuilder variable_group",
@@ -191,7 +225,9 @@
             "console": "integratedTerminal",
             "autoReload": {
                 "enable": true
-            }
+            },
+            "justMyCode": false,
+            "envFile": "${workspaceFolder}/.env" // specify where .env file is
         },
         {
             "name": "watchCosim variable_group",
@@ -206,7 +242,9 @@
             "console": "integratedTerminal",
             "autoReload": {
                 "enable": true
-            }
+            },
+            "justMyCode": false,
+            "envFile": "${workspaceFolder}/.env" // specify where .env file is
         },
         {
             "name": "importSystemStructure variable_group OspSystemStructure_original.xml",
@@ -220,7 +258,9 @@
             "console": "integratedTerminal",
             "autoReload": {
                 "enable": true
-            }
+            },
+            "justMyCode": false,
+            "envFile": "${workspaceFolder}/.env" // specify where .env file is
         },
         {
             "name": "ospCaseBuilder variable_group --inspect multiple_connection_types",
@@ -235,7 +275,9 @@
             "console": "integratedTerminal",
             "autoReload": {
                 "enable": true
-            }
+            },
+            "justMyCode": false,
+            "envFile": "${workspaceFolder}/.env" // specify where .env file is
         },
         {
             "name": "ospCaseBuilder variable_group multiple_connection_types",
@@ -249,7 +291,9 @@
             "console": "integratedTerminal",
             "autoReload": {
                 "enable": true
-            }
+            },
+            "justMyCode": false,
+            "envFile": "${workspaceFolder}/.env" // specify where .env file is
         },
         {
             "name": "importSystemStructure gunnerus-dp/control-system OspSystemStructure.xml (cwd=gunnerus-dp)",
@@ -263,7 +307,9 @@
             "console": "integratedTerminal",
             "autoReload": {
                 "enable": true
-            }
+            },
+            "justMyCode": false,
+            "envFile": "${workspaceFolder}/.env" // specify where .env file is
         },
         {
             "name": "importSystemStructure gunnerus-dp/control-system OspSystemStructure.xml (cwd=control-system)",
@@ -277,7 +323,9 @@
             "console": "integratedTerminal",
             "autoReload": {
                 "enable": true
-            }
+            },
+            "justMyCode": false,
+            "envFile": "${workspaceFolder}/.env" // specify where .env file is
         },
         {
             "name": "ospCaseBuilder gunnerus-dp",
@@ -291,7 +339,9 @@
             "console": "integratedTerminal",
             "autoReload": {
                 "enable": true
-            }
+            },
+            "justMyCode": false,
+            "envFile": "${workspaceFolder}/.env" // specify where .env file is
         },
         {
             "name": "ospCaseBuilder gunnerus-dp --inspect",
@@ -306,7 +356,9 @@
             "console": "integratedTerminal",
             "autoReload": {
                 "enable": true
-            }
+            },
+            "justMyCode": false,
+            "envFile": "${workspaceFolder}/.env" // specify where .env file is
         },
         {
             "name": "watchCosim gunnerus-dp",
@@ -321,7 +373,9 @@
             "console": "integratedTerminal",
             "autoReload": {
                 "enable": true
-            }
+            },
+            "justMyCode": false,
+            "envFile": "${workspaceFolder}/.env" // specify where .env file is
         },
         {
             "name": "importSystemStructure spring_mass_damper",
@@ -335,7 +389,9 @@
             "console": "integratedTerminal",
             "autoReload": {
                 "enable": true
-            }
+            },
+            "justMyCode": false,
+            "envFile": "${workspaceFolder}/.env" // specify where .env file is
         },
         {
             "name": "ospCaseBuilder spring_mass_damper --inspect",
@@ -350,7 +406,9 @@
             "console": "integratedTerminal",
             "autoReload": {
                 "enable": true
-            }
+            },
+            "justMyCode": false,
+            "envFile": "${workspaceFolder}/.env" // specify where .env file is
         },
         {
             "name": "ospCaseBuilder spring_mass_damper --graph",
@@ -365,7 +423,9 @@
             "console": "integratedTerminal",
             "autoReload": {
                 "enable": true
-            }
+            },
+            "justMyCode": false,
+            "envFile": "${workspaceFolder}/.env" // specify where .env file is
         },
         {
             "name": "watchCosim spring_mass_damper",
@@ -381,7 +441,9 @@
             "justMyCode": false,
             "autoReload": {
                 "enable": true
-            }
+            },
+            "justMyCode": false,
+            "envFile": "${workspaceFolder}/.env" // specify where .env file is
         },
     ]
 }

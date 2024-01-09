@@ -1,4 +1,6 @@
+import logging
 import os
+from glob import glob
 from pathlib import Path
 from shutil import rmtree
 
@@ -13,10 +15,15 @@ def chdir():
     os.chdir(Path(__file__).parent.absolute() / "test_dicts")
 
 
-ospx_dirs = [
+@pytest.fixture(scope="package", autouse=True)
+def test_dir():
+    return Path(__file__).parent.absolute()
+
+
+output_dirs = [
     "xyz",
 ]
-ospx_files = [
+output_files = [
     "parsed*",
     "*.xml",
     "*.fmu",
@@ -28,11 +35,21 @@ ospx_files = [
 ]
 
 
-def _remove_ospx_dirs_and_files():
-    for folder in ospx_dirs:
+@pytest.fixture(autouse=True)
+def default_setup_and_teardown(caplog: LogCaptureFixture):
+    _remove_output_dirs_and_files()
+    _create_test_fmu()
+    yield
+    # _remove_test_fmu()
+    _remove_output_dirs_and_files()
+
+
+def _remove_output_dirs_and_files():
+    for folder in output_dirs:
         rmtree(folder, ignore_errors=True)
-    for pattern in ospx_files:
-        for file in Path(".").rglob(pattern):
+    for pattern in output_files:
+        for file in glob(pattern):
+            file = Path(file)
             if not file.name.startswith("test_"):
                 file.unlink(missing_ok=True)
 
@@ -56,15 +73,11 @@ def _remove_test_fmu():
 
 
 @pytest.fixture(autouse=True)
-def default_setup_and_teardown(caplog: LogCaptureFixture):
-    _remove_ospx_dirs_and_files()
-    _create_test_fmu()
-    yield
-    # _remove_test_fmu()
-    _remove_ospx_dirs_and_files()
-
-
-@pytest.fixture(autouse=True)
 def setup_logging(caplog: LogCaptureFixture):
     caplog.set_level("WARNING")
     caplog.clear()
+
+
+@pytest.fixture(autouse=True)
+def logger():
+    return logging.getLogger()

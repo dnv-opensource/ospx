@@ -7,6 +7,15 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 
 * -/-
 
+## [0.2.12] - 2024-01-09
+
+Maintenance Release
+
+### Dependencies
+
+* Updated to dictIO>=0.3.1  (from dictIO>=0.2.9)
+* Updated other dependencies to latest versions
+
 
 ## [0.2.11] - 2023-09-25
 
@@ -333,7 +342,8 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 * Added support for Python 3.10
 
 <!-- Markdown link & img dfn's -->
-[unreleased]: https://github.com/dnv-opensource/ospx/compare/v0.2.11...HEAD
+[unreleased]: https://github.com/dnv-opensource/ospx/compare/v0.2.12...HEAD
+[0.2.12]: https://github.com/dnv-opensource/ospx/compare/v0.2.11...v0.2.12
 [0.2.11]: https://github.com/dnv-opensource/ospx/compare/v0.2.10...v0.2.11
 [0.2.10]: https://github.com/dnv-opensource/ospx/compare/v0.2.9...v0.2.10
 [0.2.9]: https://github.com/dnv-opensource/ospx/compare/v0.2.8...v0.2.9

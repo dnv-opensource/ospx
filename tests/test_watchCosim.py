@@ -17,6 +17,7 @@ def test_file_not_found_exception():
         skip_values,
         latest_values,
         scale_factor=1.0,
+        timeline_data=False,
     )
     # Execute and Assert
     with pytest.raises(FileNotFoundError):
@@ -40,6 +41,7 @@ def test_read_watch_dict():
         skip_values,
         latest_values,
         scale_factor=1.0,
+        timeline_data=False,
     )
     # Execute
     watcher.read_watch_dict(source_file)

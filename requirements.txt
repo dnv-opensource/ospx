@@ -1,9 +1,9 @@
 lxml>=4.9
-numpy>=1.24
+numpy>=1.26
 pandas>=2.1
 matplotlib>=3.8
 graphviz>=0.20
 
-dictIO>=0.2.9
+dictIO>=0.3.1
 
 # ../dictIO
