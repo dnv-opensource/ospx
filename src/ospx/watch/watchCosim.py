@@ -370,7 +370,7 @@ class CosimWatcher:
                 df_single_data_source: DataFrame
                 df_single_data_source = pd.read_csv(
                     Path(data_source_properties["csvFile"]),
-                    usecols=_column_names,
+                    usecols=_column_names,  # pyright: ignore
                 )
 
                 df_single_data_source = df_single_data_source.rename(columns=column_name_to_display_column_name_mapping)
