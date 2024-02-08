@@ -1,6 +1,7 @@
 # pyright: reportUnknownMemberType=false
-# pyright: reportUnnecessaryTypeIgnoreComment=false
-# pyright: reportGeneralTypeIssues=false
+# pyright: reportArgumentType=false
+# pyright: reportCallIssue=false
+
 import contextlib
 import logging
 import os
@@ -291,7 +292,8 @@ class CosimWatcher:
                     _column_names: List[str] = [data_header[column] for column in data_columns]
                     data_source_properties.update({"colNames": _column_names})
                     _display_column_names: List[str] = [
-                        pattern.sub("", col_name) for col_name in data_source_properties["colNames"]  # type: ignore
+                        pattern.sub("", col_name)
+                        for col_name in data_source_properties["colNames"]  # type: ignore
                     ]
                     # _display_column_names = ["Time", "StepCount"] + [
                     _display_column_names = [
@@ -368,7 +370,7 @@ class CosimWatcher:
                 df_single_data_source: DataFrame
                 df_single_data_source = pd.read_csv(
                     Path(data_source_properties["csvFile"]),
-                    usecols=_column_names,  # pyright: ignore
+                    usecols=_column_names,
                 )
 
                 df_single_data_source = df_single_data_source.rename(columns=column_name_to_display_column_name_mapping)
