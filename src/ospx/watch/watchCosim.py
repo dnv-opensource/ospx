@@ -273,14 +273,12 @@ class CosimWatcher:
                     data_columns: List[int] = []
                     # read_only_shortlisted_columns: bool = False #flr 2023-11-07 greedy approach needs to be updated on demand
 
-                    read_only_shortlisted_columns = True if "dataColumns" in data_source_properties else False
-                    if read_only_shortlisted_columns:
-                        # if columns were explicitely specified (shortlisted) in watch dict:
-                        # Read only shortlisted columns.
-                        if "dataColumns" in data_source_properties and isinstance(
-                            data_source_properties["dataColumns"], List
-                        ):
-                            data_columns = [int(col) for col in data_source_properties["dataColumns"]]
+                    read_only_shortlisted_columns = "dataColumns" in data_source_properties
+                    if read_only_shortlisted_columns and (
+                        "dataColumns" in data_source_properties
+                        and isinstance(data_source_properties["dataColumns"], List)
+                    ):
+                        data_columns = [int(col) for col in data_source_properties["dataColumns"]]
                     # else: frl 2023-11-07 simx heritage?
                     #    # if columns were not explicitely specified in watch dict:
                     #    # Read all columns except settings.
