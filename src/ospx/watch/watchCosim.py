@@ -291,10 +291,7 @@ class CosimWatcher:
 
                     _column_names: List[str] = [data_header[column] for column in data_columns]
                     data_source_properties.update({"colNames": _column_names})
-                    _display_column_names: List[str] = [
-                        pattern.sub("", col_name)
-                        for col_name in data_source_properties["colNames"]  # type: ignore
-                    ]
+                    _display_column_names: List[str] = [pattern.sub("", col_name) for col_name in _column_names]
                     # _display_column_names = ["Time", "StepCount"] + [
                     _display_column_names = [
                         data_source_name + "|" + col_name
