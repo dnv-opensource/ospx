@@ -5,6 +5,9 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 
 ## [Unreleased]
 
+### Dependencies
+* updated to dictIO>=0.3.3  (from dictIO>=0.3.1)
+
 * -/-
 
 
