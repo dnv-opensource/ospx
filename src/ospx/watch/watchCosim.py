@@ -1,6 +1,7 @@
 # pyright: reportUnknownMemberType=false
-# pyright: reportUnnecessaryTypeIgnoreComment=false
-# pyright: reportGeneralTypeIssues=false
+# pyright: reportArgumentType=false
+# pyright: reportCallIssue=false
+
 import contextlib
 import logging
 import os
@@ -273,14 +274,12 @@ class CosimWatcher:
                     data_columns: List[int] = []
                     # read_only_shortlisted_columns: bool = False #flr 2023-11-07 greedy approach needs to be updated on demand
 
-                    read_only_shortlisted_columns = True if "dataColumns" in data_source_properties else False
-                    if read_only_shortlisted_columns:
-                        # if columns were explicitely specified (shortlisted) in watch dict:
-                        # Read only shortlisted columns.
-                        if "dataColumns" in data_source_properties and isinstance(
-                            data_source_properties["dataColumns"], List
-                        ):
-                            data_columns = [int(col) for col in data_source_properties["dataColumns"]]
+                    read_only_shortlisted_columns = "dataColumns" in data_source_properties
+                    if read_only_shortlisted_columns and (
+                        "dataColumns" in data_source_properties
+                        and isinstance(data_source_properties["dataColumns"], List)
+                    ):
+                        data_columns = [int(col) for col in data_source_properties["dataColumns"]]
                     # else: frl 2023-11-07 simx heritage?
                     #    # if columns were not explicitely specified in watch dict:
                     #    # Read all columns except settings.
@@ -292,9 +291,7 @@ class CosimWatcher:
 
                     _column_names: List[str] = [data_header[column] for column in data_columns]
                     data_source_properties.update({"colNames": _column_names})
-                    _display_column_names: List[str] = [
-                        pattern.sub("", col_name) for col_name in data_source_properties["colNames"]  # type: ignore
-                    ]
+                    _display_column_names: List[str] = [pattern.sub("", col_name) for col_name in _column_names]
                     # _display_column_names = ["Time", "StepCount"] + [
                     _display_column_names = [
                         data_source_name + "|" + col_name
