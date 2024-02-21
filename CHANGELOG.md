@@ -5,6 +5,24 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 
 ## [Unreleased]
 
+* -/-
+
+
+## [0.2.13] - 2024-02-21
+
+### Added
+* README.md : Under `Development Setup`, added a step to install current package in "editable" mode, using the pip install -e option.
+This removes the need to manually add /src to the PythonPath environment variable in order for debugging and tests to work.
+
+### Removed
+* VS Code settings: Removed the setting which added the /src folder to PythonPath. This is no longer necessary. Installing the project itself as a package in "editable" mode, using the pip install -e option, solves the issue and removes the need to manually add /src to the PythonPath environment variable.
+
+### Changed
+* Moved all project configuration from setup.cfg to pyproject.toml
+* Moved all tox configuration from setup.cfg to tox.ini.
+* Moved pytest configuration from pyproject.toml to pytest.ini
+* Deleted setup.cfg
+
 ### Dependencies
 * updated to black[jupyter]==24.1  (from black[jupyter]==23.12)
 * updated to version: '==24.1'  (from version: '==23.12')
@@ -14,7 +32,6 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 * updated to lxml>=5.1  (from lxml>=4.9)
 * updated to pandas>=2.2  (from pandas>=2.1)
 
-* -/-
 
 ## [0.2.12] - 2024-01-09
 
@@ -351,7 +368,8 @@ Maintenance Release
 * Added support for Python 3.10
 
 <!-- Markdown link & img dfn's -->
-[unreleased]: https://github.com/dnv-opensource/ospx/compare/v0.2.12...HEAD
+[unreleased]: https://github.com/dnv-opensource/ospx/compare/v0.2.13...HEAD
+[0.2.13]: https://github.com/dnv-opensource/ospx/compare/v0.2.12...v0.2.13
 [0.2.12]: https://github.com/dnv-opensource/ospx/compare/v0.2.11...v0.2.12
 [0.2.11]: https://github.com/dnv-opensource/ospx/compare/v0.2.10...v0.2.11
 [0.2.10]: https://github.com/dnv-opensource/ospx/compare/v0.2.9...v0.2.10
