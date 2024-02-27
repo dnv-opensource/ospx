@@ -5,10 +5,12 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 
 ## [Unreleased]
 
+### Changed
+* Changed publishing workflow to use OpenID Connect (Trusted Publisher Management) when publishing to PyPI
+* Updated copyright statement
+
 ### Dependencies
 * updated to dictIO>=0.3.3  (from dictIO>=0.3.1)
-
-* -/-
 
 
 ## [0.2.13] - 2024-02-21
