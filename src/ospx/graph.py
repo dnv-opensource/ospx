@@ -209,9 +209,7 @@ def _get_edge_label(connection: Connection) -> str:
 def _create_table(name: str, child: Union[Dict[str, Any], None] = None) -> str:
     _child: Dict[str, Any] = child or {" ": " "}
     n_child = len(_child)
-    string: str = (
-        f'<\n<TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0">\n<TR>\n<TD COLSPAN="{2 * n_child:d}">{name}</TD>\n</TR>\n'
-    )
+    string: str = f'<\n<TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0">\n<TR>\n<TD COLSPAN="{2 * n_child:d}">{name}</TD>\n</TR>\n'
     for key, item in _child.items():
         string += f"<TR><TD>{key}</TD><TD>{item}</TD></TR>\n"
     string += "</TABLE>\n>"

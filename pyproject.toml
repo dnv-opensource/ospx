@@ -59,10 +59,6 @@ watchCosim = "ospx.watch.cli.watchCosim:main"
 where = ["src"]
 exclude = ["test*"]
 
-[tool.black]
-line-length = 120
-target-version = ["py39", "py310", "py311", "py312"]
-
 [tool.ruff]
 exclude = [
     ".git",
@@ -119,6 +115,9 @@ convention = "numpy"
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["I001"]
 "./tests/*" = ["D"]
+
+[tool.ruff.format]
+docstring-code-format = true
 
 [tool.pyright]
 exclude = [

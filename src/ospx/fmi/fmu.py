@@ -331,9 +331,9 @@ class FMU:
 
                 model_variables[model_variable_key][type_key]["_attributes"]["start"] = variable_with_start_values.start
                 model_variables[model_variable_key]["_attributes"]["causality"] = variable_with_start_values.causality
-                model_variables[model_variable_key]["_attributes"][
-                    "variability"
-                ] = variable_with_start_values.variability
+                model_variables[model_variable_key]["_attributes"]["variability"] = (
+                    variable_with_start_values.variability
+                )
 
         self._log_update_in_model_description()
 
