@@ -8,6 +8,32 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 * -/-
 
 
+## [0.2.14] - 2024-05-22
+
+### Dependencies
+* updated to ruff==0.4.2  (from ruff==0.2.1)
+* updated to pyright==1.1.360  (from pyright==1.1.350)
+* updated to sourcery==1.16  (from sourcery==1.15)
+* updated to lxml>=5.2  (from lxml>=5.1)
+* updated to types-lxml>=2024.4  (from types-lxml>=5.1)
+* updated to pytest>=8.2  (from pytest>=7.4)
+* updated to pytest-cov>=5.0  (from pytest-cov>=4.1)
+* updated to Sphinx>=7.3  (from Sphinx>=7.2)
+* updated to sphinx-argparse-cli>=1.15  (from sphinx-argparse-cli>=1.11)
+* updated to myst-parser>=3.0  (from myst-parser>=2.0)
+* updated to furo>=2024.4  (from furo>=2023.9.10)
+* updated to numpy>=1.26,<2.0  (from numpy>=1.26)
+* updated to matplotlib>=3.9  (from matplotlib>=3.8)
+* updated to dictIO>=0.3.4  (from dictIO>=0.3.1)
+* removed black
+
+### Changed
+* replaced black formatter with ruff formatter
+* Changed publishing workflow to use OpenID Connect (Trusted Publisher Management) when publishing to PyPI
+* Updated copyright statement
+* VS Code settings: Turned off automatic venv activation
+
+
 ## [0.2.13] - 2024-02-21
 
 ### Added
@@ -368,7 +394,8 @@ Maintenance Release
 * Added support for Python 3.10
 
 <!-- Markdown link & img dfn's -->
-[unreleased]: https://github.com/dnv-opensource/ospx/compare/v0.2.13...HEAD
+[unreleased]: https://github.com/dnv-opensource/ospx/compare/v0.2.14...HEAD
+[0.2.14]: https://github.com/dnv-opensource/ospx/compare/v0.2.13...v0.2.14
 [0.2.13]: https://github.com/dnv-opensource/ospx/compare/v0.2.12...v0.2.13
 [0.2.12]: https://github.com/dnv-opensource/ospx/compare/v0.2.11...v0.2.12
 [0.2.11]: https://github.com/dnv-opensource/ospx/compare/v0.2.10...v0.2.11

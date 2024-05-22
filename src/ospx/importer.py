@@ -98,9 +98,7 @@ class OspSystemStructureImporter:
                         logger.error(msg)
                         raise NotImplementedError(msg)
                     else:
-                        msg: str = (
-                            f"Import failed: {system_structure_file.name} contains a connection with unknown connection type '{connection_type}'\n"
-                        )
+                        msg: str = f"Import failed: {system_structure_file.name} contains a connection with unknown connection type '{connection_type}'\n"
                         logger.error(msg)
                         raise TypeError(msg)
 
@@ -119,9 +117,7 @@ class OspSystemStructureImporter:
                             logger.error(msg)
                             raise NotImplementedError(msg)
                         else:
-                            msg: str = (
-                                f"Import failed: {system_structure_file.name} contains a connection with unknown endpoint type '{endpoint_type}'\n"
-                            )
+                            msg: str = f"Import failed: {system_structure_file.name} contains a connection with unknown endpoint type '{endpoint_type}'\n"
                             logger.error(msg)
                             raise TypeError(msg)
 

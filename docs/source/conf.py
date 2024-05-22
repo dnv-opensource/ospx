@@ -15,14 +15,15 @@ import sys
 
 sys.path.insert(0, os.path.abspath("../../src"))
 
+
 # -- Project information -----------------------------------------------------
 
 project = "ospx"
-copyright = "2024, DNV. Frank Lumpitzsch, Claas Rostock, Seung Hyeon Yoo"
+copyright = "2024, DNV SE. All rights reserved."
 author = "Frank Lumpitzsch, Claas Rostock, Seung Hyeon Yoo"
 
 # The full version, including alpha/beta/rc tags
-release = "0.2.13"
+release = "0.2.14"
 
 # -- General configuration ---------------------------------------------------
 
