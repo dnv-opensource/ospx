@@ -394,7 +394,8 @@ Maintenance Release
 * Added support for Python 3.10
 
 <!-- Markdown link & img dfn's -->
-[unreleased]: https://github.com/dnv-opensource/ospx/compare/v0.2.13...HEAD
+[unreleased]: https://github.com/dnv-opensource/ospx/compare/v0.2.14...HEAD
+[0.2.14]: https://github.com/dnv-opensource/ospx/compare/v0.2.13...v0.2.14
 [0.2.13]: https://github.com/dnv-opensource/ospx/compare/v0.2.12...v0.2.13
 [0.2.12]: https://github.com/dnv-opensource/ospx/compare/v0.2.11...v0.2.12
 [0.2.11]: https://github.com/dnv-opensource/ospx/compare/v0.2.10...v0.2.11
