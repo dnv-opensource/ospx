@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from dictIO import DictReader, DictWriter
-from matplotlib import cm
+from matplotlib import colormaps
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from numpy import ndarray
@@ -147,7 +147,7 @@ class CosimWatcher:
                         time_key,
                         current_key,
                         linewidth=2,
-                        color=cm.get_cmap("gist_rainbow")(index / self.number_of_subplots),
+                        color=colormaps["gist_rainbow"](index / self.number_of_subplots),
                         data=df[[time_key, current_key]],
                     )
                 except (TypeError, ValueError):
