@@ -63,7 +63,7 @@ This removes the need to manually add /src to the PythonPath environment variabl
 * updated to pyright==1.1.371  (from pyright==1.1.371)
 * updated to sourcery==1.21  (from sourcery==1.21)
 * updated to lxml>=5.2  (from lxml>=5.2)
-* updated to pandas>=2.2  (from pandas>=2.1)
+* updated to pandas>=2.2  (from pandas>=2.2)
 
 
 ## [0.2.12] - 2024-01-09
