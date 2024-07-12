@@ -31,7 +31,7 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 * updated to furo>=2024.4  (from furo>=2023.9.10)
 * updated to numpy>=1.26,<2.0  (from numpy>=1.26,<2.0)
 * updated to matplotlib>=3.9  (from matplotlib>=3.9)
-* updated to dictIO>=0.3.4  (from dictIO>=0.3.1)
+* updated to dictIO>=0.3.4  (from dictIO>=0.3.4)
 * removed black
 
 ### Changed
@@ -72,7 +72,7 @@ Maintenance Release
 
 ### Dependencies
 
-* Updated to dictIO>=0.3.1  (from dictIO>=0.2.9)
+* Updated to dictIO>=0.3.4  (from dictIO>=0.3.4)
 * Updated other dependencies to latest versions
 
 
@@ -92,7 +92,7 @@ Maintenance Release
 
 ### Dependencies
 
-* updated to dictIO>=0.2.8
+* updated to dictIO>=0.3.4
 * requirements-dev.txt: Updated dependencies to latest versions
 
 
@@ -114,7 +114,7 @@ Maintenance Release
 
 ### Dependencies
 
-* updated to dictIO>=0.2.6
+* updated to dictIO>=0.3.4
 
 
 ## [0.2.7] - 2023-01-04
@@ -133,7 +133,7 @@ Maintenance Release
 
 ### Dependencies
 
-* updated to dictIO>=0.2.5
+* updated to dictIO>=0.3.4
 
 
 ## [0.2.6] - 2022-12-12
@@ -159,7 +159,7 @@ Maintenance Release
 
 ### Dependencies
 
-* updated to dictIO>=0.2.4
+* updated to dictIO>=0.3.4
 
 
 ## [0.2.5] - 2022-12-01
