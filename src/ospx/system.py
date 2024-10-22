@@ -1,5 +1,6 @@
 import logging
-from typing import Any, MutableMapping, Union
+from collections.abc import MutableMapping
+from typing import Any
 
 from ospx import Component, Connection, Connector, Endpoint
 from ospx.fmi import FMU, ScalarVariable, Unit
@@ -18,7 +19,7 @@ class System:
     Both component variables and component connectors can be used as endpoints in a connection.
     """
 
-    def __init__(self, properties: MutableMapping[Any, Any]):
+    def __init__(self, properties: MutableMapping[Any, Any]) -> None:
         self._components: dict[str, Component] = {}
         self._connections: dict[str, Connection] = {}
         self._read_components(properties)
@@ -105,7 +106,7 @@ class System:
                 variables |= component.variables
         return variables
 
-    def _read_components(self, properties: MutableMapping[Any, Any]):
+    def _read_components(self, properties: MutableMapping[Any, Any]) -> None:
         """Read components from (case dict) properties."""
         logger.info("read components from case dict")
         self._components.clear()
@@ -115,15 +116,15 @@ class System:
             component = Component(component_name, component_properties)
             self._components[component.name] = component
 
-    def _read_connections(self, properties: MutableMapping[Any, Any]):
+    def _read_connections(self, properties: MutableMapping[Any, Any]) -> None:
         """Read connections from (case dict) properties."""
         logger.info("read connections from case dict")
         self._connections.clear()
         if "connections" not in properties:
             return
         for connection_name, connection_properties in properties["connections"].items():
-            source_endpoint: Union[Endpoint, None] = None
-            target_endpoint: Union[Endpoint, None] = None
+            source_endpoint: Endpoint | None = None
+            target_endpoint: Endpoint | None = None
             if "source" in connection_properties:
                 source_endpoint = self._read_endpoint(connection_properties["source"])
             if "target" in connection_properties:
@@ -137,16 +138,17 @@ class System:
                 self._connections[connection.name] = connection
             else:
                 logger.error(
-                    f"connection {connection_name}: connection could not be resolved. Please recheck connection properties in case dict."
+                    f"connection {connection_name}: connection could not be resolved. "
+                    "Please recheck connection properties in case dict."
                 )
         return
 
-    def _read_endpoint(self, properties: MutableMapping[Any, Any]) -> Union[Endpoint, None]:
+    def _read_endpoint(self, properties: MutableMapping[Any, Any]) -> Endpoint | None:
         if "component" not in properties:
             return None
-        component: Union[Component, None] = None
-        connector: Union[Connector, None] = None
-        variable: Union[ScalarVariable, None] = None
+        component: Component | None = None
+        connector: Connector | None = None
+        variable: ScalarVariable | None = None
 
         component_name: str = properties["component"]
         if component_name in self.components:
@@ -157,7 +159,7 @@ class System:
             if component and connector_name in component.connectors:
                 connector = component.connectors[connector_name]
             else:
-                for _, c in self.components.items():
+                for c in self.components.values():
                     if connector_name in c.connectors:
                         component = c
                         connector = c.connectors[connector_name]

@@ -1,26 +1,30 @@
 # pyright: reportUnknownMemberType=false
 # pyright: reportArgumentType=false
 # pyright: reportCallIssue=false
+# ruff: noqa: ERA001
 
 import contextlib
 import logging
 import os
 import re
-from math import sqrt as sqrt
+from collections.abc import MutableMapping, MutableSequence, Sequence
+from math import sqrt
 from pathlib import Path
-from typing import Any, Dict, List, MutableMapping, MutableSequence, Union
+from typing import TYPE_CHECKING, Any
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from dictIO import DictReader, DictWriter
 from matplotlib import colormaps
-from matplotlib.axes import Axes
-from matplotlib.figure import Figure
 from numpy import ndarray
 from pandas import DataFrame
 
 from ospx.utils.plotting import create_meta_dict, save_figure
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
+    from matplotlib.figure import Figure
 
 logger = logging.getLogger(__name__)
 
@@ -36,14 +40,15 @@ class CosimWatcher:
         skip_values: int,
         latest_values: int,
         scale_factor: float,
+        *,
         timeline_data: bool,
-    ):
-        self.watch_dict_file: Union[Path, None] = None
+    ) -> None:
+        self.watch_dict_file: Path | None = None
         self.watch_dict: MutableMapping[Any, Any] = {}
         self.csv_file_names: MutableSequence[str] = csv_file_names
         self.title: str = "watch"
         self.delimiter: str = ","  # default
-        self.data_sources: Dict[str, Dict[str, Union[List[int], List[str], int, str]]] = {}
+        self.data_sources: dict[str, dict[str, list[int] | list[str] | int | str]] = {}
         self.results_dir: str = "results"
         self.number_of_columns: int = 3
         self.number_of_subplots: int = 0
@@ -54,9 +59,13 @@ class CosimWatcher:
         self.figure: Figure
         self.terminate: bool = False
         self.max_row: int = 0
+        self.screenSize: tuple[float, float]
         return
 
-    def read_watch_dict(self, watch_dict_file: Union[str, os.PathLike[str]]):
+    def read_watch_dict(
+        self,
+        watch_dict_file: str | os.PathLike[str],
+    ) -> None:
         """Read watchDict file.
 
         The watchDict file contains the parameters to be plotted.
@@ -71,7 +80,6 @@ class CosimWatcher:
         FileNotFoundError
             if watch_dict_file does not exist
         """
-
         # Make sure watch_dict_file argument is of type Path. If not, cast it to Path type.
         watch_dict_file = watch_dict_file if isinstance(watch_dict_file, Path) else Path(watch_dict_file)
         if not watch_dict_file.exists():
@@ -97,7 +105,11 @@ class CosimWatcher:
         self._define_data_source_properties_for_plotting()
         return
 
-    def plot(self, converge: bool = False):
+    def plot(
+        self,
+        *,
+        converge: bool = False,
+    ) -> None:
         """Plot trends.
 
         Plotting + convergence checker (future task)
@@ -107,7 +119,6 @@ class CosimWatcher:
         converge : bool, optional
             if True, convergence is checked, by default False
         """
-
         self._initialize_plot()
 
         if converge:
@@ -120,25 +131,24 @@ class CosimWatcher:
         df_row_size = 0
 
         while True:  # do as long as not interrupted
-            df = self._read_csv_files_into_dataframe()
+            data = self._read_csv_files_into_dataframe()
 
             # cumulate counter for termination if no changes
-            if df_row_size == len(df):
+            if df_row_size == len(data):
                 terminate_loops += 1
             else:
                 terminate_loops = 0
 
-            df_row_size = len(df)
-            df_col_size = (
-                len(list(df)) - 1
-            )  # reduced by one because 1st col is time column, frl: check multiple datasources
+            df_row_size = len(data)
+            df_col_size = len(list(data)) - 1  # reduced by one because 1st col is time column
 
             # axs = [None for x in range(df_col_size)]
             axs: MutableSequence[Axes] = []
             plot: Axes
-            time_key = list(df)[0]
+            time_key: Sequence[float] = list(data)[0]  # type: ignore[assignment, reportAssignmentType]  # noqa: RUF015
             for index in range(df_col_size):
-                current_key = list(df)[index + 1]  # 0 is time column and thus removed, frl: check multiple dataframes
+                # 0 is time column and thus removed
+                current_key: Sequence[float] = list(data)[index + 1]  # type: ignore[assignment, reportAssignmentType]
 
                 plot = self.figure.add_subplot(self.max_row, self.number_of_columns, index + 1)
 
@@ -148,17 +158,17 @@ class CosimWatcher:
                         current_key,
                         linewidth=2,
                         color=colormaps["gist_rainbow"](index / self.number_of_subplots),
-                        data=df[[time_key, current_key]],
+                        data=data[[time_key, current_key]],
                     )
                 except (TypeError, ValueError):
                     pass
-                except Exception as e:
-                    logger.exception(e)
+                except Exception:
+                    logger.exception("CosimWatcher.plot(): An error occurred while plotting.")
 
                 # subplot.set_title(currentKey,  fontsize=10)
-                _ = plot.grid(color="#66aa88", linestyle="--")
-                _ = plot.xaxis.set_tick_params(labelsize=8)
-                _ = plot.yaxis.set_tick_params(labelsize=8)
+                plot.grid(color="#66aa88", linestyle="--")
+                plot.xaxis.set_tick_params(labelsize=8)
+                plot.yaxis.set_tick_params(labelsize=8)
                 _ = plot.legend(fontsize=8)
                 axs.append(plot)
                 # if isinstance(plot, Axes):
@@ -189,28 +199,27 @@ class CosimWatcher:
 
         return
 
-    def dump(self):
+    def dump(self) -> None:
         """Write dataframe to dump."""
-
-        df = self._read_csv_files_into_dataframe()
+        data = self._read_csv_files_into_dataframe()
 
         result_dict = {}
-        for header in list(df):
-            values: ndarray[Any, Any] = df[header].dropna().to_numpy()
+        for header in list(data):
+            values: ndarray[Any, Any] = data[header].dropna().to_numpy()
             _first_value: Any = values[0]
             _last_value: Any = values[-1]
-            _mean: Union[float, str] = "None"
-            _stddev: Union[float, str] = "None"
-            _min: Union[float, str] = "None"
-            _max: Union[float, str] = "None"
+            _mean: float | str = "None"
+            _stddev: float | str = "None"
+            _min: float | str = "None"
+            _max: float | str = "None"
             with contextlib.suppress(TypeError):
-                _mean = np.mean(values)  # type: ignore
+                _mean = float(np.mean(values))
             with contextlib.suppress(TypeError):
-                _stddev = np.std(values)  # type: ignore
+                _stddev = float(np.std(values))
             with contextlib.suppress(TypeError):
-                _min = np.min(values)
+                _min = float(np.min(values))
             with contextlib.suppress(TypeError):
-                _max = np.max(values)
+                _max = float(np.max(values))
             result_dict[header] = {
                 "latestValue": _last_value,
                 "firstValue": _first_value,
@@ -224,28 +233,26 @@ class CosimWatcher:
 
         # debug
         # result_dict.update({'_datasources':self.data_sources})
-        result_dict_name = "-".join([self.title, "resultDict"])
+        result_dict_name = f"{self.title}-resultDict"
 
         target_file_path = Path.cwd() / self.results_dir / result_dict_name
         DictWriter.write(result_dict, target_file_path, mode="w")
 
-        dump_dict_name = "-".join([self.title, "dataFrame.dump"])
+        dump_dict_name = f"{self.title}-dataFrame.dump"
         target_file_path = Path.cwd() / self.results_dir / dump_dict_name
-        df.to_pickle(str(target_file_path.absolute()), compression="gzip")
+        data.to_pickle(str(target_file_path.absolute()), compression="gzip")
         return
 
-    def _define_data_source_properties_for_plotting(self):
+    def _define_data_source_properties_for_plotting(self) -> None:
         """Details out the properties of all data sources for plotting.
 
-        Details out the properties of all data source, making sure they contain the following fields required for plotting
+        Details out the properties of all data source, making sure they contain
+        the following fields required for plotting:
             - file name
             - column names (= variable names)
         """
-
-        # pattern = re.compile(r"(^#|\s+\[.*?\]$)")
-        pattern = re.compile(
-            r"(^#{0,2}\s*|\s+\[.*?\]$)"
-        )  # frl 2023-11-07 remove all leading #'s and spaces and all trailing [.*]'s
+        # Remove all leading #'s and spaces and all trailing [.*]'s
+        pattern = re.compile(r"(^#{0,2}\s*|\s+\[.*?\]$)")
 
         for (
             data_source_name,
@@ -256,8 +263,8 @@ class CosimWatcher:
                     data_source_properties.update({"csvFile": csv_file_name})
 
                     # extract the header row from the csv file to determine the variable names
-                    data_header: List[str] = []
-                    with open(csv_file_name, "r") as f:
+                    data_header: list[str] = []
+                    with Path(csv_file_name).open() as f:
                         data_header = f.readline().strip().split(self.delimiter)
                     if not data_header:
                         continue
@@ -271,13 +278,15 @@ class CosimWatcher:
                     _display_time_name: str = pattern.sub("", _time_name)
                     data_source_properties.update({"displayTimeName": _display_time_name})
 
-                    data_columns: List[int] = []
-                    # read_only_shortlisted_columns: bool = False #flr 2023-11-07 greedy approach needs to be updated on demand
+                    data_columns: list[int] = []
+                    read_only_shortlisted_columns: bool
+                    # NOTE: Greedy approach needs to be updated on demand; hence commnted out. @FRALUM, 2023-11-07
+                    # read_only_shortlisted_columns = False
 
                     read_only_shortlisted_columns = "dataColumns" in data_source_properties
                     if read_only_shortlisted_columns and (
                         "dataColumns" in data_source_properties
-                        and isinstance(data_source_properties["dataColumns"], List)
+                        and isinstance(data_source_properties["dataColumns"], list)
                     ):
                         data_columns = [int(col) for col in data_source_properties["dataColumns"]]
                     # else: frl 2023-11-07 simx heritage?
@@ -289,9 +298,9 @@ class CosimWatcher:
                     #        if not re.match(r"^(settings)", col_name)
                     #    )
 
-                    _column_names: List[str] = [data_header[column] for column in data_columns]
+                    _column_names: list[str] = [data_header[column] for column in data_columns]
                     data_source_properties.update({"colNames": _column_names})
-                    _display_column_names: List[str] = [pattern.sub("", col_name) for col_name in _column_names]
+                    _display_column_names: list[str] = [pattern.sub("", col_name) for col_name in _column_names]
                     # _display_column_names = ["Time", "StepCount"] + [
                     _display_column_names = [
                         data_source_name + "|" + col_name
@@ -305,14 +314,14 @@ class CosimWatcher:
 
         return
 
-    def _initialize_plot(self):
+    def _initialize_plot(self) -> None:
         """Initialize the plot.
 
         Collects data and sets plot header line
         """
         self.figure = plt.figure(figsize=(16 * self.scale_factor, 9 * self.scale_factor), dpi=150)
         # self.fig.tight_layout()  # constraint_layout()
-        _ = self.figure.subplots_adjust(
+        self.figure.subplots_adjust(
             left=0.1,
             bottom=0.05,
             right=0.95,
@@ -322,12 +331,10 @@ class CosimWatcher:
         )
         self.terminate = False
 
-        df = (
-            self._read_csv_files_into_dataframe()
-        )  # do it once to find the number of respective columns of all datasources
-        self.number_of_subplots = (
-            len(list(df)) - 1
-        )  # one of the columns is the abscissa, frl: check if this works for multiple datasources and merged time columns
+        # do it once to find the number of respective columns of all datasources
+        data = self._read_csv_files_into_dataframe()
+        # one of the columns is the abscissa, frl: check if this works for multiple datasources and merged time columns
+        self.number_of_subplots = len(list(data)) - 1
 
         self.number_of_columns = int(sqrt(self.number_of_subplots - 1)) + 1
         self.max_row = int(self.number_of_subplots / self.number_of_columns - 0.1) + 1
@@ -345,23 +352,23 @@ class CosimWatcher:
         pandas.core.frame.DataFrame
             Pandas dataframe containing the data of all csv files
         """
-
         df_all_data_sources = pd.DataFrame()  # initialize empty df
 
-        for _, data_source_properties in self.data_sources.items():
+        for data_source_properties in self.data_sources.values():
             # mapping dict for display column names
-            column_name_to_display_column_name_mapping: Dict[str, str] = dict(
+            column_name_to_display_column_name_mapping: dict[str, str] = dict(
                 zip(
-                    [data_source_properties["timeName"]] + data_source_properties["colNames"],  # type: ignore
-                    [data_source_properties["displayTimeName"]] + data_source_properties["displayColNames"],  # type: ignore
+                    [data_source_properties["timeName"]] + data_source_properties["colNames"],  # type: ignore[arg-type, operator, reportOperatorIssue]
+                    [data_source_properties["displayTimeName"]] + data_source_properties["displayColNames"],  # type: ignore[arg-type, operator, reportOperatorIssue]
+                    strict=False,
                 )
             )
 
-            _column_names: List[str] = []
-            if "colNames" in data_source_properties and isinstance(data_source_properties["colNames"], List):
+            _column_names: list[str] = []
+            if "colNames" in data_source_properties and isinstance(data_source_properties["colNames"], list):
                 _column_names = [str(col_name) for col_name in data_source_properties["colNames"]]
             if "timeName" in data_source_properties and isinstance(data_source_properties["timeName"], str):
-                _column_names = [data_source_properties["timeName"]] + _column_names
+                _column_names = [data_source_properties["timeName"], *_column_names]
 
             if "csvFile" in data_source_properties and isinstance(data_source_properties["csvFile"], str):
                 df_single_data_source: DataFrame
@@ -421,13 +428,13 @@ class CosimWatcher:
 
         return df_all_data_sources.iloc[start:length, :]
 
-    def _determine_optimum_screen_size(self):
+    def _determine_optimum_screen_size(self) -> None:
         """Determine the optimum screen size."""
         # Opening and closing of window may be deprecated when a better solution is found
         mgr = plt.get_current_fig_manager()
         if mgr is None:
             return
         mgr.full_screen_toggle()
-        self.screenSize = (mgr.canvas.width(), mgr.canvas.height())  # type: ignore
-        mgr.window.close()  # type: ignore
+        self.screenSize = (mgr.canvas.width(), mgr.canvas.height())  # type: ignore[attr-defined, reportAttributeAccessIssue]
+        mgr.window.close()  # type: ignore[attr-defined, reportAttributeAccessIssue]
         return

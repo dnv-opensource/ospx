@@ -1,8 +1,9 @@
 import logging
+from collections.abc import MutableMapping
 from copy import deepcopy
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, MutableMapping, Union
+from typing import Any
 
 from dictIO import DictWriter
 from dictIO.utils.counter import BorgCounter
@@ -18,10 +19,12 @@ logger = logging.getLogger(__name__)
 class Component:
     r"""A component is an instance of a (component-) model.
 
-    A component represents an instance of a (component-) model. Any system structure can contain an arbitrary number of components.
+    A component represents an instance of a (component-) model.
+    Any system structure can contain an arbitrary number of components.
     Important here is, that multiple components in a system structure can be instances of one and the same model.
     In practical terms this means that multiple components can refer to the same physical FMU file. \n
-    As components are instances of a model (FMU), they inherit the start values defined in the FMU's modelDescription file upon instantiation; \n
+    As components are instances of a model (FMU), they inherit the start values defined
+    in the FMU's modelDescription file upon instantiation; \n
     howevere, being an instance, each component can alter and overwrite these start values.
     This is accomplished using the 'initialize' section inside a 'component' element in the ospx case dict. \n
     See https://dnv-opensource.github.io/ospx/fileFormat.caseDict.html
@@ -30,17 +33,16 @@ class Component:
     \t 'Simulator' in OSP. See https://open-simulation-platform.github.io/libcosim/configuration#simulator \n
     \t 'Simulation model' in FMI for co-simulation. See https://github.com/modelica/fmi-standard/releases/download/v2.0.3/FMI-Specification-2.0.3.pdf \n
     \t 'Component' in SSP. See https://ssp-standard.org/publications/SSP10/SystemStructureAndParameterization10.pdf
-    """
+    """  # noqa: E501
 
-    def __init__(self, name: str, properties: MutableMapping[Any, Any]):
+    def __init__(self, name: str, properties: MutableMapping[Any, Any]) -> None:
         self.name: str = name
-        self.generate_proxy = False
         self.fmu: FMU
-        self.step_size: Union[float, None] = None
+        self.step_size: float | None = None
         self._initial_values: dict[str, ScalarVariable] = {}
         self._connectors: dict[str, Connector] = {}
         self.generate_proxy: bool = False
-        self.remote_access: Union[RemoteAccess, None] = None
+        self.remote_access: RemoteAccess | None = None
         self.counter = BorgCounter()
         self._units: dict[str, Unit]
         self._variables: dict[str, ScalarVariable]
@@ -59,7 +61,7 @@ class Component:
 
         self._read_connectors(properties)
 
-    def _read_fmu(self, properties: MutableMapping[Any, Any]):
+    def _read_fmu(self, properties: MutableMapping[Any, Any]) -> None:
         if "fmu" not in properties:
             msg = f"component {self.name}: 'fmu' element missing in case dict."
             logger.exception(msg)
@@ -75,12 +77,12 @@ class Component:
         if self.fmu.default_experiment and not self.step_size:
             self.step_size = self.fmu.default_experiment.step_size
 
-    def _read_step_size(self, properties: MutableMapping[Any, Any]):
+    def _read_step_size(self, properties: MutableMapping[Any, Any]) -> None:
         if "stepSize" not in properties:
             return
         self.step_size = float(properties["stepSize"])
 
-    def _read_initialize(self, properties: MutableMapping[Any, Any]):
+    def _read_initialize(self, properties: MutableMapping[Any, Any]) -> None:
         if "initialize" not in properties:
             return
         for variable_name, variable_properties in properties["initialize"].items():
@@ -93,7 +95,7 @@ class Component:
                 variable.start = variable_properties["start"]
             self._initial_values[variable.name] = variable
 
-    def _read_connectors(self, properties: MutableMapping[Any, Any]):
+    def _read_connectors(self, properties: MutableMapping[Any, Any]) -> None:
         if "connectors" not in properties:
             return
         for connector_name, connector_properties in properties["connectors"].items():
@@ -106,12 +108,12 @@ class Component:
                 connector.type = connector_properties["type"]
             self._connectors[connector.name] = connector
 
-    def _read_generate_proxy(self, properties: MutableMapping[Any, Any]):
+    def _read_generate_proxy(self, properties: MutableMapping[Any, Any]) -> None:
         if "generate_proxy" not in properties:
             return
         self.generate_proxy = properties["generate_proxy"]
 
-    def _read_remote_access(self, properties: MutableMapping[Any, Any]):
+    def _read_remote_access(self, properties: MutableMapping[Any, Any]) -> None:
         if "remoteAccess" not in properties:
             return
         if "host" in properties["remoteAccess"] and "port" in properties["remoteAccess"]:
@@ -120,10 +122,11 @@ class Component:
                 port=properties["remoteAccess"]["port"],
             )
 
-    def _generate_proxy(self):
+    def _generate_proxy(self) -> None:
         if not self.remote_access:
             logger.error(
-                f"component {self.name}: 'generate_proxy' set to True, but the 'remoteAccess' element is not correctly defined."
+                f"component {self.name}: 'generate_proxy' set to True, "
+                "but the 'remoteAccess' element is not correctly defined."
             )
         elif not self.remote_access.host:
             logger.error(f"component {self.name}: 'remoteAccess' element is defined, but host is not specified.")
@@ -133,12 +136,11 @@ class Component:
             self.fmu = self.fmu.proxify(self.remote_access.host, self.remote_access.port)
             # if NTNU-IHB fmu-proxy code is used, use '-proxy' reference
             self.name = f"{self.name}-proxy"
-            # self.name = self.fmu.file.stem
 
-    def _init_units(self):
+    def _init_units(self) -> None:
         self._units = deepcopy(self.fmu.units)
 
-    def _init_variables(self):
+    def _init_variables(self) -> None:
         self._variables = deepcopy(self.fmu.variables)
 
         for variable_name, variable in self._initial_values.items():
@@ -194,17 +196,18 @@ class Component:
         """
         return self._connectors
 
-    def write_osp_model_description_xml(self):  # sourcery skip: merge-dict-assign
+    def write_osp_model_description_xml(self) -> None:
         """Write the <component.name>_OspModelDescription.xml file in the current working directory."""
+        # sourcery skip: extract-method, merge-dict-assign
         osp_model_description_file = self.fmu.file.parent.absolute() / f"{self.name}_OspModelDescription.xml"
         self._clean(osp_model_description_file)
 
-        osp_model_description = {}
+        osp_model_description: dict[str, Any] = {}
 
         # Unit Definitions
-        unit_definitions = {}
+        unit_definitions: dict[str, dict[str, dict[str, Any]]] = {}
         for unit in self.units.values():
-            unit_definition = {"_attributes": {}}
+            unit_definition: dict[str, dict[str, Any]] = {"_attributes": {}}
             unit_definition["_attributes"]["name"] = unit.name
             if unit.base_unit:
                 unit_definition["BaseUnit"] = {"_attributes": {}}
@@ -267,7 +270,7 @@ class Component:
 
         DictWriter.write(osp_model_description, osp_model_description_file)
 
-    def _clean(self, file_to_remove: Union[str, Path]):
+    def _clean(self, file_to_remove: str | Path) -> None:
         """Clean up single file."""
         if isinstance(file_to_remove, str):
             file_to_remove = Path.cwd() / file_to_remove

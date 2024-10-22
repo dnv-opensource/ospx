@@ -1,6 +1,5 @@
 import logging
 from dataclasses import dataclass
-from typing import Union
 
 __ALL__ = ["Simulation"]
 
@@ -11,18 +10,18 @@ logger = logging.getLogger(__name__)
 class Simulation:
     """Data class holding the attributes of the 'simulation' element inside OspSystemStructure.xml."""
 
-    name: Union[str, None] = None
-    start_time: Union[float, None] = None
-    stop_time: Union[float, None] = None
-    base_step_size: Union[float, None] = None
-    _algorithm: Union[str, None] = None
+    name: str | None = None
+    start_time: float | None = None
+    stop_time: float | None = None
+    base_step_size: float | None = None
+    _algorithm: str | None = None
 
     @property
-    def algorithm(self) -> Union[str, None]:  # noqa: D102
+    def algorithm(self) -> str | None:
         return self._algorithm
 
     @algorithm.setter
-    def algorithm(self, value: str):  # noqa: D102
+    def algorithm(self, value: str) -> None:
         valid_values: list[str] = [
             "fixedStep",
         ]

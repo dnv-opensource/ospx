@@ -1,6 +1,7 @@
+# ruff: noqa: PYI041
 import logging
-from collections.abc import Iterable
-from typing import Any, List, Sequence, Union
+from collections.abc import Iterable, Sequence
+from typing import Any
 
 from dictIO import Formatter, Parser
 
@@ -15,30 +16,30 @@ class ScalarVariable:
     See https://github.com/modelica/fmi-standard/blob/v2.0.x/schema/fmi2ScalarVariable.xsd
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
-        data_type: Union[str, None] = None,
-        causality: Union[str, None] = None,
-        variability: Union[str, None] = None,
-        start: Union[int, float, bool, str, None] = None,
+        data_type: str | None = None,
+        causality: str | None = None,
+        variability: str | None = None,
+        start: int | float | bool | str | None = None,
         value_reference: int = 0,
-        description: Union[str, None] = None,
-        quantity: Union[str, None] = None,
-        unit: Union[str, None] = None,
-        display_unit: Union[str, None] = None,
-    ):
+        description: str | None = None,
+        quantity: str | None = None,
+        unit: str | None = None,
+        display_unit: str | None = None,
+    ) -> None:
         # Attributes
         self.name: str
-        self._data_type: Union[str, None] = None
+        self._data_type: str | None = None
         self._causality: str = "local"
-        self._variability: Union[str, None] = None
-        self._start: Union[int, float, bool, str, None] = None
+        self._variability: str | None = None
+        self._start: int | float | bool | str | None = None
         self.value_reference: int = 0
-        self.description: Union[str, None] = None
-        self.quantity: Union[str, None] = None
-        self.unit: Union[str, None] = None
-        self.display_unit: Union[str, None] = None
+        self.description: str | None = None
+        self.quantity: str | None = None
+        self.unit: str | None = None
+        self.display_unit: str | None = None
         # Initialization
         self.name = name
         if data_type:
@@ -56,12 +57,12 @@ class ScalarVariable:
         self.display_unit = display_unit
 
     @property
-    def data_type(self) -> Union[str, None]:
+    def data_type(self) -> str | None:
         """Returns the FMI data type of the scalar Variable."""
         return self._data_type
 
     @data_type.setter
-    def data_type(self, type: str):
+    def data_type(self, value: str) -> None:
         """Set the FMI data type of the scalar Variable.
 
         Valid values are:
@@ -78,10 +79,10 @@ class ScalarVariable:
             "String",
             "Enumeration",
         ]
-        if type not in valid_types:
-            logger.error(f"variable {self.name}: value for data_type '{type}' is invalid.")
+        if value not in valid_types:
+            logger.error(f"variable {self.name}: value for data_type '{value}' is invalid.")
             return
-        self._data_type = type
+        self._data_type = value
         return
 
     @property
@@ -90,7 +91,7 @@ class ScalarVariable:
         return self._causality
 
     @causality.setter
-    def causality(self, value: str):
+    def causality(self, value: str) -> None:
         """Set the causality of the scalar Variable.
 
         Valid values are:
@@ -118,12 +119,12 @@ class ScalarVariable:
         return
 
     @property
-    def variability(self) -> Union[str, None]:
+    def variability(self) -> str | None:
         """Returns the variability of the scalar Variable."""
         return self._variability
 
     @variability.setter
-    def variability(self, value: str):
+    def variability(self, value: str) -> None:
         """Set the variability of the scalar Variable.
 
         Valid values are:
@@ -147,18 +148,19 @@ class ScalarVariable:
         return
 
     @property
-    def start(self) -> Union[int, float, bool, str, None]:
+    def start(self) -> int | float | bool | str | None:
         """Returns the start value (initial value) of the scalar Variable."""
         return self._start
 
     @start.setter
-    def start(self, value: Union[int, float, bool, str, None]):
+    def start(self, value: int | float | bool | str | None) -> None:
         """Set the start value (initial value) of the scalar Variable."""
         if value is None:
             logger.error(f"variable {self.name}: start value shall be set to 'None', but 'None' is invalid for start.")
             return
         if self.data_type:
-            # make sure the data type of the new value does either match or gets casted to the data_type defined for the variable
+            # make sure the data type of the new value does either match
+            # or gets casted to the data_type defined for the variable
             new_value_data_type = get_fmi_data_type(value)
             if new_value_data_type == self.data_type:
                 self._start = value
@@ -173,7 +175,8 @@ class ScalarVariable:
                     return
                 else:
                     logger.error(
-                        f"variable {self.name}: start shall be set to {casted_value}, but fmi data type 'Enumeration' is invalid for start."
+                        f"variable {self.name}: start shall be set to {casted_value}, "
+                        "but fmi data type 'Enumeration' is invalid for start."
                     )
                     return
         else:
@@ -181,7 +184,7 @@ class ScalarVariable:
             self.data_type = get_fmi_data_type(self.start)
 
 
-def get_fmi_data_type(arg: Any) -> str:
+def get_fmi_data_type(arg: object) -> str:
     r"""Return the fmi 2.0 data type corresponding to Python type of the passed in argument.
 
     See https://github.com/modelica/fmi-standard/blob/v2.0.x/schema/fmi2Type.xsd
@@ -197,24 +200,24 @@ def get_fmi_data_type(arg: Any) -> str:
         The fmi 2.0 data type, returned as string literal.\n
         valid fmi 2.0 data types are 'Integer', 'Real', 'Boolean', 'String' and 'Enumeration'
     """
-
+    # sourcery skip: assign-if-exp, reintroduce-else
     if isinstance(arg, int):
         return "Integer"
-    elif isinstance(arg, float):
+    if isinstance(arg, float):
         return "Real"
-    elif isinstance(arg, bool):
+    if isinstance(arg, bool):
         return "Boolean"
     # not regarding the content, sequence is always returned if not int or float, e.g. string.
     # requires a solution, if xs:enumeration is required.
-    # elif isinstance(arg, Sequence):
-    #    return 'Enumeration'
-    else:
-        return "String"
+    # elif isinstance(arg, Sequence):  # noqa: ERA001
+    #    return 'Enumeration'  # noqa: ERA001
+    return "String"
 
 
 def _cast_to_fmi_data_type(
-    arg: Union[int, float, bool, str, Sequence[Any]], fmi_data_type: str
-) -> Union[int, float, bool, str, List[Any], None]:
+    arg: int | float | bool | str | Sequence[Any],
+    fmi_data_type: str,
+) -> int | float | bool | str | list[Any] | None:
     r"""Casts the passed in argument to a Python data type that matches the requested fmi data type.
 
     Parameters
@@ -233,24 +236,23 @@ def _cast_to_fmi_data_type(
     if fmi_data_type in {"Integer", "Real", "Boolean"}:
         if isinstance(arg, Sequence):
             logger.warning(
-                f"_cast_to_fmi_data_type(): argument {arg} of type List/Tuple/Sequence cannot be casted to fmi data type {fmi_data_type}"
+                f"_cast_to_fmi_data_type(): argument {arg} of type List/Tuple/Sequence "
+                f"cannot be casted to fmi data type {fmi_data_type}"
             )
             return None
         # parse if arg is string
-        parsed_value: Union[int, float, bool]
+        parsed_value: int | float | bool
         parsed_value = Parser().parse_type(arg) if isinstance(arg, str) else arg
         # cast to int / float / bool
         if fmi_data_type == "Integer":
             return int(parsed_value)
-        elif fmi_data_type == "Real":
+        if fmi_data_type == "Real":
             return float(parsed_value)
-        else:
-            return bool(parsed_value)
-    elif fmi_data_type == "String":
+        return bool(parsed_value)
+    if fmi_data_type == "String":
         # format as string
         return Formatter().format_dict(arg) if isinstance(arg, Sequence) else Formatter().format_type(arg)
-    elif fmi_data_type == "Enumeration":
+    if fmi_data_type == "Enumeration":
         # cast to list
         return list(arg) if isinstance(arg, Iterable) else [arg]
-    else:
-        return None
+    return None

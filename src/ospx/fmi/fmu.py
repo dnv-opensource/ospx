@@ -1,12 +1,14 @@
+from __future__ import annotations
+
 import logging
 import os
 import platform
 import re
 from copy import deepcopy
-from datetime import date, datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from shutil import copyfile
-from typing import Any, Dict, Mapping, MutableMapping, Union
+from typing import TYPE_CHECKING, Any
 from zipfile import ZipFile
 
 from dictIO import CppDict, XmlFormatter, XmlParser
@@ -21,6 +23,9 @@ from ospx.utils.zip import (
     rename_file_in_zip,
 )
 
+if TYPE_CHECKING:
+    from collections.abc import Mapping, MutableMapping
+
 __ALL__ = ["FMU"]
 
 logger = logging.getLogger(__name__)
@@ -32,7 +37,7 @@ class FMU:
     See also https://github.com/modelica/fmi-standard/blob/v2.0.x/schema/fmi2ModelDescription.xsd
     """
 
-    def __init__(self, file: Union[str, os.PathLike[str]]):
+    def __init__(self, file: str | os.PathLike[str]) -> None:
         # Make sure fmu_file argument is of type Path. If not, cast it to Path type.
         file = file if isinstance(file, Path) else Path(file)
         if not file.exists():
@@ -60,9 +65,10 @@ class FMU:
 
     def _write_model_description(
         self,
-        model_description: Union[CppDict, None] = None,
+        model_description: CppDict | None = None,
+        *,
         write_inside_fmu: bool = False,
-    ):
+    ) -> None:
         """Save updated model_description both inside FMU as well as separate file in the FMUs directory."""
         if model_description:
             self.model_description = model_description
@@ -83,13 +89,13 @@ class FMU:
 
         # Write external modelDescription.xml (separate file, beside FMU)
         external_file = self.file.parent.absolute() / f"{self.file.stem}_ModelDescription.xml"
-        with open(external_file, "w") as f:
+        with Path.open(external_file, "w") as f:
             _ = f.write(formatted_xml)
 
         return
 
     @property
-    def units(self) -> Dict[str, Unit]:
+    def units(self) -> dict[str, Unit]:
         """Returns a dict with all units defined in the FMU.
 
         Returns
@@ -191,7 +197,7 @@ class FMU:
         return variables
 
     @property
-    def default_experiment(self) -> Union[Experiment, None]:
+    def default_experiment(self) -> Experiment | None:
         """Returns the default experiment, if defined in the FMU.
 
         Returns
@@ -216,7 +222,7 @@ class FMU:
                 default_experiment.step_size = default_experiment_attributes["stepSize"]
         return default_experiment
 
-    def copy(self, new_name: str):
+    def copy(self, new_name: str) -> FMU:
         """Save a copy of the FMU with a new name.
 
         Parameters
@@ -248,7 +254,7 @@ class FMU:
                 if re.search(r".*\.dll$", file.filename) and existing_file_name in file.filename
             ]
         new_dll_file_names = [re.sub(existing_file_name, new_name, dll_file_name) for dll_file_name in dll_file_names]
-        for dll_file_name, new_dll_file_name in zip(dll_file_names, new_dll_file_names):
+        for dll_file_name, new_dll_file_name in zip(dll_file_names, new_dll_file_names, strict=False):
             logger.info(f"{self.file.name} copy: renaming dll {dll_file_name} to {new_dll_file_name}")
             _ = rename_file_in_zip(new_file, dll_file_name, new_dll_file_name)
 
@@ -267,11 +273,11 @@ class FMU:
 
         # Write updated modelDescription.xml into new FMU
         new_fmu = FMU(new_file)
-        new_fmu._write_model_description(new_model_description)
+        new_fmu._write_model_description(new_model_description)  # noqa: SLF001
 
         return new_fmu
 
-    def proxify(self, host: str, port: int):
+    def proxify(self, host: str, port: int) -> FMU:
         """Create a proxy version of the FMU.
 
         For details see https://github.com/NTNU-IHB/FMU-proxy
@@ -288,22 +294,20 @@ class FMU:
         FMU
             The created proxy version of the FMU
         """
-
         import subprocess
 
         remote_string = f"--remote={host}:{port}"
         command = f"fmu-proxify {self.file.name} {remote_string}"
         try:
-            _ = subprocess.run(command, timeout=60)
+            _ = subprocess.run(command, timeout=60, check=False)  # noqa: S603
         except subprocess.TimeoutExpired:
             logger.exception(f"Timeout occured when calling {command}.")
             return self
         proxy_fmu_file = self.file.parent.absolute() / f"{self.file.stem}-proxy.fmu"
         return FMU(proxy_fmu_file)
 
-    def _modify_start_values(self, variables_with_start_values: dict[str, ScalarVariable]):
+    def _modify_start_values(self, variables_with_start_values: dict[str, ScalarVariable]) -> None:
         """Modify the start values of variables inside the FMUs modelDescription.xml."""
-
         logger.info(f"{self.file.name}: update start values of variables in modelDescription.xml")  # 2
 
         model_variables: MutableMapping[Any, Any] = self.model_description[
@@ -337,35 +341,37 @@ class FMU:
 
         self._log_update_in_model_description()
 
-    def _log_update_in_model_description(self, model_description: Union[CppDict, None] = None):
+    def _log_update_in_model_description(
+        self,
+        model_description: CppDict | None = None,
+    ) -> None:
         model_description = model_description or self.model_description
 
         logger.info(f"{self.file.name}: update <fmiModelDescription description>")  # 2
         # Author
         old_author = model_description["_xmlOpts"]["_rootAttributes"]["author"]
-        if platform.system() == "Linux":
-            new_author = os.environ["USER"]
-        else:
-            new_author = os.environ["USERNAME"]
+        new_author = os.environ["USER"] if platform.system() == "Linux" else os.environ["USERNAME"]
         model_description["_xmlOpts"]["_rootAttributes"]["author"] = new_author
         # DateAndTime
         old_date = model_description["_xmlOpts"]["_rootAttributes"]["generationDateAndTime"]
-        new_date = str(datetime.now())
+        new_date = str(datetime.now(tz=UTC))
         model_description["_xmlOpts"]["_rootAttributes"]["generationDateAndTime"] = new_date
         # Log modifications in <fmiModelDescription description> attribute
         add_description_string = (
-            f"\nmodified {date.today()}:\n"
+            f"\nmodified {datetime.now(tz=UTC).date()}:\n"
             f"\tauthor {old_author} to {new_author}\n"
             f"\tgenerationDateAndTime {old_date} to {new_date}\n"
         )
         model_description["_xmlOpts"]["_rootAttributes"]["description"] += add_description_string
+        return
 
     # @TODO: Check when and where this method needs to be called. And why..
     #        CLAROS, 2022-05-24
-    def _clean_solver_internal_variables(self, model_description: MutableMapping[Any, Any]):
+    def _clean_solver_internal_variables(self, model_description: MutableMapping[Any, Any]) -> None:
         """Clean solver internal variables, such as '_iti_...'."""
         model_variables: Mapping[Any, Any] = model_description[find_key(model_description, "ModelVariables$")]
         model_name = model_description["_xmlOpts"]["_rootAttributes"]["modelName"]
         for model_variable_key in model_variables:
             if "_origin" in model_variables[model_variable_key]:
                 model_variables[model_variable_key]["_origin"] = model_name
+        return
