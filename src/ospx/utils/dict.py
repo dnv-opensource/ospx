@@ -1,5 +1,4 @@
 import re
-from ast import literal_eval
 from collections import OrderedDict
 from collections.abc import MutableMapping
 from typing import Any
@@ -41,7 +40,7 @@ def shrink_dict(dict_in: MutableMapping[Any, Any], unique_key: list[str] | None 
     _unique_key: list[str] = unique_key or []
     unique_keys_string: str = "['" + "']['".join(_unique_key) + "']"
     # sort an ordered dict for attribute (child) where the dict is to make unique for
-    eval_string: str = f"sorted(dict.items(), key=lambda x: str(x[1]{unique_keys_string}))"
+    eval_string: str = f"sorted(dict_in.items(), key=lambda x: str(x[1]{unique_keys_string}))"
 
     # Identify doublettes and collect them for subsequent removal
     seen: set[Any] = set()
@@ -49,10 +48,10 @@ def shrink_dict(dict_in: MutableMapping[Any, Any], unique_key: list[str] | None 
 
     # value is necessary here as it is used in the eval statements below. Do not delete it.
     for key, value in OrderedDict(eval(eval_string)).items():  # noqa: B007, PERF102, S307
-        proove_value = literal_eval(f"value{unique_keys_string}")
+        proove_value = eval(f"value{unique_keys_string}")  # noqa: S307
         if proove_value in seen:
             remove_key.append(key)
         else:
-            seen.add(literal_eval(f"value{unique_keys_string}"))
+            seen.add(eval(f"value{unique_keys_string}"))  # noqa: S307
 
     return {key: dict_in[key] for key in dict_in if key not in remove_key}
