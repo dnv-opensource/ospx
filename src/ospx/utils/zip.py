@@ -10,9 +10,9 @@ logger = logging.getLogger(__name__)
 
 
 def read_file_content_from_zip(zip_file: Path, file_name: str) -> str | None:
-    """
-    belongs to zip functions
-    read a single file.
+    """Read a single file.
+
+    Belongs to zip functions
     """
     file_handle, temp_name = mkstemp(dir=zip_file.parent)
     file_content = None
@@ -31,9 +31,9 @@ def read_file_content_from_zip(zip_file: Path, file_name: str) -> str | None:
 
 
 def rename_file_in_zip(zip_file: Path, file_name: str, new_file_name: str) -> ZipFile | None:
-    """
-    belongs to zip functions
-    rename files.
+    """Rename files.
+
+    Belongs to zip functions.
     """
     file_handle, temp_name = mkstemp(dir=zip_file.parent)
     updated_zip_file = None
@@ -60,9 +60,9 @@ def rename_file_in_zip(zip_file: Path, file_name: str, new_file_name: str) -> Zi
 
 
 def remove_files_from_zip(zip_file: Path, *file_names: str) -> ZipFile | None:
-    """
-    belongs to zip functions
-    remove files.
+    """Remove files.
+
+    Belongs to zip functions.
     """
     file_handle, temp_name = mkstemp(dir=zip_file.parent)
     updated_zip_file = None
@@ -88,9 +88,9 @@ def remove_files_from_zip(zip_file: Path, *file_names: str) -> ZipFile | None:
 
 
 def add_file_content_to_zip(zip_file: Path, file_name: str, file_content: str) -> ZipFile | None:
-    """
-    belongs to zip functions
-    add a single file and its ascii content.
+    """Add a single file and its ascii content.
+
+    Belongs to zip functions.
     """
     file_handle, temp_name = mkstemp(dir=zip_file.parent)
     updated_zip_file = None
@@ -112,9 +112,9 @@ def add_file_content_to_zip(zip_file: Path, file_name: str, file_content: str) -
 def substitute_text_in_zip(
     zip_file: Path, file_name_pattern: str = "", subst: tuple[str, str] = ("", "")
 ) -> ZipFile | None:
-    """
-    belongs to zip functions
-    substitutes a given string in all files matching the passed file name pattern.
+    """Substitute a given string in all files matching the passed file name pattern.
+
+    Belongs to zip functions.
     """
     file_handle, temp_name = mkstemp(dir=zip_file.parent)
     updated_zip_file = None
@@ -144,9 +144,9 @@ def substitute_text_in_zip(
 
 
 def update_file_content_in_zip(zip_file: Path, file_name: str, file_content: str) -> ZipFile | None:
-    """
-    belongs to zip functions
-    updates the ascii content of a single file.
+    """Update the ascii content of a single file.
+
+    Belongs to zip functions.
     """
     file_handle, temp_name = mkstemp(dir=zip_file.parent)
     updated_zip_file = None

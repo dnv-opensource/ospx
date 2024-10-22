@@ -30,7 +30,9 @@ logger = logging.getLogger(__name__)
 
 
 class CosimWatcher:
-    """CosimWatcher allows to monitor a running simulation,
+    """Watcher to monitor a running simulation.
+
+    CosimWatcher allows to monitor a running simulation,
     plot trends and dump simulation results into a resultDict file.
     """
 

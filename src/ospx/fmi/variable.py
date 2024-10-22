@@ -233,6 +233,7 @@ def _cast_to_fmi_data_type(
     Union[int, float, bool, str, List[Any], None]
         The casted value (in a Python data type that matches the requested fmi data type)
     """
+    # sourcery skip: assign-if-exp, extract-method, reintroduce-else
     if fmi_data_type in {"Integer", "Real", "Boolean"}:
         if isinstance(arg, Sequence):
             logger.warning(

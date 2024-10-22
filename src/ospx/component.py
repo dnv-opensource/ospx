@@ -153,7 +153,9 @@ class Component:
 
     @property
     def variables_with_start_values(self) -> dict[str, ScalarVariable]:
-        """Returns a dict with all scalar variables for which start values (initial values)
+        """Return all scalar variables with start values.
+
+        Returns a dict with all scalar variables for which start values (initial values)
         are defined in the component.
 
         Returns

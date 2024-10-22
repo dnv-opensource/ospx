@@ -626,8 +626,9 @@ class OspSimulationCase:
         return
 
     def _correct_wrong_xml_namespace(self, file_name: str, pattern: str, replace: str) -> None:
-        """Substitutes namespace
-        (may be obsolete in future).
+        """Substitute namespace.
+
+        (may be obsolete in future)
         """
         buffer = ""
         with Path(file_name).open() as f:

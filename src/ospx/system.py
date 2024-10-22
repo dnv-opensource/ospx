@@ -27,7 +27,7 @@ class System:
 
     @property
     def fmus(self) -> dict[str, FMU]:
-        """Returns a dict with all FMUs referenced by components contained in the system.
+        """Return a dict with all FMUs referenced by components contained in the system.
 
         Returns
         -------
@@ -38,7 +38,7 @@ class System:
 
     @property
     def components(self) -> dict[str, Component]:
-        """Returns a dict with all components contained in the system.
+        """Return a dict with all components contained in the system.
 
         Returns
         -------
@@ -49,7 +49,7 @@ class System:
 
     @property
     def connections(self) -> dict[str, Connection]:
-        """Returns a dict with all connections defined in the system.
+        """Return a dict with all connections defined in the system.
 
         Returns
         -------
@@ -60,8 +60,7 @@ class System:
 
     @property
     def units(self) -> dict[str, Unit]:
-        """Returns a combined dict with all units
-        from all components contained in the system.
+        """Return a combined dict with all units from all components contained in the system.
 
         Returns
         -------
@@ -76,8 +75,7 @@ class System:
 
     @property
     def connectors(self) -> dict[str, Connector]:
-        """Returns a combined dict with all connectors
-        from all components contained in the system.
+        """Return a combined dict with all connectors from all components contained in the system.
 
         Returns
         -------
@@ -92,8 +90,7 @@ class System:
 
     @property
     def variables(self) -> dict[str, ScalarVariable]:
-        """Returns a combined dict with all scalar variables
-        from all components contained in the system.
+        """Return a combined dict with all scalar variables from all components contained in the system.
 
         Returns
         -------

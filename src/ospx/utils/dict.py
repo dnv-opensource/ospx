@@ -21,7 +21,9 @@ def find_keys(dict_in: MutableMapping[Any, Any], pattern: str) -> list[str] | No
 
 
 def find_type_identifier_in_keys(dict_in: MutableMapping[Any, Any]) -> str | None:
-    """Find the first key name in dict that contains one of the following type identifier strings:
+    """Find the first type identifier in dict.
+
+    Find. the first key name in dict that contains one of the following type identifier strings:
     [Integer|Real|Boolean|Enumeration|String|Unknown].
     """
     key_list: list[str] = ["Integer", "Real", "Boolean", "Enumeration", "String", "Unkown"]

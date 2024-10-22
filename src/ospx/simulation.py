@@ -18,10 +18,12 @@ class Simulation:
 
     @property
     def algorithm(self) -> str | None:
+        """Return the simulation algorithm."""
         return self._algorithm
 
     @algorithm.setter
     def algorithm(self, value: str) -> None:
+        """Set the simulation algorithm."""
         valid_values: list[str] = [
             "fixedStep",
         ]

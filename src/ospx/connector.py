@@ -6,7 +6,9 @@ logger = logging.getLogger(__name__)
 
 
 class Connector:
-    """Connectors allow to explicitely make public a components scalar variable or variable group
+    """Class representing a connector.
+
+    Connectors allow to explicitely make public a components scalar variable or variable group
     at the component's outer interface.
 
     An connector is for a component what an endpoint is for a connection.
