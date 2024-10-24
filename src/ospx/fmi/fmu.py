@@ -5,7 +5,7 @@ import os
 import platform
 import re
 from copy import deepcopy
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from shutil import copyfile
 from typing import TYPE_CHECKING, Any
@@ -354,11 +354,11 @@ class FMU:
         model_description["_xmlOpts"]["_rootAttributes"]["author"] = new_author
         # DateAndTime
         old_date = model_description["_xmlOpts"]["_rootAttributes"]["generationDateAndTime"]
-        new_date = str(datetime.now(tz=UTC))
+        new_date = str(datetime.now(tz=timezone.utc))
         model_description["_xmlOpts"]["_rootAttributes"]["generationDateAndTime"] = new_date
         # Log modifications in <fmiModelDescription description> attribute
         add_description_string = (
-            f"\nmodified {datetime.now(tz=UTC).date()}:\n"
+            f"\nmodified {datetime.now(tz=timezone.utc).date()}:\n"
             f"\tauthor {old_author} to {new_author}\n"
             f"\tgenerationDateAndTime {old_date} to {new_date}\n"
         )
