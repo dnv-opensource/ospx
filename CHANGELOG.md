@@ -5,6 +5,11 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 
 ## [Unreleased]
 
+-/-
+
+
+## [0.2.15] - 2024-10-24
+
 ### Changed
 * Changed from `pip`/`tox` to `uv` as package manager
 * README.md : Completely rewrote section "Development Setup", introducing `uv` as package manager.
@@ -423,7 +428,8 @@ Maintenance Release
 * Added support for Python 3.10
 
 <!-- Markdown link & img dfn's -->
-[unreleased]: https://github.com/dnv-opensource/ospx/compare/v0.2.14...HEAD
+[unreleased]: https://github.com/dnv-opensource/ospx/compare/v0.2.15...HEAD
+[0.2.15]: https://github.com/dnv-opensource/ospx/compare/v0.2.14...v0.2.15
 [0.2.14]: https://github.com/dnv-opensource/ospx/compare/v0.2.13...v0.2.14
 [0.2.13]: https://github.com/dnv-opensource/ospx/compare/v0.2.12...v0.2.13
 [0.2.12]: https://github.com/dnv-opensource/ospx/compare/v0.2.11...v0.2.12
