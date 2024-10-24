@@ -22,7 +22,7 @@ packages = [
 
 [project]
 name = "ospx"
-version = "0.2.14"
+version = "0.2.15"
 description = "Extension package to farn, adding support to build OSP simulation cases using FMUs."
 readme = "README.md"
 requires-python = ">= 3.10"
