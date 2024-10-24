@@ -207,7 +207,7 @@ class CosimWatcher:
 
         result_dict = {}
         for header in list(data):
-            values: ndarray[Any, Any] = data[header].dropna().to_numpy()
+            values: ndarray[tuple[int], np.dtype[np.float64]] = data[header].dropna().to_numpy()
             _first_value: Any = values[0]
             _last_value: Any = values[-1]
             _mean: float | str = "None"
