@@ -5,11 +5,11 @@ import pytest
 from ospx.fmi.fmu import FMU
 
 
-def test_conftest_create_test_fmu():
+def test_conftest_create_test_fmu() -> None:
     pass
 
 
-def test_fmu_instantiation():
+def test_fmu_instantiation() -> None:
     # Prepare
     fmu_file: Path = Path("test_fmu.fmu")
     # Execute
@@ -18,21 +18,21 @@ def test_fmu_instantiation():
     assert isinstance(fmu, FMU)
 
 
-@pytest.fixture()
+@pytest.fixture
 def test_fmu() -> FMU:
     fmu_file: Path = Path("test_fmu.fmu")
     return FMU(fmu_file)
 
 
-def test_fmu_variables_number(test_fmu: FMU):
+def test_fmu_variables_number(test_fmu: FMU) -> None:
     assert len(test_fmu.variables) == 34
 
 
-def test_fmu_units_number(test_fmu: FMU):
+def test_fmu_units_number(test_fmu: FMU) -> None:
     assert len(test_fmu.units) == 0
 
 
-def test_fmu_variables_fmi_data_type(test_fmu: FMU):
+def test_fmu_variables_fmi_data_type(test_fmu: FMU) -> None:
     assert test_fmu.variables["Variable_1_IN_Real"].data_type == "Real"
     assert isinstance(test_fmu.variables["Variable_1_IN_Real"].start, float)
     assert test_fmu.variables["Variable_2_IN_Integer"].data_type == "Integer"
@@ -42,13 +42,13 @@ def test_fmu_variables_fmi_data_type(test_fmu: FMU):
     assert test_fmu.variables["Variable_6_OUT_Bool"].data_type == "Boolean"
 
 
-def test_fmu_variables_start_value(test_fmu: FMU):
+def test_fmu_variables_start_value(test_fmu: FMU) -> None:
     assert test_fmu.variables["Vector_1_IN[0]"].start == 10.0
     assert test_fmu.variables["Vector_1_IN[1]"].start == 11.0
     assert test_fmu.variables["Vector_1_IN[2]"].start == 12.0
 
 
-# def test_fmu():
+# def test_fmu() -> None:
 # Prepare
 
 # Execute

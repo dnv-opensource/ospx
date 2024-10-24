@@ -1,6 +1,5 @@
 import logging
 from dataclasses import dataclass, field
-from typing import Union
 
 __ALL__ = ["Unit", "BaseUnit", "DisplayUnit"]
 
@@ -55,5 +54,5 @@ class Unit:
     # Name of unit, e.g. "N.m", "Nm",  "%/s".
     # "name" must be unique with respect to all other unit elements inside the UnitDefinitions section.
     name: str = field(default_factory=lambda: "-")
-    base_unit: Union[BaseUnit, None] = None
+    base_unit: BaseUnit | None = None
     display_unit: DisplayUnit = field(default_factory=lambda: DisplayUnit())

@@ -1,5 +1,4 @@
 import logging
-from typing import Union
 
 __ALL__ = ["Connector"]
 
@@ -7,7 +6,9 @@ logger = logging.getLogger(__name__)
 
 
 class Connector:
-    """Connectors allow to explicitely make public a components scalar variable or variable group
+    """Class representing a connector.
+
+    Connectors allow to explicitely make public a components scalar variable or variable group
     at the component's outer interface.
 
     An connector is for a component what an endpoint is for a connection.
@@ -17,14 +18,14 @@ class Connector:
     def __init__(
         self,
         name: str,
-        variable: Union[str, None] = None,
-        variable_group: Union[str, None] = None,
-        type: Union[str, None] = None,
-    ):
+        variable: str | None = None,
+        variable_group: str | None = None,
+        type: str | None = None,  # noqa: A002
+    ) -> None:
         self.name: str = name
-        self._variable: Union[str, None] = None
-        self._variable_group: Union[str, None] = None
-        self._type: Union[str, None] = None
+        self._variable: str | None = None
+        self._variable_group: str | None = None
+        self._type: str | None = None
         if variable:
             self.variable = variable
         if variable_group:
@@ -33,7 +34,7 @@ class Connector:
             self.type = type
 
     @property
-    def variable(self) -> Union[str, None]:
+    def variable(self) -> str | None:
         """Returns the scalar variable this connector is defined for.
 
         Returns
@@ -44,7 +45,7 @@ class Connector:
         return self._variable
 
     @variable.setter
-    def variable(self, variable: str):
+    def variable(self, variable: str) -> None:
         """Set the scalar variable this connector shall be defined for.
 
         Parameters
@@ -63,7 +64,7 @@ class Connector:
         self._variable = variable
 
     @property
-    def variable_group(self) -> Union[str, None]:
+    def variable_group(self) -> str | None:
         """Returns the variable group this connector is defined for.
 
         Returns
@@ -74,7 +75,7 @@ class Connector:
         return self._variable_group
 
     @variable_group.setter
-    def variable_group(self, variable_group: str):
+    def variable_group(self, variable_group: str) -> None:
         """Set the variable group this connector shall be defined for.
 
         Parameters
@@ -93,12 +94,12 @@ class Connector:
         self._variable_group = variable_group
 
     @property
-    def type(self) -> Union[str, None]:
+    def type(self) -> str | None:
         """Returns the type of the connector."""
         return self._type
 
     @type.setter
-    def type(self, type: str):
+    def type(self, value: str) -> None:
         """Set the type of the connector.
 
         Valid values are:
@@ -109,10 +110,10 @@ class Connector:
             "input",
             "output",
         ]
-        if type not in valid_types:
-            logger.error(f"connector {self.name}: type '{type}' is invalid.")
+        if value not in valid_types:
+            logger.error(f"connector {self.name}: type '{value}' is invalid.")
             return
-        self._type = type
+        self._type = value
         return
 
     @property
@@ -146,9 +147,9 @@ class Connector:
         str
             name of the variable or variable group
         """
+        # sourcery skip: assign-if-exp, reintroduce-else
         if self._variable:
             return self._variable
-        elif self._variable_group:
+        if self._variable_group:
             return self._variable_group
-        else:
-            return "UNKNOWN"
+        return "UNKNOWN"

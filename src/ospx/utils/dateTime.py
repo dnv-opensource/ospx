@@ -1,10 +1,9 @@
-from datetime import datetime as datetime
-from typing import Tuple
+from datetime import datetime
 
 __all__ = ["calc_time"]
 
 
-def calc_time(time0: datetime, time1: datetime) -> Tuple[int, int, int, int, int]:
+def calc_time(time0: datetime, time1: datetime) -> tuple[int, int, int, int, int]:
     """Calculate the time delta between time0 and time1.
 
     Calculates the time delta between time0 and time1 and

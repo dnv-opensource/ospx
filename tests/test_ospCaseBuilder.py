@@ -5,7 +5,7 @@ from dictIO import DictParser
 from ospx import OspCaseBuilder
 
 
-def test_build():
+def test_build() -> None:
     # sourcery skip: extract-duplicate-method
     # Prepare
     case_dict_file = Path("test_caseDict_simple")
@@ -43,7 +43,7 @@ def test_build():
     assert Path("watchDict").exists()
 
 
-def test_inspect():
+def test_inspect() -> None:
     # Prepare
     case_dict_file = Path("test_caseDict")
     parsed_case_dict_file = Path(f"parsed.{case_dict_file.name}")
