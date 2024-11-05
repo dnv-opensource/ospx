@@ -42,7 +42,7 @@ _For more examples and usage, please refer to [ospx's documentation][ospx_docs].
 ## File Format
 A caseDict is a file in dictIO dict file format used with farn.
 
-_For a documentation of the caseDict file format, see [File Format](fileFormat.md) in [ospx's documentation][ospx_docs] on GitHub Pages._
+_For a documentation of the caseDict file format, see [File Format](fileFormat.rst) in [ospx's documentation][ospx_docs] on GitHub Pages._
 
 _For a detailed documentation of the dictIO dict file format used by farn, see [dictIO's documentation][dictIO_docs] on GitHub Pages._
 
