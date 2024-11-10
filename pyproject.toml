@@ -57,7 +57,7 @@ dependencies = [
     "pandas>=2.2",
     "matplotlib>=3.9",
     "graphviz>=0.20",
-    "dictIO>=0.3.4",
+    "dictIO>=0.4.0b1",
 ]
 
 [project.urls]
@@ -90,6 +90,7 @@ dev-dependencies = [
     "types-lxml>=2024.4",
 ]
 native-tls = true
+# prerelease = "explicit"
 
 
 [project.scripts]
