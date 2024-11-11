@@ -1,31 +1,34 @@
 import re
 from collections import OrderedDict
-from typing import Any, List, MutableMapping, Set, Union
+from collections.abc import MutableMapping
+from typing import Any
 
 
-def find_key(dict: MutableMapping[Any, Any], pattern: str) -> Union[str, None]:
+def find_key(dict_in: MutableMapping[Any, Any], pattern: str) -> str | None:
     """Find the first key in dict that matches the given pattern."""
     try:
-        return [k for k in dict.keys() if re.search(pattern, k)][0]
-    except Exception:
+        return next(key for key in dict_in if re.search(pattern, key))
+    except Exception:  # noqa: BLE001
         return None
 
 
-def find_keys(dict: MutableMapping[Any, Any], pattern: str) -> Union[List[str], None]:
+def find_keys(dict_in: MutableMapping[Any, Any], pattern: str) -> list[str] | None:
     """Find all keys in dict that match the given pattern."""
     try:
-        return [k for k in dict.keys() if re.search(pattern, k)]
-    except Exception:
+        return [k for k in dict_in if re.search(pattern, k)]
+    except Exception:  # noqa: BLE001
         return None
 
 
-def find_type_identifier_in_keys(dict: MutableMapping[Any, Any]) -> Union[str, None]:
-    """Find the first key name in dict that contains one of the following type identifier strings:
+def find_type_identifier_in_keys(dict_in: MutableMapping[Any, Any]) -> str | None:
+    """Find the first type identifier in dict.
+
+    Find. the first key name in dict that contains one of the following type identifier strings:
     [Integer|Real|Boolean|Enumeration|String|Unknown].
     """
-    key_list: List[str] = ["Integer", "Real", "Boolean", "Enumeration", "String", "Unkown"]
-    type_identifier: List[str] = []
-    for key in dict:
+    key_list: list[str] = ["Integer", "Real", "Boolean", "Enumeration", "String", "Unkown"]
+    type_identifier: list[str] = []
+    for key in dict_in:
         key_without_index = re.sub(r"^\d{6}_", "", key)
 
         if key_without_index in key_list:
@@ -34,23 +37,23 @@ def find_type_identifier_in_keys(dict: MutableMapping[Any, Any]) -> Union[str, N
     return type_identifier[0] if type_identifier else None
 
 
-def shrink_dict(dict: MutableMapping[Any, Any], unique_key: Union[List[str], None] = None) -> MutableMapping[Any, Any]:
+def shrink_dict(dict_in: MutableMapping[Any, Any], unique_key: list[str] | None = None) -> dict[Any, Any]:
     """Identify doubled entries in the passed in dict and return a new dict with doubled entries removed."""
-    _unique_key: List[str] = unique_key or []
+    _unique_key: list[str] = unique_key or []
     unique_keys_string: str = "['" + "']['".join(_unique_key) + "']"
     # sort an ordered dict for attribute (child) where the dict is to make unique for
-    eval_string: str = f"sorted(dict.items(), key=lambda x: str(x[1]{unique_keys_string}))"
+    eval_string: str = f"sorted(dict_in.items(), key=lambda x: str(x[1]{unique_keys_string}))"
 
     # Identify doublettes and collect them for subsequent removal
-    seen: Set[Any] = set([])
-    remove_key: List[Any] = []
+    seen: set[Any] = set()
+    remove_key: list[Any] = []
 
     # value is necessary here as it is used in the eval statements below. Do not delete it.
-    for key, value in OrderedDict(eval(eval_string)).items():  # noqa: B007
-        proove_value = eval(f"value{unique_keys_string}")
+    for key, value in OrderedDict(eval(eval_string)).items():  # noqa: B007, PERF102, S307
+        proove_value = eval(f"value{unique_keys_string}")  # noqa: S307
         if proove_value in seen:
             remove_key.append(key)
         else:
-            seen.add(eval(f"value{unique_keys_string}"))
+            seen.add(eval(f"value{unique_keys_string}"))  # noqa: S307
 
-    return {key: dict[key] for key in dict.keys() if key not in remove_key}
+    return {key: dict_in[key] for key in dict_in if key not in remove_key}

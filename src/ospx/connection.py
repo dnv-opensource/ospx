@@ -1,5 +1,4 @@
 import logging
-from typing import Union
 
 from ospx.component import Component
 from ospx.connector import Connector
@@ -21,19 +20,19 @@ class Endpoint:
     def __init__(
         self,
         component: Component,
-        connector: Union[Connector, None] = None,
-        variable: Union[ScalarVariable, None] = None,
-    ):
+        connector: Connector | None = None,
+        variable: ScalarVariable | None = None,
+    ) -> None:
         self.component: Component = component
-        self._connector: Union[Connector, None] = None
-        self._variable: Union[ScalarVariable, None] = None
+        self._connector: Connector | None = None
+        self._variable: ScalarVariable | None = None
         if connector:
             self.connector = connector
         if variable:
             self.variable = variable
 
     @property
-    def connector(self) -> Union[Connector, None]:
+    def connector(self) -> Connector | None:
         """Returns the connector this endpoint refers to, if defined.
 
         Returns
@@ -44,7 +43,7 @@ class Endpoint:
         return self._connector
 
     @connector.setter
-    def connector(self, connector: Connector):
+    def connector(self, connector: Connector) -> None:
         """Set the connector this endpoint shall refer to.
 
         Parameters
@@ -63,7 +62,7 @@ class Endpoint:
         self._connector = connector
 
     @property
-    def variable(self) -> Union[ScalarVariable, None]:
+    def variable(self) -> ScalarVariable | None:
         """Returns the scalar variable this endpoint refers to, if defined.
 
         Returns
@@ -74,7 +73,7 @@ class Endpoint:
         return self._variable
 
     @variable.setter
-    def variable(self, variable: ScalarVariable):
+    def variable(self, variable: ScalarVariable) -> None:
         """Set the scalar variable this endpoint shall refer to.
 
         Parameters
@@ -101,12 +100,12 @@ class Endpoint:
         str
             the name of the scalar variable.
         """
+        # sourcery skip: assign-if-exp, reintroduce-else
         if self._connector:
             return self._connector.variable_name
-        elif self._variable:
+        if self._variable:
             return self._variable.name
-        else:
-            return "UNKNOWN"
+        return "UNKNOWN"
 
     @property
     def is_valid(self) -> bool:
@@ -131,7 +130,7 @@ class Connection:
         name: str,
         source_endpoint: Endpoint,
         target_endpoint: Endpoint,
-    ):
+    ) -> None:
         self.name: str = name
         self.source_endpoint: Endpoint = source_endpoint
         self.target_endpoint: Endpoint = target_endpoint
@@ -183,17 +182,18 @@ class Connection:
             return False
         if self.source_endpoint.variable and self.target_endpoint.variable:
             return True
-        if self.source_endpoint.connector and self.target_endpoint.connector:
-            _both_are_single: bool = (
-                self.source_endpoint.connector.is_single_connector
-                and self.target_endpoint.connector.is_single_connector
-            )
-            _both_are_group: bool = (
-                self.source_endpoint.connector.is_group_connector and self.target_endpoint.connector.is_group_connector
-            )
-            return _both_are_single or _both_are_group
-        elif self.source_endpoint.connector:
+        if self.source_endpoint.connector:
+            if self.target_endpoint.connector:
+                _both_are_single: bool = (
+                    self.source_endpoint.connector.is_single_connector
+                    and self.target_endpoint.connector.is_single_connector
+                )
+                _both_are_group: bool = (
+                    self.source_endpoint.connector.is_group_connector
+                    and self.target_endpoint.connector.is_group_connector
+                )
+                return _both_are_single or _both_are_group
             return self.source_endpoint.connector.is_single_connector
-        elif self.target_endpoint.connector:
+        if self.target_endpoint.connector:
             return self.target_endpoint.connector.is_single_connector
         return False

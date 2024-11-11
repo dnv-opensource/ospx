@@ -1,6 +1,5 @@
 import logging
 from dataclasses import dataclass
-from typing import Union
 
 __ALL__ = ["Experiment"]
 
@@ -14,7 +13,7 @@ class Experiment:
     See https://github.com/modelica/fmi-standard/blob/v2.0.x/schema/fmi2ModelDescription.xsd
     """
 
-    start_time: Union[float, None] = None
-    stop_time: Union[float, None] = None
-    tolerance: Union[float, None] = None
-    step_size: Union[float, None] = None
+    start_time: float | None = None
+    stop_time: float | None = None
+    tolerance: float | None = None
+    step_size: float | None = None

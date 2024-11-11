@@ -5,10 +5,10 @@
 import functools
 import logging
 import re
-from typing import Any, Dict, Tuple, Union
+from typing import Any
 
 from graphviz import Digraph
-from graphviz.dot import Dot
+from graphviz.graphs import BaseGraph
 
 from ospx import Component, Connection, OspSimulationCase
 
@@ -18,12 +18,10 @@ logger = logging.getLogger(__name__)
 
 
 class Graph:
-    """Class providing methods to generate a visual dependency graph
-    of a system's components and its connections.
-    """
+    """Class providing methods to generate a visual dependency graph of a system's components and its connections."""
 
     @staticmethod
-    def generate_dependency_graph(case: OspSimulationCase):
+    def generate_dependency_graph(case: OspSimulationCase) -> None:
         """Generate a dependency graph of the system structure as pdf, for documentation.
 
         Note: This requires graphviz to be installed on the local machine
@@ -34,9 +32,18 @@ class Graph:
             "Kindly check your local installation of graphviz."
         )
 
+        label: str
+        shape: str
+        style: str
+        color: str
+        fontcolor: str
+        fillcolor: str
+        penwidth: tuple[str]
+        weight: tuple[str]
+
         # Default styles
         text_size: str = "11"
-        styles: Dict[str, Dict[str, str]] = {
+        styles: dict[str, dict[str, str]] = {
             "graph": {
                 "label": f"{case.simulation.name}",
                 "fontname": "Verdana",
@@ -74,7 +81,7 @@ class Graph:
         basic_op_names: str = "(power|dot|sum|diff|prod|div|quotient)"
         input_names: str = "^(INP|inp)"
 
-        callgraph: Dot
+        callgraph: BaseGraph
         try:
             digraph = functools.partial(Digraph, format="png")
             callgraph = digraph()
@@ -86,8 +93,6 @@ class Graph:
         # Components
         for component in case.system_structure.components.values():
             label_key, label = _get_node_label(component)
-            # var_keys = find_key(case.models[key]['InitialValues'], 'InitialValue')
-            # variables = {}
             label = _create_table(
                 label_key,
                 {
@@ -101,8 +106,7 @@ class Graph:
                 shape = "diamond"
                 style = "filled,rounded"
                 fillcolor = "#FFFFFF"
-            elif re.search(basic_op_names, component.name, re.I):
-                label = label
+            elif re.search(basic_op_names, component.name, re.IGNORECASE):
                 shape = "square"
                 style = "filled, rounded"
                 fillcolor = "#EEBBDD"
@@ -125,7 +129,7 @@ class Graph:
 
         # Connections
 
-        for _, connection in case.system_structure.connections.items():
+        for connection in case.system_structure.connections.values():
             if not (connection.source_endpoint and connection.target_endpoint):
                 return
             if not (connection.source_endpoint.component and connection.target_endpoint.component):
@@ -135,20 +139,20 @@ class Graph:
 
             label = _get_edge_label(connection)
 
-            if re.search(input_names, from_key, re.I):
-                label = "input\n%s" % label
+            if re.search(input_names, from_key, re.IGNORECASE):
+                label = f"input\n{label}"
                 style = "dashed"
                 color = "#003399"
                 fontcolor = "#003399"
                 penwidth = ("%i" % 1,)
-                weight = "%i" % 1
+                weight = ("%i" % 1,)
 
-            elif re.search(basic_op_names, from_key, re.I):
+            elif re.search(basic_op_names, from_key, re.IGNORECASE):
                 style = "filled"
                 color = "#995566"
                 fontcolor = "#663344"
                 penwidth = ("%i" % 3,)
-                weight = ("%.2f" % 0.66,)
+                weight = (f"{0.66:.2f}",)
 
             else:
                 style = "bold"
@@ -176,21 +180,21 @@ class Graph:
         # Create callGraph pdf
 
         try:
-            callgraph.render(f"{case.simulation.name}_callGraph", format="pdf")  # type: ignore
+            _ = callgraph.render(f"{case.simulation.name}_callGraph", format="pdf")
         except Exception:
             logger.exception(graphiz_not_found_error_mesage)
 
         return
 
 
-def _apply_styles(digraph: Dot, styles: Dict[str, Any]) -> Dot:
-    digraph.graph_attr.update(("graph" in styles and styles["graph"]) or {})  # type: ignore
-    digraph.node_attr.update(("nodes" in styles and styles["nodes"]) or {})  # type: ignore
-    digraph.edge_attr.update(("edges" in styles and styles["edges"]) or {})  # type: ignore
+def _apply_styles(digraph: BaseGraph, styles: dict[str, Any]) -> BaseGraph:
+    digraph.graph_attr.update(("graph" in styles and styles["graph"]) or {})
+    digraph.node_attr.update(("nodes" in styles and styles["nodes"]) or {})
+    digraph.edge_attr.update(("edges" in styles and styles["edges"]) or {})
     return digraph
 
 
-def _get_node_label(component: Component) -> Tuple[str, str]:
+def _get_node_label(component: Component) -> tuple[str, str]:
     label = f"{component.name}\n___________\n\nfmu\n"
     label += re.sub(r"(^.*/|^.*\\|\.fmu.*$)", "", component.fmu.file.name)
 
@@ -206,10 +210,13 @@ def _get_edge_label(connection: Connection) -> str:
     )
 
 
-def _create_table(name: str, child: Union[Dict[str, Any], None] = None) -> str:
-    _child: Dict[str, Any] = child or {" ": " "}
+def _create_table(name: str, child: dict[str, Any] | None = None) -> str:
+    _child: dict[str, Any] = child or {" ": " "}
     n_child = len(_child)
-    string: str = f'<\n<TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0">\n<TR>\n<TD COLSPAN="{2 * n_child:d}">{name}</TD>\n</TR>\n'
+    string: str = (
+        f'<\n<TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0">\n<TR>\n'
+        f'<TD COLSPAN="{2 * n_child:d}">{name}</TD>\n</TR>\n'
+    )
     for key, item in _child.items():
         string += f"<TR><TD>{key}</TD><TD>{item}</TD></TR>\n"
     string += "</TABLE>\n>"

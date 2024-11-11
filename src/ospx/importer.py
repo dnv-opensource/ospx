@@ -2,7 +2,7 @@ import logging
 import os
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Union
+from typing import Any
 
 from dictIO import DictReader, DictWriter
 from dictIO.utils.counter import BorgCounter
@@ -16,15 +16,14 @@ logger = logging.getLogger(__name__)
 
 
 class OspSystemStructureImporter:
-    """Class providing methods to convert an existing
-    OspSystemStructure.xml file to an ospx caseDict file.
-    """
+    """Class providing methods to convert an existing OspSystemStructure.xml file to an ospx caseDict file."""
 
     @staticmethod
     def import_system_structure(
-        system_structure_file: Union[str, os.PathLike[str]],
+        system_structure_file: str | os.PathLike[str],
+        *,
         enter_lib_source_as_relative_path: bool = False,
-    ):
+    ) -> None:
         """Import an OspSystemStructure.xml file and save it as an ospx caseDict file.
 
         Parameters
@@ -53,7 +52,6 @@ class OspSystemStructureImporter:
         TypeError
             if the OspSystemStructure contains connections with an unknown endpoint type.
         """
-
         # Make sure source_file argument is of type Path. If not, cast it to Path type.
         system_structure_file = (
             system_structure_file if isinstance(system_structure_file, Path) else Path(system_structure_file)
@@ -76,54 +74,62 @@ class OspSystemStructureImporter:
         target_folder: Path = Path.cwd().absolute()
 
         # Main subdicts contained in systemStructure
-        connections: Dict[str, Dict[Any, Any]] = {}
-        components: Dict[str, Dict[Any, Any]] = {}
+        connections: dict[str, dict[Any, Any]] = {}
+        components: dict[str, dict[Any, Any]] = {}
 
         # Connections
         # iterate over the connections first as they contain the variable and component names
         temp_connectors = {}
+        msg: str
         if connections_key := find_key(source_dict, "Connections$"):
-            for connection_type, connection_properties in source_dict[connections_key].items():
-                connection_type: str = re.sub(r"(^\d{1,6}_)", "", connection_type)
+            for _connection_type, connection_properties in source_dict[connections_key].items():
+                connection_type: str = re.sub(r"(^\d{1,6}_)", "", _connection_type)
 
                 if connection_type not in {
                     "VariableConnection",
                     "VariableGroupConnection",
                 }:
                     if connection_type in {"SignalConnection", "SignalGroupConnection"}:
-                        msg: str = (
-                            f"Import failed: {system_structure_file.name} contains a connection with OSP-IS connection type '{connection_type}'\n"
+                        msg = (
+                            f"Import failed: {system_structure_file.name} contains a connection "
+                            f"with OSP-IS connection type '{connection_type}'\n"
                             f"The support for connection type '{connection_type}' is not yet implemented in ospx."
                         )
                         logger.error(msg)
                         raise NotImplementedError(msg)
-                    else:
-                        msg: str = f"Import failed: {system_structure_file.name} contains a connection with unknown connection type '{connection_type}'\n"
-                        logger.error(msg)
-                        raise TypeError(msg)
+                    msg = (
+                        f"Import failed: {system_structure_file.name} contains a connection with "
+                        f"unknown connection type '{connection_type}'\n"
+                    )
+                    logger.error(msg)
+                    raise TypeError(msg)
 
-                connection: Dict[str, Dict[Any, Any]] = {}
+                connection: dict[str, dict[Any, Any]] = {}
                 connection_name: str = ""
                 # following loop has range {0,1}
-                for index, (endpoint_type, endpoint_properties) in enumerate(connection_properties.items()):
-                    endpoint_type: str = re.sub(r"(^\d{1,6}_)", "", endpoint_type)
+                for index, (_endpoint_type, endpoint_properties) in enumerate(connection_properties.items()):
+                    endpoint_type: str = re.sub(r"(^\d{1,6}_)", "", _endpoint_type)
 
                     if endpoint_type not in {"Variable", "VariableGroup"}:
                         if endpoint_type in {"Signal", "SignalGroup"}:
-                            msg: str = (
-                                f"Import failed: {system_structure_file.name} contains a connection with OSP-IS endpoint type '{endpoint_type}'\n"
+                            msg = (
+                                f"Import failed: {system_structure_file.name} contains a connection "
+                                f"with OSP-IS endpoint type '{endpoint_type}'\n"
                                 f"The support for endpoint type '{endpoint_type}' is not yet implemented in ospx."
                             )
                             logger.error(msg)
                             raise NotImplementedError(msg)
-                        else:
-                            msg: str = f"Import failed: {system_structure_file.name} contains a connection with unknown endpoint type '{endpoint_type}'\n"
-                            logger.error(msg)
-                            raise TypeError(msg)
+                        msg = (
+                            f"Import failed: {system_structure_file.name} contains a connection "
+                            f"with unknown endpoint type '{endpoint_type}'\n"
+                        )
+                        logger.error(msg)
+                        raise TypeError(msg)
 
                     component_name: str = endpoint_properties["_attributes"]["simulator"]
                     referenced_name: str = endpoint_properties["_attributes"]["name"]
-                    # alternator for source <--> target (because there are always 2 entries in VariableConnection in always the same sequence)
+                    # alternator for source <--> target
+                    # (because there are always 2 entries in VariableConnection in always the same sequence)
                     endpoint_name: str = "source" if index % 2 == 0 else "target"
                     endpoint: dict[str, str] = {}
                     _connector_type: str = "output" if endpoint_name == "source" else "input"
@@ -170,11 +176,13 @@ class OspSystemStructureImporter:
         if simulators_key := find_key(source_dict, "Simulators$"):
             # Determine the highest common root folder among all FMU's.
             # This will be used as libSource folder.
-            fmu_folders: List[Path] = []
+            fmu_folders: list[Path] = []
+            fmu_name: str
+            fmu_file: Path
+            fmu_folder: Path
             for simulator_properties in source_dict[simulators_key].values():
-                fmu_name: str = simulator_properties["_attributes"]["source"]
-                fmu_file: Path = Path(fmu_name)
-                fmu_folder: Path
+                fmu_name = simulator_properties["_attributes"]["source"]
+                fmu_file = Path(fmu_name)
                 if fmu_file.is_absolute():
                     fmu_folder = fmu_file.resolve().parent.absolute()
                 else:
@@ -187,24 +195,21 @@ class OspSystemStructureImporter:
                 # Component
                 component_name = simulator_properties["_attributes"]["name"]
                 # Connectors
-                component_connectors: Dict[str, Dict[Any, Any]] = {}
+                component_connectors: dict[str, dict[Any, Any]] = {}
                 for temp_connector_key, connector in temp_connectors.items():
                     if component_name in temp_connector_key:
                         component_connectors |= connector
                 # FMU
-                fmu_name: str = simulator_properties["_attributes"]["source"]
-                fmu_file: Path = Path(fmu_name)
-                if fmu_file.is_absolute():
-                    fmu_file = fmu_file.resolve()
-                else:
-                    fmu_file = (source_folder / fmu_file).resolve()
+                fmu_name = simulator_properties["_attributes"]["source"]
+                fmu_file = Path(fmu_name)
+                fmu_file = fmu_file.resolve() if fmu_file.is_absolute() else (source_folder / fmu_file).resolve()
                 fmu_file_relative_to_lib_source: Path = relative_path(lib_source_folder, fmu_file)
                 # Step Size
-                step_size: Union[float, None] = None
+                step_size: float | None = None
                 if "stepSize" in simulator_properties["_attributes"]:
                     step_size = float(simulator_properties["_attributes"]["stepSize"])
                     # Initial values
-                component_initial_values: Dict[str, Dict[Any, Any]] = {}
+                component_initial_values: dict[str, dict[Any, Any]] = {}
                 if initial_values_key := find_key(simulator_properties, "InitialValues$"):
                     initial_values = simulator_properties[initial_values_key]
                     if initial_value_keys := find_keys(initial_values, "InitialValue$"):
@@ -216,7 +221,7 @@ class OspSystemStructureImporter:
                                     continue
                                 _type: str = re.sub(r"(^\d{1,6}_)", "", type_key)
                                 referenced_name = initial_value["_attributes"]["variable"]
-                                value: Union[float, int, bool, str]
+                                value: float | int | bool | str
                                 if _type == "Boolean":
                                     value = bool(initial_value[type_key]["_attributes"]["value"])
                                 elif _type == "Integer":
@@ -227,7 +232,7 @@ class OspSystemStructureImporter:
                                     value = initial_value[type_key]["_attributes"]["value"]
                                 component_initial_values |= {referenced_name: {"start": value}}
                                 # Assemble component
-                component: Dict[str, Union[Dict[Any, Any], str, float, Path]] = {
+                component: dict[str, dict[Any, Any] | str | float | Path] = {
                     "connectors": component_connectors,
                     "fmu": fmu_file_relative_to_lib_source,
                 }
@@ -239,14 +244,14 @@ class OspSystemStructureImporter:
                 components[component_name] = component
 
         # System Structure
-        system_structure: Dict[str, Dict[str, Any]] = {
+        system_structure: dict[str, dict[str, Any]] = {
             "connections": connections,
             "components": components,
         }
 
         # Global Settings
         # 1: Defaults
-        simulation: Dict[str, Any] = {
+        simulation: dict[str, Any] = {
             "name": system_structure_file.stem,
             "startTime": 0.0,
             "baseStepSize": 0.01,
