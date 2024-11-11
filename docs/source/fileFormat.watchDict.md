@@ -38,7 +38,7 @@ The watchDict file serves as configuration for watchCosim, allowing to
 
 Below example shows a typical watchDict file.
 
-~~~js
+~~~cpp
 /*---------------------------------*- C++ -*----------------------------------*\
 filetype dictionary; coding utf-8; version 0.1; local --; purpose --;
 \*----------------------------------------------------------------------------*/
