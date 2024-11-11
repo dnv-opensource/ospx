@@ -8,7 +8,12 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 -/-
 
 
-## [0.2.15] - 2024-10-24
+## [0.3.0] - 2024-11-11
+
+### Breaking changes
+* The code has been adapted to [dictIO][dictIO_docs] 0.4.0 <br>
+  [dictIO][dictIO_docs] 0.4.0 introduced some breaking changes. With the current release 0.3.0 of ospx, the code base has been adapted to these in changes. <br>
+  The most prominent change being that class `dictIO.CppDict` has been replaced by class `dictIO.SDict`.
 
 ### Changed
 * Changed from `pip`/`tox` to `uv` as package manager
@@ -31,6 +36,7 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 * _test_future.yml : updated name of test job to 'test313'
 
 ### Dependencies
+* Updated to dictIO>=0.4.0  (from dictIO>=0.3.4)
 * Updated to ruff>=0.6.3  (from ruff==0.4.2)
 * Updated to pyright>=1.1.378  (from pyright==1.1.360)
 * Updated to sourcery>=1.22  (from sourcery==1.16)
@@ -455,3 +461,6 @@ Maintenance Release
 [0.0.22]: https://github.com/dnv-opensource/ospx/compare/v0.0.17...v0.0.22
 [0.0.17]: https://github.com/dnv-opensource/ospx/releases/tag/v0.0.17
 [ospx]: https://github.com/dnv-opensource/ospx
+
+<!-- Markdown link & img dfn's -->
+[dictIO_docs]: https://dnv-opensource.github.io/dictIO/README.html
