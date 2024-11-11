@@ -58,11 +58,11 @@ A caseDict file contains
 
 Below example shows a typical caseDict file.
 
-~~~guess
+~~~cpp
 /*---------------------------------*- C++ -*----------------------------------*\
 filetype dictionary; coding utf-8; version 0.1; local --; purpose --;
 \*----------------------------------------------------------------------------*/
-#include 'paramDict'
+#include paramDict
 
 _environment
 {
@@ -256,7 +256,7 @@ into the case's build directory and call ospCaseBuilder with the --inspect optio
 ospCaseBuilder caseDict --inspect --verbose
 ```
 Inspection works already with a fairly rudimentary caseDict, such as:
-~~~guess
+~~~cpp
 /*---------------------------------*- C++ -*----------------------------------*\
 filetype dictionary; coding utf-8; version 0.1; local --; purpose --;
 \*----------------------------------------------------------------------------*/
