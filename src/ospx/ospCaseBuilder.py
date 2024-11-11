@@ -1,8 +1,9 @@
 import logging
 import os
 from pathlib import Path
+from typing import Any
 
-from dictIO import CppDict, DictReader
+from dictIO import DictReader, SDict
 
 from ospx import Graph, OspSimulationCase
 
@@ -64,7 +65,7 @@ class OspCaseBuilder:
 
         logger.info(f"reading {case_dict_file}")  # 0
 
-        case_dict: CppDict = DictReader.read(case_dict_file, comments=False)
+        case_dict: SDict[str, Any] = DictReader.read(case_dict_file, comments=False)
 
         case = OspSimulationCase(case_dict)
         try:

@@ -4,7 +4,7 @@ from pathlib import Path
 from shutil import copy2
 from typing import Any
 
-from dictIO import CppDict, DictWriter, XmlFormatter
+from dictIO import DictWriter, SDict, XmlFormatter
 from dictIO.utils.counter import BorgCounter
 from dictIO.utils.path import relative_path
 
@@ -21,10 +21,10 @@ class OspSimulationCase:
 
     def __init__(
         self,
-        case_dict: CppDict,
+        case_dict: SDict[str, Any],
     ) -> None:
         self.counter = BorgCounter()
-        self.case_dict: CppDict = case_dict
+        self.case_dict: SDict[str, Any] = case_dict
         self.case_folder: Path = case_dict.source_file.resolve().parent if case_dict.source_file else Path.cwd()
         self.system_structure: System
 

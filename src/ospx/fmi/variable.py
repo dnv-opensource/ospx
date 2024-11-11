@@ -1,9 +1,12 @@
 # ruff: noqa: PYI041
 import logging
 from collections.abc import Iterable, Sequence
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from dictIO import Formatter, Parser
+from dictIO import Formatter, NativeFormatter, Parser
+
+if TYPE_CHECKING:
+    from dictIO.types import TSingleValue
 
 __ALL__ = ["ScalarVariable", "get_fmi_data_type"]
 
@@ -222,7 +225,7 @@ def _cast_to_fmi_data_type(
 
     Parameters
     ----------
-    arg : Union[int, float, bool, str, Sequence[Any]]
+    arg : int | float | bool | str | Sequence[Any]
         The argument to be casted
     fmi_data_type : str
         The fmi data type the argument shall be casted to.\n
@@ -242,17 +245,19 @@ def _cast_to_fmi_data_type(
             )
             return None
         # parse if arg is string
-        parsed_value: int | float | bool
-        parsed_value = Parser().parse_type(arg) if isinstance(arg, str) else arg
+        parsed_value: TSingleValue
+        parsed_value = Parser().parse_value(arg) if isinstance(arg, str) else arg
         # cast to int / float / bool
         if fmi_data_type == "Integer":
+            assert parsed_value is not None
             return int(parsed_value)
         if fmi_data_type == "Real":
+            assert parsed_value is not None
             return float(parsed_value)
         return bool(parsed_value)
     if fmi_data_type == "String":
         # format as string
-        return Formatter().format_dict(arg) if isinstance(arg, Sequence) else Formatter().format_type(arg)
+        return NativeFormatter().format_dict(arg) if isinstance(arg, Sequence) else Formatter().format_value(arg)
     if fmi_data_type == "Enumeration":
         # cast to list
         return list(arg) if isinstance(arg, Iterable) else [arg]

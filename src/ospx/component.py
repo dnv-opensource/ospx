@@ -270,7 +270,7 @@ class Component:
             "_rootTag": "ospModelDescription",
         }
 
-        DictWriter.write(osp_model_description, osp_model_description_file)
+        DictWriter.write(source_dict=osp_model_description, target_file=osp_model_description_file)
 
     def _clean(self, file_to_remove: str | Path) -> None:
         """Clean up single file."""
