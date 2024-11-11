@@ -1,15 +1,17 @@
+from __future__ import annotations
+
 import logging
 import os
 import platform
 import re
 from copy import deepcopy
-from datetime import date, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from shutil import copyfile
-from typing import Any, Dict, Mapping, MutableMapping, Union
+from typing import TYPE_CHECKING, Any
 from zipfile import ZipFile
 
-from dictIO import CppDict, XmlFormatter, XmlParser
+from dictIO import SDict, XmlFormatter, XmlParser
 from dictIO.utils.counter import BorgCounter
 
 from ospx.fmi import BaseUnit, DisplayUnit, Experiment, ScalarVariable, Unit
@@ -20,6 +22,9 @@ from ospx.utils.zip import (
     remove_files_from_zip,
     rename_file_in_zip,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping, MutableMapping
 
 __ALL__ = ["FMU"]
 
@@ -32,7 +37,7 @@ class FMU:
     See also https://github.com/modelica/fmi-standard/blob/v2.0.x/schema/fmi2ModelDescription.xsd
     """
 
-    def __init__(self, file: Union[str, os.PathLike[str]]):
+    def __init__(self, file: str | os.PathLike[str]) -> None:
         # Make sure fmu_file argument is of type Path. If not, cast it to Path type.
         file = file if isinstance(file, Path) else Path(file)
         if not file.exists():
@@ -40,11 +45,11 @@ class FMU:
             raise FileNotFoundError(file)
 
         self.file: Path = file
-        self.model_description: CppDict = self._read_model_description()
+        self.model_description: SDict[str, Any] = self._read_model_description()
         self.counter = BorgCounter()
 
-    def _read_model_description(self) -> CppDict:
-        model_description = CppDict(Path("modelDescription.xml"))
+    def _read_model_description(self) -> SDict[str, Any]:
+        model_description: SDict[str, Any] = SDict(Path("modelDescription.xml"))
         xml_parser = XmlParser()
 
         logger.info(f"{self.file.name}: read modelDescription.xml")
@@ -60,9 +65,10 @@ class FMU:
 
     def _write_model_description(
         self,
-        model_description: Union[CppDict, None] = None,
+        model_description: SDict[str, Any] | None = None,
+        *,
         write_inside_fmu: bool = False,
-    ):
+    ) -> None:
         """Save updated model_description both inside FMU as well as separate file in the FMUs directory."""
         if model_description:
             self.model_description = model_description
@@ -83,13 +89,13 @@ class FMU:
 
         # Write external modelDescription.xml (separate file, beside FMU)
         external_file = self.file.parent.absolute() / f"{self.file.stem}_ModelDescription.xml"
-        with open(external_file, "w") as f:
+        with Path.open(external_file, "w") as f:
             _ = f.write(formatted_xml)
 
         return
 
     @property
-    def units(self) -> Dict[str, Unit]:
+    def units(self) -> dict[str, Unit]:
         """Returns a dict with all units defined in the FMU.
 
         Returns
@@ -191,7 +197,7 @@ class FMU:
         return variables
 
     @property
-    def default_experiment(self) -> Union[Experiment, None]:
+    def default_experiment(self) -> Experiment | None:
         """Returns the default experiment, if defined in the FMU.
 
         Returns
@@ -216,7 +222,7 @@ class FMU:
                 default_experiment.step_size = default_experiment_attributes["stepSize"]
         return default_experiment
 
-    def copy(self, new_name: str):
+    def copy(self, new_name: str) -> FMU:
         """Save a copy of the FMU with a new name.
 
         Parameters
@@ -234,7 +240,7 @@ class FMU:
         existing_file_name = self.file.stem
         if new_name == existing_file_name:
             logger.error(f"{self.file.name} copy: new name {new_name} is identical with existing name. copy() aborted.")
-        new_model_description: CppDict = deepcopy(self.model_description)
+        new_model_description: SDict[str, Any] = deepcopy(self.model_description)
         new_file = self.file.parent.absolute() / f"{new_name}.fmu"
 
         # Copy FMU
@@ -248,30 +254,30 @@ class FMU:
                 if re.search(r".*\.dll$", file.filename) and existing_file_name in file.filename
             ]
         new_dll_file_names = [re.sub(existing_file_name, new_name, dll_file_name) for dll_file_name in dll_file_names]
-        for dll_file_name, new_dll_file_name in zip(dll_file_names, new_dll_file_names):
+        for dll_file_name, new_dll_file_name in zip(dll_file_names, new_dll_file_names, strict=False):
             logger.info(f"{self.file.name} copy: renaming dll {dll_file_name} to {new_dll_file_name}")
             _ = rename_file_in_zip(new_file, dll_file_name, new_dll_file_name)
 
         # Rename <fmiModelDescription modelName> in modelDescription.xml
         new_model_description["_xmlOpts"]["_rootAttributes"]["modelName"] = new_name
 
-        # Rename <CoSimulation modelIdentifier> in modelDescription.xml
-        # (STC requires consistency between <fmiModelDescription modelName> and <CoSimulation modelIdentifier>)
-        co_simulation: MutableMapping[Any, Any] = new_model_description[
-            find_key(new_model_description, "CoSimulation$")
-        ]
-        co_simulation["_attributes"]["modelIdentifier"] = new_name
+        if _key := find_key(
+            dict_in=new_model_description,
+            pattern="CoSimulation$",
+        ):
+            co_simulation: MutableMapping[str, Any] = new_model_description[_key]
+            co_simulation["_attributes"]["modelIdentifier"] = new_name
 
         # Log the update in modelDescription.xml
         self._log_update_in_model_description(new_model_description)
 
         # Write updated modelDescription.xml into new FMU
         new_fmu = FMU(new_file)
-        new_fmu._write_model_description(new_model_description)
+        new_fmu._write_model_description(new_model_description)  # noqa: SLF001
 
         return new_fmu
 
-    def proxify(self, host: str, port: int):
+    def proxify(self, host: str, port: int) -> FMU:
         """Create a proxy version of the FMU.
 
         For details see https://github.com/NTNU-IHB/FMU-proxy
@@ -288,84 +294,90 @@ class FMU:
         FMU
             The created proxy version of the FMU
         """
-
         import subprocess
 
         remote_string = f"--remote={host}:{port}"
         command = f"fmu-proxify {self.file.name} {remote_string}"
         try:
-            _ = subprocess.run(command, timeout=60)
+            _ = subprocess.run(command, timeout=60, check=False)  # noqa: S603
         except subprocess.TimeoutExpired:
             logger.exception(f"Timeout occured when calling {command}.")
             return self
         proxy_fmu_file = self.file.parent.absolute() / f"{self.file.stem}-proxy.fmu"
         return FMU(proxy_fmu_file)
 
-    def _modify_start_values(self, variables_with_start_values: dict[str, ScalarVariable]):
+    def _modify_start_values(self, variables_with_start_values: dict[str, ScalarVariable]) -> None:
         """Modify the start values of variables inside the FMUs modelDescription.xml."""
-
         logger.info(f"{self.file.name}: update start values of variables in modelDescription.xml")  # 2
-
-        model_variables: MutableMapping[Any, Any] = self.model_description[
-            find_key(self.model_description, "ModelVariables$")
-        ]
 
         names_of_variables_with_start_values: list[str] = [
             variable.name for _, variable in variables_with_start_values.items()
         ]
 
-        for model_variable_key, model_variable_properties in model_variables.items():
-            model_variable_name: str = model_variable_properties["_attributes"]["name"]
+        if _key := find_key(
+            dict_in=self.model_description,
+            pattern="ModelVariables$",
+        ):
+            model_variables: MutableMapping[Any, Any] = self.model_description[_key]
 
-            if model_variable_name in names_of_variables_with_start_values:
-                variable_with_start_values = variables_with_start_values[model_variable_name]
-                type_identifier = find_type_identifier_in_keys(model_variable_properties)
-                type_key = find_key(model_variable_properties, f"{type_identifier}$")
+            for model_variable_key, model_variable_properties in model_variables.items():
+                model_variable_name: str = model_variable_properties["_attributes"]["name"]
 
-                logger.info(
-                    f"{self.file.name}: update start values for variable {model_variable_name}:\n"
-                    f"\tstart:\t\t{variable_with_start_values.start}\n"
-                    f"\tcausality:\t {variable_with_start_values.causality}\n"
-                    f"\tvariability:\t{variable_with_start_values.variability}"
-                )
+                if model_variable_name in names_of_variables_with_start_values:
+                    variable_with_start_values = variables_with_start_values[model_variable_name]
+                    type_identifier = find_type_identifier_in_keys(model_variable_properties)
+                    type_key = find_key(model_variable_properties, f"{type_identifier}$")
 
-                model_variables[model_variable_key][type_key]["_attributes"]["start"] = variable_with_start_values.start
-                model_variables[model_variable_key]["_attributes"]["causality"] = variable_with_start_values.causality
-                model_variables[model_variable_key]["_attributes"]["variability"] = (
-                    variable_with_start_values.variability
-                )
+                    logger.info(
+                        f"{self.file.name}: update start values for variable {model_variable_name}:\n"
+                        f"\tstart:\t\t{variable_with_start_values.start}\n"
+                        f"\tcausality:\t {variable_with_start_values.causality}\n"
+                        f"\tvariability:\t{variable_with_start_values.variability}"
+                    )
+
+                    model_variables[model_variable_key][type_key]["_attributes"]["start"] = (
+                        variable_with_start_values.start
+                    )
+                    model_variables[model_variable_key]["_attributes"]["causality"] = (
+                        variable_with_start_values.causality
+                    )
+                    model_variables[model_variable_key]["_attributes"]["variability"] = (
+                        variable_with_start_values.variability
+                    )
 
         self._log_update_in_model_description()
 
-    def _log_update_in_model_description(self, model_description: Union[CppDict, None] = None):
+    def _log_update_in_model_description(
+        self,
+        model_description: SDict[str, Any] | None = None,
+    ) -> None:
         model_description = model_description or self.model_description
 
         logger.info(f"{self.file.name}: update <fmiModelDescription description>")  # 2
         # Author
         old_author = model_description["_xmlOpts"]["_rootAttributes"]["author"]
-        if platform.system() == "Linux":
-            new_author = os.environ["USER"]
-        else:
-            new_author = os.environ["USERNAME"]
+        new_author = os.environ["USER"] if platform.system() == "Linux" else os.environ["USERNAME"]
         model_description["_xmlOpts"]["_rootAttributes"]["author"] = new_author
         # DateAndTime
         old_date = model_description["_xmlOpts"]["_rootAttributes"]["generationDateAndTime"]
-        new_date = str(datetime.now())
+        new_date = str(datetime.now(tz=timezone.utc))
         model_description["_xmlOpts"]["_rootAttributes"]["generationDateAndTime"] = new_date
         # Log modifications in <fmiModelDescription description> attribute
         add_description_string = (
-            f"\nmodified {date.today()}:\n"
+            f"\nmodified {datetime.now(tz=timezone.utc).date()}:\n"
             f"\tauthor {old_author} to {new_author}\n"
             f"\tgenerationDateAndTime {old_date} to {new_date}\n"
         )
         model_description["_xmlOpts"]["_rootAttributes"]["description"] += add_description_string
+        return
 
     # @TODO: Check when and where this method needs to be called. And why..
     #        CLAROS, 2022-05-24
-    def _clean_solver_internal_variables(self, model_description: MutableMapping[Any, Any]):
+    def _clean_solver_internal_variables(self, model_description: MutableMapping[Any, Any]) -> None:
         """Clean solver internal variables, such as '_iti_...'."""
         model_variables: Mapping[Any, Any] = model_description[find_key(model_description, "ModelVariables$")]
         model_name = model_description["_xmlOpts"]["_rootAttributes"]["modelName"]
         for model_variable_key in model_variables:
             if "_origin" in model_variables[model_variable_key]:
                 model_variables[model_variable_key]["_origin"] = model_name
+        return

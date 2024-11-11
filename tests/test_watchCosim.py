@@ -1,15 +1,14 @@
 from pathlib import Path
-from typing import List
 
 import pytest
 
 from ospx.watch.watchCosim import CosimWatcher
 
 
-def test_file_not_found_exception():
+def test_file_not_found_exception() -> None:
     # Prepare
     source_file: Path = Path("this_file_does_not_exist")
-    csv_file_names: List[str] = []
+    csv_file_names: list[str] = []
     skip_values: int = 0
     latest_values: int = 0
     watcher = CosimWatcher(
@@ -24,7 +23,7 @@ def test_file_not_found_exception():
         watcher.read_watch_dict(source_file)
 
 
-def test_read_watch_dict():
+def test_read_watch_dict() -> None:
     # Prepare
     source_file = Path("test_watchDict")
     csv_file_names = [

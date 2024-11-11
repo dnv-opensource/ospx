@@ -1,10 +1,8 @@
 #!/usr/bin/env python
-# coding: utf-8
 
 import argparse
 import logging
 from pathlib import Path
-from typing import Union
 
 from ospx import OspCaseBuilder
 from ospx.utils.logging import configure_logging
@@ -98,7 +96,7 @@ def _argparser() -> argparse.ArgumentParser:
     return parser
 
 
-def main():
+def main() -> None:
     """Entry point for console script as configured in setup.cfg.
 
     Runs the command line interface and parses arguments and options entered on the console.
@@ -114,7 +112,7 @@ def main():
         log_level_console = "DEBUG" if args.verbose else log_level_console
 
     # ..to file
-    log_file: Union[Path, None] = Path(args.log) if args.log else None
+    log_file: Path | None = Path(args.log) if args.log else None
     log_level_file: str = args.log_level
     configure_logging(log_level_console, log_file, log_level_file)
 
