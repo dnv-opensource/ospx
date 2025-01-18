@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <OspModelDescription xmlns="https://open-simulation-platform.com/OspModelDescription/1.0.0" version="1.0">
-    
+
     <UnitDefinitions>
         <Unit name="m">
             <BaseUnit kg="0" m="1" s="0" A="0" K="0" mol="0" cd="0" rad="0" factor="1.0" offset="0.0"/>
@@ -21,9 +21,9 @@
             <BaseUnit kg="1" m="2" s="-2" A="0" K="0" mol="0" cd="0" rad="0" factor="1.0" offset="0.0"/>
         </Unit>
     </UnitDefinitions>
-    
+
     <VariableGroups>
-        
+
         <Generic name="position_3dof">
             <LinearDisplacement name="linear_vessel_position">
                 <Variable ref="Measured_Position[1]" unit="m"/>
@@ -45,7 +45,7 @@
         </Generic>
 
         <Generic name="acceleration_3dof">
-            <LinearAcceleration name="linear_vessel_acceleration">    
+            <LinearAcceleration name="linear_vessel_acceleration">
                 <Variable ref="Measured_Acceleration[1]"/>
                 <Variable ref="Measured_Acceleration[2]"/>
             </LinearAcceleration>
@@ -53,7 +53,7 @@
                 <Variable ref="Measured_Acceleration[3]"/>
             </AngularAcceleration>
         </Generic>
-        
+
         <Generic name="wind_measurements">
             <LinearVelocity name="linear_wind_velocity">
                 <Variable ref="Measured_Wind[1]" unit="m/s"/>
@@ -63,7 +63,7 @@
                 <Variable ref="Measured_Wind[3]" unit="rad/s"/>
             </AngularVelocity>
         </Generic>
-        
+
         <Generic name="thrust_command">
             <Force name="linear_force_command">
                 <Variable ref="Commanded_Thrust[1]" unit="N"/>

@@ -17,7 +17,7 @@
             <VariableGroup simulator="thruster_dynamics" name="thrust"/>
             <VariableGroup simulator="vessel_model" name="thrust"/>
         </VariableGroupConnection>
-        
+
        <VariableGroupConnection>
             <VariableGroup simulator="current_model" name="current_velocity"/>
             <VariableGroup simulator="vessel_model" name="current_velocity"/>
@@ -27,7 +27,7 @@
             <VariableGroup simulator="vessel_model" name="position_3dof"/>
             <VariableGroup simulator="control_system_communication" name="position_3dof"/>
         </VariableGroupConnection>
-        
+
        <VariableGroupConnection>
             <VariableGroup simulator="vessel_model" name="velocity"/>
             <VariableGroup simulator="control_system_communication" name="velocity"/>
@@ -42,6 +42,6 @@
             <VariableGroup simulator="control_system_communication" name="thrust_command"/>
             <VariableGroup simulator="thruster_dynamics" name="thrust_command"/>
         </VariableGroupConnection>
-        
+
     </Connections>
 </OspSystemStructure>

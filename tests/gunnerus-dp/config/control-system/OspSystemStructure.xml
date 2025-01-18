@@ -17,7 +17,7 @@
             <VariableGroup simulator="box_reference" name="position_setpoint"/>
             <VariableGroup simulator="reference_model" name="position_setpoint"/>
         </VariableGroupConnection>
-        
+
        <VariableGroupConnection>
             <VariableGroup simulator="reference_model" name="desired_position"/>
             <VariableGroup simulator="dp_controller" name="position_setpoint"/>
@@ -37,7 +37,7 @@
             <VariableGroup simulator="dp_controller" name="thrust_command"/>
             <VariableGroup simulator="simulator_communication" name="thrust_command"/>
         </VariableGroupConnection>
-        
+
        <VariableGroupConnection>
             <VariableGroup simulator="simulator_communication" name="position_3dof"/>
             <VariableGroup simulator="dp_controller" name="position_3dof"/>

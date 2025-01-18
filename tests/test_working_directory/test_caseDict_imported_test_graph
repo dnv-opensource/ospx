@@ -1,0 +1,368 @@
+/*---------------------------------*- C++ -*----------------------------------*\
+filetype dictionary; coding utf-8; version 0.1; local --; purpose --;
+\*----------------------------------------------------------------------------*/
+
+_environment
+{
+    libSource                 ../library/house;
+}
+systemStructure
+{
+    connections
+    {
+        OuterWall1_to_Room1
+        {
+            source
+            {
+                component        OuterWall1;
+                variable        h_wall;
+            }
+            target
+            {
+                component        Room1;
+                variable        h_OuterWall;
+            }
+        }
+        InnerWall_to_Room1
+        {
+            source
+            {
+                component        InnerWall;
+                variable        h_wall;
+            }
+            target
+            {
+                component        Room1;
+                variable        h_InnerWall;
+            }
+        }
+        TempController_to_Room1
+        {
+            source
+            {
+                component        TempController;
+                variable        h_room1;
+            }
+            target
+            {
+                component        Room1;
+                variable        h_powerHeater;
+            }
+        }
+        Room1_to_OuterWall1
+        {
+            source
+            {
+                component        Room1;
+                variable        T_room;
+            }
+            target
+            {
+                component        OuterWall1;
+                variable        T_room1;
+            }
+        }
+        InnerWall_to_Room2
+        {
+            source
+            {
+                component        InnerWall;
+                variable        h_wall;
+            }
+            target
+            {
+                component        Room2;
+                variable        h_InnerWall;
+            }
+        }
+        OuterWall2_to_Room2
+        {
+            source
+            {
+                component        OuterWall2;
+                variable        h_wall;
+            }
+            target
+            {
+                component        Room2;
+                variable        h_OuterWall;
+            }
+        }
+        TempController_to_Room2
+        {
+            source
+            {
+                component        TempController;
+                variable        h_room2;
+            }
+            target
+            {
+                component        Room2;
+                variable        h_powerHeater;
+            }
+        }
+        Room2_to_TempController
+        {
+            source
+            {
+                component        Room2;
+                variable        T_room;
+            }
+            target
+            {
+                component        TempController;
+                variable        T_room2;
+            }
+        }
+        Room1_to_TempController
+        {
+            source
+            {
+                component        Room1;
+                variable        T_room;
+            }
+            target
+            {
+                component        TempController;
+                variable        T_room1;
+            }
+        }
+        Clock_to_TempController
+        {
+            source
+            {
+                component        Clock;
+                variable        Clock;
+            }
+            target
+            {
+                component        TempController;
+                variable        T_clock;
+            }
+        }
+        Room1_to_InnerWall
+        {
+            source
+            {
+                component        Room1;
+                variable        T_room;
+            }
+            target
+            {
+                component        InnerWall;
+                variable        T_room1;
+            }
+        }
+        Room2_to_InnerWall
+        {
+            source
+            {
+                component        Room2;
+                variable        T_room;
+            }
+            target
+            {
+                component        InnerWall;
+                variable        T_room2;
+            }
+        }
+        Room2_to_OuterWall2
+        {
+            source
+            {
+                component        Room2;
+                variable        T_room;
+            }
+            target
+            {
+                component        OuterWall2;
+                variable        T_room2;
+            }
+        }
+    }
+    components
+    {
+        Clock
+        {
+            connectors
+            {
+                Clock_Clock
+                {
+                    variable        Clock;
+                    type        output;
+                }
+            }
+            fmu               Clock.fmu;
+        }
+        InnerWall
+        {
+            connectors
+            {
+                InnerWall_h_wall
+                {
+                    variable        h_wall;
+                    type        output;
+                }
+                InnerWall_T_room1
+                {
+                    variable        T_room1;
+                    type        input;
+                }
+                InnerWall_T_room2
+                {
+                    variable        T_room2;
+                    type        input;
+                }
+            }
+            fmu               InnerWall.fmu;
+        }
+        OuterWall1
+        {
+            connectors
+            {
+                OuterWall1_h_wall
+                {
+                    variable        h_wall;
+                    type        output;
+                }
+                OuterWall1_T_room1
+                {
+                    variable        T_room1;
+                    type        input;
+                }
+            }
+            fmu               OuterWall1.fmu;
+            initialize
+            {
+                T_outside
+                {
+                    causality        parameter;
+                    variability        fixed;
+                    start        5.3;
+                }
+            }
+        }
+        OuterWall2
+        {
+            connectors
+            {
+                OuterWall2_h_wall
+                {
+                    variable        h_wall;
+                    type        output;
+                }
+                OuterWall2_T_room2
+                {
+                    variable        T_room2;
+                    type        input;
+                }
+            }
+            fmu               OuterWall2.fmu;
+            initialize
+            {
+                T_outside
+                {
+                    causality        parameter;
+                    variability        fixed;
+                    start        4.9;
+                }
+            }
+        }
+        Room1
+        {
+            connectors
+            {
+                Room1_h_OuterWall
+                {
+                    variable        h_OuterWall;
+                    type        input;
+                }
+                Room1_h_InnerWall
+                {
+                    variable        h_InnerWall;
+                    type        input;
+                }
+                Room1_h_powerHeater
+                {
+                    variable        h_powerHeater;
+                    type        input;
+                }
+                Room1_T_room
+                {
+                    variable        T_room;
+                    type        output;
+                }
+            }
+            fmu               Room1.fmu;
+        }
+        Room2
+        {
+            connectors
+            {
+                Room2_h_InnerWall
+                {
+                    variable        h_InnerWall;
+                    type        input;
+                }
+                Room2_h_OuterWall
+                {
+                    variable        h_OuterWall;
+                    type        input;
+                }
+                Room2_h_powerHeater
+                {
+                    variable        h_powerHeater;
+                    type        input;
+                }
+                Room2_T_room
+                {
+                    variable        T_room;
+                    type        output;
+                }
+            }
+            fmu               Room2.fmu;
+        }
+        TempController
+        {
+            connectors
+            {
+                TempController_h_room1
+                {
+                    variable        h_room1;
+                    type        output;
+                }
+                TempController_h_room2
+                {
+                    variable        h_room2;
+                    type        output;
+                }
+                TempController_T_room2
+                {
+                    variable        T_room2;
+                    type        input;
+                }
+                TempController_T_room1
+                {
+                    variable        T_room1;
+                    type        input;
+                }
+                TempController_T_clock
+                {
+                    variable        T_clock;
+                    type        input;
+                }
+            }
+            fmu               TempController.fmu;
+        }
+    }
+}
+run
+{
+    simulation
+    {
+        name                  OspSystemStructure;
+        startTime             0.0;
+        baseStepSize          0.01;
+        algorithm             fixedStep;
+    }
+}

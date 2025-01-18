@@ -11,12 +11,12 @@ ospx Documentation
    :caption: Contents:
 
    README
-   CHANGELOG
-   LICENSE
    api
    cli
    fileFormat
-
+   CHANGELOG
+   STYLEGUIDE
+   LICENSE
 
 
 Indices and tables
