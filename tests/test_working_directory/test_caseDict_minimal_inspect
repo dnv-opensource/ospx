@@ -1,0 +1,40 @@
+/*---------------------------------*- C++ -*----------------------------------*\
+filetype dictionary; coding utf-8; version 0.1; local --; purpose --;
+\*----------------------------------------------------------------------------*/
+_environment
+{
+    libSource                           ../library;  //adjust this path to point to the library folder containing the fmu's
+}
+systemStructure
+{
+    components
+    {
+        difference
+        {
+            fmu                         simple/difference.fmu;
+        }
+        quotient
+        {
+            fmu                         simple/quotient.fmu;
+        }
+        minuend
+        {
+            fmu                         simple/constantVal.fmu;
+        }
+        subtrahend
+        {
+            fmu                         simple/constantVal.fmu;
+        }
+        dividend
+        {
+            fmu                         simple/constantVal.fmu;
+        }
+    }
+}
+run
+{
+    simulation
+    {
+        name                            demoCase;
+    }
+}
