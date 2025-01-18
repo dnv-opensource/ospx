@@ -1,8 +1,8 @@
 #!/usr/bin/env python
+"""importSystemStructure command line interface."""
 
 import argparse
 import logging
-from argparse import ArgumentParser
 from pathlib import Path
 
 from ospx import OspSystemStructureImporter
@@ -12,9 +12,9 @@ logger = logging.getLogger(__name__)
 
 
 def _argparser() -> argparse.ArgumentParser:
-    parser = ArgumentParser(
+    parser = argparse.ArgumentParser(
         prog="importSystemStructure",
-        usage="%(prog)s systemStructureFile [options [args]]",
+        usage="%(prog)s system_structure_file [options [args]]",
         epilog="_________________importSystemStructure___________________",
         prefix_chars="-",
         add_help=True,
@@ -22,8 +22,8 @@ def _argparser() -> argparse.ArgumentParser:
     )
 
     _ = parser.add_argument(
-        "systemStructureFile",
-        metavar="systemStructureFile",
+        "system_structure_file",
+        metavar="system_structure_file",
         type=str,
         help="name of the system structure file",
         default="OspSystemStructure.xml",
@@ -70,7 +70,7 @@ def _argparser() -> argparse.ArgumentParser:
 
 
 def main() -> None:
-    """Entry point for console script as configured in setup.cfg.
+    """Entry point for console script as configured in pyproject.toml.
 
     Runs the command line interface and parses arguments and options entered on the console.
     """
@@ -78,16 +78,17 @@ def main() -> None:
     args = parser.parse_args()
 
     # Configure Logging
+    # ..to console
     log_level_console: str = "WARNING"
     if any([args.quiet, args.verbose]):
         log_level_console = "ERROR" if args.quiet else log_level_console
-        log_level_console = "DEBUG" if args.verbose else log_level_console
+        log_level_console = "INFO" if args.verbose else log_level_console
     # ..to file
     log_file: Path | None = Path(args.log) if args.log else None
     log_level_file: str = args.log_level
     configure_logging(log_level_console, log_file, log_level_file)
 
-    system_structure_file: Path = Path(args.systemStructureFile)
+    system_structure_file: Path = Path(args.system_structure_file)
 
     # Check whether system structure file exists
     if not system_structure_file.is_file():

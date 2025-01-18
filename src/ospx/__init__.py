@@ -1,3 +1,4 @@
+"""ospx package"""
 from ospx.simulation import Simulation as Simulation
 from ospx.connector import Connector as Connector
 from ospx.connection import (
