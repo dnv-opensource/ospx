@@ -144,22 +144,22 @@ class Graph:
                 style = "dashed"
                 color = "#003399"
                 fontcolor = "#003399"
-                penwidth = ("%i" % 1,)
-                weight = ("%i" % 1,)
+                penwidth = (f"{1:d}",)
+                weight = (f"{1:d}",)
 
             elif re.search(basic_op_names, from_key, re.IGNORECASE):
                 style = "filled"
                 color = "#995566"
                 fontcolor = "#663344"
-                penwidth = ("%i" % 3,)
+                penwidth = (f"{3:d}",)
                 weight = (f"{0.66:.2f}",)
 
             else:
                 style = "bold"
                 color = "black"
                 fontcolor = "black"
-                penwidth = ("%i" % int(round((2) ** 1.5, 0)),)
-                weight = ("%i" % int(round((2) ** 1.5, 0)),)
+                penwidth = (f"{int(round((2) ** 1.5, 0))}",)
+                weight = (f"{int(round((2) ** 1.5, 0))}",)
 
             callgraph.edge(
                 from_key,

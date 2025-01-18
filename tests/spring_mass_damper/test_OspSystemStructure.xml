@@ -13,7 +13,7 @@
                 </InitialValue>
             </InitialValues>
         </Simulator>
-        
+
         <Simulator name="damper" source="Damper.fmu">
             <InitialValues>
                 <InitialValue variable="dampingCoefficient">
@@ -21,7 +21,7 @@
                 </InitialValue>
             </InitialValues>
         </Simulator>
-        
+
         <Simulator name="mass" source="Mass.fmu">
             <InitialValues>
                 <InitialValue variable="initialPositionX">

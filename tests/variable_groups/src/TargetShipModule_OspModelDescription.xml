@@ -5,46 +5,46 @@
 	<VariableGroups>
 		<!-- Input -->
 		<Generic name="ASVStates">
-			<Variable ref="ASVState[0]"/>			
-			<Variable ref="ASVState[1]"/>			
+			<Variable ref="ASVState[0]"/>
+			<Variable ref="ASVState[1]"/>
 			<Variable ref="ASVState[2]"/>
-			<Variable ref="ASVState[3]"/>			
-			<Variable ref="ASVState[4]"/>			
-			<Variable ref="ASVState[5]"/>							
+			<Variable ref="ASVState[3]"/>
+			<Variable ref="ASVState[4]"/>
+			<Variable ref="ASVState[5]"/>
 		</Generic>
 		<!-- Output -->
 		<Generic name="ASVStates">
-			<Variable ref="ASVState[0]"/>			
-			<Variable ref="ASVState[1]"/>			
+			<Variable ref="ASVState[0]"/>
+			<Variable ref="ASVState[1]"/>
 			<Variable ref="ASVState[2]"/>
-			<Variable ref="ASVState[3]"/>			
-			<Variable ref="ASVState[4]"/>			
-			<Variable ref="ASVState[5]"/>							
+			<Variable ref="ASVState[3]"/>
+			<Variable ref="ASVState[4]"/>
+			<Variable ref="ASVState[5]"/>
 		</Generic>
 		<Generic name="TargetShipsPositionX">
-			<Variable ref="PositionX[0]"/>			
-			<Variable ref="PositionX[1]"/>			
-			<Variable ref="PositionX[2]"/>						
+			<Variable ref="PositionX[0]"/>
+			<Variable ref="PositionX[1]"/>
+			<Variable ref="PositionX[2]"/>
 		</Generic>
 		<Generic name="TargetShipsPositionY">
-			<Variable ref="PositionY[0]"/>			
-			<Variable ref="PositionY[1]"/>			
-			<Variable ref="PositionY[2]"/>						
+			<Variable ref="PositionY[0]"/>
+			<Variable ref="PositionY[1]"/>
+			<Variable ref="PositionY[2]"/>
 		</Generic>
 		<Generic name="TargetShipsVelocityX">
-			<Variable ref="VelocityX[0]"/>			
-			<Variable ref="VelocityX[1]"/>			
-			<Variable ref="VelocityX[2]"/>						
+			<Variable ref="VelocityX[0]"/>
+			<Variable ref="VelocityX[1]"/>
+			<Variable ref="VelocityX[2]"/>
 		</Generic>
 		<Generic name="TargetShipsVelocityY">
-			<Variable ref="VelocityY[0]"/>			
-			<Variable ref="VelocityY[1]"/>			
-			<Variable ref="VelocityY[2]"/>						
+			<Variable ref="VelocityY[0]"/>
+			<Variable ref="VelocityY[1]"/>
+			<Variable ref="VelocityY[2]"/>
 		</Generic>
 		<Generic name="TargetShipsYaw">
-			<Variable ref="Yaw[0]"/>			
-			<Variable ref="Yaw[1]"/>			
-			<Variable ref="Yaw[2]"/>						
+			<Variable ref="Yaw[0]"/>
+			<Variable ref="Yaw[1]"/>
+			<Variable ref="Yaw[2]"/>
 		</Generic>
 	</VariableGroups>
 </OspModelDescription>

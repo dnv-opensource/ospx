@@ -11,7 +11,7 @@
           {
             "simulator": "vessel_model",
             "variable": "Vessel_Position[1]"
-          } 
+          }
         ]
       },
       {

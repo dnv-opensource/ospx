@@ -43,7 +43,7 @@ models
         stepSize              0.1;
     }
     scalarSender
-    {   
+    {
         modify
         {
             sender.port
@@ -55,7 +55,7 @@ models
         }
         prototype             scalarSender\scalarSender.fmu;
         stepSize              0.1;
-    }    
+    }
 }
 simulation
 {

@@ -49,7 +49,7 @@
             "name": "ospCaseBuilder test_caseDict --inspect",
             "type": "debugpy",
             "request": "launch",
-            "cwd": "${workspaceFolder}\\tests\\test_dicts",
+            "cwd": "${workspaceFolder}\\tests\\test_working_directory",
             "program": "${workspaceFolder}\\src\\ospx\\cli\\ospCaseBuilder.py",
             "args": [
                 "test_caseDict",
@@ -65,7 +65,7 @@
             "name": "ospCaseBuilder test_caseDict_minimal_inspect --inspect",
             "type": "debugpy",
             "request": "launch",
-            "cwd": "${workspaceFolder}\\tests\\test_dicts",
+            "cwd": "${workspaceFolder}\\tests\\test_working_directory",
             "program": "${workspaceFolder}\\src\\ospx\\cli\\ospCaseBuilder.py",
             "args": [
                 "test_caseDict_minimal_inspect",
@@ -81,7 +81,7 @@
             "name": "importSystemStructure test_import_OspSystemStructure.xml",
             "type": "debugpy",
             "request": "launch",
-            "cwd": "${workspaceFolder}\\tests\\test_dicts",
+            "cwd": "${workspaceFolder}\\tests\\test_working_directory",
             "program": "${workspaceFolder}\\src\\ospx\\cli\\importSystemStructure.py",
             "args": [
                 "test_import_OspSystemStructure.xml",
@@ -96,7 +96,7 @@
             "name": "ospCaseBuilder test_caseDict_imported_test_graph",
             "type": "debugpy",
             "request": "launch",
-            "cwd": "${workspaceFolder}\\tests\\test_dicts",
+            "cwd": "${workspaceFolder}\\tests\\test_working_directory",
             "program": "${workspaceFolder}\\src\\ospx\\cli\\ospCaseBuilder.py",
             "args": [
                 "test_caseDict_imported_test_graph",
@@ -112,7 +112,7 @@
             "name": "ospCaseBuilder test_caseDict --graph",
             "type": "debugpy",
             "request": "launch",
-            "cwd": "${workspaceFolder}\\tests\\test_dicts",
+            "cwd": "${workspaceFolder}\\tests\\test_working_directory",
             "program": "${workspaceFolder}\\src\\ospx\\cli\\ospCaseBuilder.py",
             "args": [
                 "test_caseDict",
@@ -128,7 +128,7 @@
             "name": "watchCosim test_caseDict",
             "type": "debugpy",
             "request": "launch",
-            "cwd": "${workspaceFolder}\\tests\\test_dicts",
+            "cwd": "${workspaceFolder}\\tests\\test_working_directory",
             "program": "${workspaceFolder}\\src\\ospx\\watch\\cli\\watchCosim.py",
             "args": [
                 "watchDict",
@@ -144,7 +144,7 @@
             "name": "ospCaseBuilder test_caseDict_minimal_set_int_for_real",
             "type": "debugpy",
             "request": "launch",
-            "cwd": "${workspaceFolder}\\tests\\test_dicts",
+            "cwd": "${workspaceFolder}\\tests\\test_working_directory",
             "program": "${workspaceFolder}\\src\\ospx\\cli\\ospCaseBuilder.py",
             "args": [
                 "test_caseDict_minimal_set_int_for_real",

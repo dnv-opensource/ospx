@@ -1,0 +1,124 @@
+/*---------------------------------*- C++ -*----------------------------------*\
+filetype dictionary; coding utf-8; version 0.1; local --; purpose --;
+\*----------------------------------------------------------------------------*/
+#include test_caseDict_paramDict
+
+_environment
+{
+    libSource                           .;
+}
+systemStructure
+{
+    connections
+    {
+        component_1_to_component_2
+        {
+            source
+            {
+                component               component_1;
+                connector               output_1;
+            }
+            target
+            {
+                component               component_2;
+                connector               input_1;
+            }
+        }
+        component_2_to_component_1
+        {
+            source
+            {
+                component               component_2;
+                connector               output_2;
+            }
+            target
+            {
+                component               component_1;
+                connector               input_2;
+            }
+        }
+    }
+    components
+    {
+        component_1
+        {
+            connectors
+            {
+                input_1
+                {
+                    variable            Variable_1_IN_Real;
+                    type                input;
+                }
+                input_2
+                {
+                    variableGroup       VariableGroup_1_IN;
+                    type                input;
+                }
+                output_1
+                {
+                    variable            Variable_4_OUT_Real;
+                    type                output;
+                }
+                output_2
+                {
+                    variableGroup       VariableGroup_2_OUT;
+                    type                output;
+                }
+            }
+            initialize
+            {
+                Variable_1_IN_Real
+                {
+                    start               $variable_1;
+                }
+                Variable_2_IN_Integer
+                {
+                    start               $variable_2;
+                }
+                Variable_3_IN_Bool
+                {
+                    start               $variable_3;
+                }
+            }
+            fmu                         test_fmu.fmu;
+        }
+        component_2
+        {
+            connectors
+            {
+                input_1
+                {
+                    variable            Variable_1_IN_Real;
+                    type                input;
+                }
+                input_2
+                {
+                    variableGroup       VariableGroup_1_IN;
+                    type                input;
+                }
+                output_1
+                {
+                    variable            Variable_4_OUT_Real;
+                    type                output;
+                }
+                output_2
+                {
+                    variableGroup       VariableGroup_2_OUT;
+                    type                output;
+                }
+            }
+            fmu                         test_fmu.fmu;
+        }
+    }
+}
+run
+{
+    simulation
+    {
+        name                            testCase;
+        startTime                       0;
+        stopTime                        10;
+        baseStepSize                    0.01;
+        algorithm                       fixedStep;
+    }
+}

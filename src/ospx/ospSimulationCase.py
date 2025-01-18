@@ -527,13 +527,13 @@ class OspSimulationCase:
         delim = "\t" * 3
 
         log_string = (
-            f"Components and related FMUs as defined in {self.case_dict.name}\n" f"\tcomponent{delim}fmu{delim}\n\n"
+            f"Components and related FMUs as defined in {self.case_dict.name}\n\tcomponent{delim}fmu{delim}\n\n"
         )
         for component_name, component in self.system_structure.components.items():
             log_string += f"\t{component_name}{delim}{component.fmu.file.name}\n"
         logger.info(log_string + "\n")
 
-        log_string = f"FMU attributes defined in the fmu's modelDescription.xml\n" f"\tfmu{delim}attributes{delim}"
+        log_string = f"FMU attributes defined in the fmu's modelDescription.xml\n\tfmu{delim}attributes{delim}"
         for fmu_name, fmu in self.system_structure.fmus.items():
             log_string += f"\n\n\t{fmu_name}\n"
             fmu_attributes = "\n".join(
@@ -562,9 +562,7 @@ class OspSimulationCase:
             log_string += unit_definitions
         logger.info(log_string + "\n")
 
-        log_string = (
-            f"Variables defined in the fmu's modelDescription.xml\n" f"\tfmu{delim}variable{delim}type{delim}unit"
-        )
+        log_string = f"Variables defined in the fmu's modelDescription.xml\n\tfmu{delim}variable{delim}type{delim}unit"
         logger.info(log_string + "\n")
         for fmu_name, fmu in self.system_structure.fmus.items():
             log_string = f"\t{fmu_name}\n"

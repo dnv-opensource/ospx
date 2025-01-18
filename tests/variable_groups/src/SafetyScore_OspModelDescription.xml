@@ -5,44 +5,44 @@
 	<!-- Input -->
 	<VariableGroups>
 		<Generic name="ColregState">
-			<Variable ref="ColregState[0]"/>			
-			<Variable ref="ColregState[1]"/>			
-			<Variable ref="ColregState[2]"/>						
+			<Variable ref="ColregState[0]"/>
+			<Variable ref="ColregState[1]"/>
+			<Variable ref="ColregState[2]"/>
 		</Generic>
 		<Generic name="PoseAlphaCPA">
-			<Variable ref="PoseAlphaCPA[1]"/>			
-			<Variable ref="PoseAlphaCPA[2]"/>			
-			<Variable ref="PoseAlphaCPA[3]"/>						
+			<Variable ref="PoseAlphaCPA[1]"/>
+			<Variable ref="PoseAlphaCPA[2]"/>
+			<Variable ref="PoseAlphaCPA[3]"/>
 		</Generic>
 		<Generic name="PoseBetaCPA">
-			<Variable ref="PoseBetaCPA[1]"/>			
-			<Variable ref="PoseBetaCPA[2]"/>			
-			<Variable ref="PoseBetaCPA[3]"/>						
+			<Variable ref="PoseBetaCPA[1]"/>
+			<Variable ref="PoseBetaCPA[2]"/>
+			<Variable ref="PoseBetaCPA[3]"/>
 		</Generic>
 		<Generic name="Range">
-			<Variable ref="Range[0]"/>			
-			<Variable ref="Range[1]"/>			
-			<Variable ref="Range[2]"/>						
+			<Variable ref="Range[0]"/>
+			<Variable ref="Range[1]"/>
+			<Variable ref="Range[2]"/>
 		</Generic>
 		<Generic name="RangeCPA">
-			<Variable ref="RangeCPA[1]"/>			
-			<Variable ref="RangeCPA[2]"/>			
-			<Variable ref="RangeCPA[3]"/>						
+			<Variable ref="RangeCPA[1]"/>
+			<Variable ref="RangeCPA[2]"/>
+			<Variable ref="RangeCPA[3]"/>
 		</Generic>
 		<Generic name="StartEvaluation">
-			<Variable ref="StartEvaluation[1]"/>			
-			<Variable ref="StartEvaluation[2]"/>			
-			<Variable ref="StartEvaluation[3]"/>						
+			<Variable ref="StartEvaluation[1]"/>
+			<Variable ref="StartEvaluation[2]"/>
+			<Variable ref="StartEvaluation[3]"/>
 		</Generic>
 		<Generic name="TargetShipPassed">
-			<Variable ref="TargetShipPassed[0]"/>			
-			<Variable ref="TargetShipPassed[1]"/>			
-			<Variable ref="TargetShipPassed[2]"/>						
+			<Variable ref="TargetShipPassed[0]"/>
+			<Variable ref="TargetShipPassed[1]"/>
+			<Variable ref="TargetShipPassed[2]"/>
 		</Generic>
 		<Generic name="TimeCPA">
-			<Variable ref="TimeCPA[0]"/>			
-			<Variable ref="TimeCPA[1]"/>			
-			<Variable ref="TimeCPA[2]"/>						
+			<Variable ref="TimeCPA[0]"/>
+			<Variable ref="TimeCPA[1]"/>
+			<Variable ref="TimeCPA[2]"/>
 		</Generic>
 	</VariableGroups>
 </OspModelDescription>
