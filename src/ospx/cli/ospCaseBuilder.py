@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 def _argparser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="ospCaseBuilder",
-        usage="%(prog)s case_file [options [args]]",
+        usage="%(prog)s case_dict_file [options [args]]",
         epilog="_________________ospCaseBuilder___________________",
         prefix_chars="-",
         add_help=True,
@@ -22,8 +22,8 @@ def _argparser() -> argparse.ArgumentParser:
     )
 
     _ = parser.add_argument(
-        "case_file",
-        metavar="case_file",
+        "case_dict_file",
+        metavar="case_dict_file",
         type=str,
         nargs="?",
         help="name of the dict file containing the OSP simulation case configuration.",
@@ -120,16 +120,16 @@ def main() -> None:
     graph: bool = args.graph
     clean: bool = args.clean
 
-    case_file: Path = Path(args.case_file)
+    case_dict_file: Path = Path(args.case_dict_file)
 
     # Check whether case dict file exists
-    if not case_file.exists():
-        logger.error(f"ospCaseBuilder.py: File {case_file} not found.")
+    if not case_dict_file.exists():
+        logger.error(f"ospCaseBuilder.py: File {case_dict_file} not found.")
         return
 
     logger.info(
         f"Start ospCaseBuilder.py with following arguments:\n"
-        f"\t case_file: \t\t{case_file}\n"
+        f"\t case_dict_file: \t\t{case_dict_file}\n"
         f"\t inspect: \t\t\t\t{inspect}\n"
         f"\t graph: \t\t\t{graph}\n"
         f"\t clean: \t\t\t{clean}\n"
@@ -137,7 +137,7 @@ def main() -> None:
 
     # Invoke API
     OspCaseBuilder.build(
-        case_file=case_file,
+        case_dict_file=case_dict_file,
         inspect=inspect,
         graph=graph,
         clean=clean,
