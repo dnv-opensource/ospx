@@ -5,33 +5,38 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 
 ## [Unreleased]
 
+-/-
+
+
+## [0.3.1] - 2025-01-18
+
+### Added
+* Added support for Python 3.13
+* Added CITATION.cff
+* pyproject.toml : Added keywords
+
+### Solved
+* Resolved issues raised by `ruff` 0.9.2
+
 ### Dependencies
-* Updated to ruff>=0.9.2  (from ruff>=0.8.3)
-* Updated to pyright>=1.1.392  (from pyright>=1.1.390)
-* Updated to sourcery>=1.31  (from sourcery>=1.27)
-* Updated to types-lxml>=2024.12  (from types-lxml>=2024.11)
-* Updated to numpy>=1.26  (from numpy>=1.26,<2.0)
+* Updated to ruff>=0.9.2  (from ruff>=0.6.3)
+* Updated to pyright>=1.1.392  (from pyright>=1.1.378)
+* Updated to sourcery>=1.31  (from sourcery>=1.22)
+* Updated to lxml>=5.3  (from lxml>=5.2)
+* Updated to types-lxml>=2024.12  (from types-lxml>=2024.4)
 * Updated to matplotlib>=3.10  (from matplotlib>=3.9)
 * Updated to dictIO>=0.4.1  (from dictIO>=0.4.0)
-* Updated to sphinx-autodoc-typehints>=3.0  (from sphinx-autodoc-typehints>=2.5)
-* Updated to mypy>=1.14  (from mypy>=1.13)
-* Updated to setup-uv@v5  (from setup-uv@v2)
-
-### Dependencies
-* Updated to ruff>=0.8.3  (from ruff>=0.6.3)
-* Updated to pyright>=1.1.390  (from pyright>=1.1.378)
-* Updated to sourcery>=1.27  (from sourcery>=1.22)
-* Updated to lxml>=5.3  (from lxml>=5.2)
-* Updated to types-lxml>=2024.11  (from types-lxml>=2024.4)
-* Updated to jupyter>=1.1  (from jupyter>=1.0)
-* Updated to pytest-cov>=6.0  (from pytest-cov>=5.0)
 * Updated to Sphinx>=8.1  (from Sphinx>=8.0)
 * Updated to sphinx-argparse-cli>=1.19  (from sphinx-argparse-cli>=1.17)
-* Updated to sphinx-autodoc-typehints>=2.5  (from sphinx-autodoc-typehints>=2.2)
+* Updated to sphinx-autodoc-typehints>=3.0  (from sphinx-autodoc-typehints>=2.2)
+* Updated to mypy>=1.14  (from mypy>=1.11.1)
+* Updated to setup-uv@v5  (from setup-uv@v2)
+* Updated to jupyter>=1.1  (from jupyter>=1.0)
+* Updated to pytest-cov>=6.0  (from pytest-cov>=5.0)
 * Updated to pre-commit>=4.0  (from pre-commit>=3.8)
-* Updated to mypy>=1.13  (from mypy>=1.11.1)
-
--/-
+* numpy: As Python 3.13 requires numpy 2.x, made minimum required numpy version in pyproject.toml dependent on Python version:
+  * "numpy>=1.26; python_version < '3.13'",
+  * "numpy>=2.2; python_version >= '3.13'",
 
 
 ## [0.3.0] - 2024-11-11
@@ -464,8 +469,9 @@ Maintenance Release
 * Added support for Python 3.10
 
 <!-- Markdown link & img dfn's -->
-[unreleased]: https://github.com/dnv-opensource/ospx/compare/v0.2.15...HEAD
-[0.2.15]: https://github.com/dnv-opensource/ospx/compare/v0.2.14...v0.2.15
+[unreleased]: https://github.com/dnv-opensource/ospx/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/dnv-opensource/ospx/compare/v0.3.0...v0.3.1
+[0.3.0]: https://github.com/dnv-opensource/ospx/compare/v0.2.14...v0.3.0
 [0.2.14]: https://github.com/dnv-opensource/ospx/compare/v0.2.13...v0.2.14
 [0.2.13]: https://github.com/dnv-opensource/ospx/compare/v0.2.12...v0.2.13
 [0.2.12]: https://github.com/dnv-opensource/ospx/compare/v0.2.11...v0.2.12
