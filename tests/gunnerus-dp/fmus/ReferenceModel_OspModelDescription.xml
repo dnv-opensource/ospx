@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <OspModelDescription xmlns="https://open-simulation-platform.com/OspModelDescription/1.0.0" version="1.0">
-    
+
     <UnitDefinitions>
         <Unit name="m">
             <BaseUnit kg="0" m="1" s="0" A="0" K="0" mol="0" cd="0" rad="0" factor="1.0" offset="0.0"/>
@@ -15,9 +15,9 @@
             <BaseUnit kg="0" m="0" s="-1" A="0" K="0" mol="0" cd="0" rad="1" factor="1.0" offset="0.0"/>
         </Unit>
     </UnitDefinitions>
-    
+
     <VariableGroups>
-        
+
         <Generic name="position_setpoint">
             <LinearDisplacement name="linear_position_setpoint">
                 <Variable ref="Position_Setpoint[1]" unit="m"/>
@@ -37,7 +37,7 @@
                 <Variable ref="Desired_Position[3]" unit="rad"/>
             </AngularDisplacement>
         </Generic>
-        
+
         <Generic name="desired_velocity">
             <LinearVelocity name="linear_desired_velocity">
                 <Variable ref="Desired_Velocity[1]" unit="m/s"/>
@@ -47,7 +47,7 @@
                 <Variable ref="Desired_Velocity[3]" unit="rad/s"/>
             </AngularVelocity>
         </Generic>
-        
+
         <Generic name="desired_acceleration">
             <LinearAcceleration name="linear_desired_acceleration">
                 <Variable ref="Desired_Acceleration[1]"/>
@@ -57,6 +57,6 @@
                 <Variable ref="Desired_Acceleration[3]"/>
             </AngularAcceleration>
         </Generic>
-        
+
     </VariableGroups>
 </OspModelDescription>

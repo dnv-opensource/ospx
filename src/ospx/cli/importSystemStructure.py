@@ -96,8 +96,7 @@ def main() -> None:
         return
 
     logger.info(
-        f"Start importSystemStructure.py with following arguments:\n"
-        f"\t system_structure_file: \t{system_structure_file}"
+        f"Start importSystemStructure.py with following arguments:\n\t system_structure_file: \t{system_structure_file}"
     )
 
     # Invoke API

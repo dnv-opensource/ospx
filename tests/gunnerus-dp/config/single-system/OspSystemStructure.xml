@@ -19,7 +19,7 @@
             <VariableGroup simulator="box_reference" name="position_setpoint"/>
             <VariableGroup simulator="reference_model" name="position_setpoint"/>
         </VariableGroupConnection>
-        
+
        <VariableGroupConnection>
             <VariableGroup simulator="reference_model" name="desired_position"/>
             <VariableGroup simulator="dp_controller" name="position_setpoint"/>
@@ -39,7 +39,7 @@
             <VariableGroup simulator="dp_controller" name="thrust_command"/>
             <VariableGroup simulator="thruster_dynamics" name="thrust_command"/>
         </VariableGroupConnection>
-        
+
        <VariableGroupConnection>
             <VariableGroup simulator="vessel_model" name="position_3dof"/>
             <VariableGroup simulator="dp_controller" name="position_3dof"/>
@@ -54,11 +54,11 @@
             <VariableGroup simulator="thruster_dynamics" name="thrust"/>
             <VariableGroup simulator="vessel_model" name="thrust"/>
         </VariableGroupConnection>
-        
+
        <VariableGroupConnection>
             <VariableGroup simulator="current_model" name="current_velocity"/>
             <VariableGroup simulator="vessel_model" name="current_velocity"/>
         </VariableGroupConnection>
-             
+
     </Connections>
 </OspSystemStructure>

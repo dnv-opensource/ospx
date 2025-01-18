@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <OspModelDescription xmlns="https://open-simulation-platform.com/OspModelDescription/1.0.0" version="1.0">
-        
+
     <UnitDefinitions>
         <Unit name="m/s">
             <BaseUnit kg="0" m="1" s="-1" A="0" K="0" mol="0" cd="0" rad="0" factor="1.0" offset="0.0"/>
@@ -9,7 +9,7 @@
             <BaseUnit kg="0" m="0" s="-1" A="0" K="0" mol="0" cd="0" rad="1" factor="1.0" offset="0.0"/>
         </Unit>
     </UnitDefinitions>
-    
+
     <VariableGroups>
         <Generic name="current_velocity">
             <LinearVelocity name="linear_current_velocity">

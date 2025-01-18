@@ -128,7 +128,7 @@ def substitute_text_in_zip(
                     temp = zip_read.read(item.filename)
                     source = (re.findall(subst[0], str(temp)))[0]
                     if not str(source):
-                        logger.warning(f'substitution source is empty:\'{" ".join(source)}\'')
+                        logger.warning(f"substitution source is empty:'{' '.join(source)}'")
                     temp = temp.replace(bytes(source, "utf-8"), bytes(subst[1], "utf-8"))
                     zip_write.writestr(item, temp)
 

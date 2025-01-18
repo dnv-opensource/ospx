@@ -11,7 +11,7 @@
           {
             "simulator": "simulator_communication",
             "variable": "Measured_Position[1]"
-          }, 
+          },
           {
             "simulator": "reference_model",
             "variable": "Position_Setpoint[2]"

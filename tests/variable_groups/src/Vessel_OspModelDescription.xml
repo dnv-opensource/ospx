@@ -6,12 +6,12 @@
 	<VariableGroups>
 		<!-- Output -->
 		<Generic name="ASVStatesVSSL">
-			<Variable ref="ASVStates[0]"/>			
-			<Variable ref="ASVStates[1]"/>			
+			<Variable ref="ASVStates[0]"/>
+			<Variable ref="ASVStates[1]"/>
 			<Variable ref="ASVStates[2]"/>
-			<Variable ref="ASVStates[3]"/>			
-			<Variable ref="ASVStates[4]"/>			
-			<Variable ref="ASVStates[5]"/>							
+			<Variable ref="ASVStates[3]"/>
+			<Variable ref="ASVStates[4]"/>
+			<Variable ref="ASVStates[5]"/>
 		</Generic>
 	</VariableGroups>
 </OspModelDescription>

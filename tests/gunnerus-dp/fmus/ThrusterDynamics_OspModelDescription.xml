@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <OspModelDescription xmlns="https://open-simulation-platform.com/OspModelDescription/1.0.0" version="1.0">
-    
+
      <UnitDefinitions>
         <Unit name="N">
             <BaseUnit kg="1" m="1" s="-2" A="0" K="0" mol="0" cd="0" rad="0" factor="1.0" offset="0.0"/>
@@ -9,9 +9,9 @@
             <BaseUnit kg="1" m="2" s="-2" A="0" K="0" mol="0" cd="0" rad="0" factor="1.0" offset="0.0"/>
         </Unit>
     </UnitDefinitions>
-    
+
     <VariableGroups>
-        
+
         <Generic name="thrust_command">
             <Force name="linear_thrust_command">
                 <Variable ref="Commanded_Thrust[1]" unit="N"/>
@@ -34,6 +34,6 @@
                 <Variable ref="Thrust[6]" unit="N.m"/>
             </Torque>
         </Generic>
-        
+
     </VariableGroups>
 </OspModelDescription>
