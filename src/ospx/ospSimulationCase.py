@@ -45,9 +45,9 @@ class OspSimulationCase:
         Raises
         ------
         ValueError
-            If an expected element in caseDict is missing
+            If an expected element in the case dict file is missing
         FileNotFoundError
-            If an FMU file referenced in caseDict does not exist
+            If an FMU file referenced in case dict file does not exist
         """
         logger.info(f"Set up OSP simulation case '{self.name}' in case folder: {self.case_folder}")
 
@@ -373,7 +373,7 @@ class OspSimulationCase:
         }
 
         # @TODO: Time, StepCount, conn0, conn1, etc from modelDescription.xml ModelVariables
-        #        should match connectors in caseDict for respective model. Improvement needed.
+        #        should match connectors in case dict file for respective model. Improvement needed.
         #        FRALUM, 2021-xx-xx
         time_column = 0
         # Components

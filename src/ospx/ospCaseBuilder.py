@@ -38,7 +38,7 @@ class OspCaseBuilder:
         Parameters
         ----------
         case_dict_file : Union[str, os.PathLike[str]]
-            caseDict file. Contains all case-specific information OspCaseBuilder needs to generate the OSP files.
+            case dict file. Contains all case-specific information OspCaseBuilder needs to generate the OSP files.
         inspect : bool, optional
             inspect mode. If True, build() reads all properties from the FMUs
             but does not actually create the OSP case files, by default False
