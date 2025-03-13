@@ -273,7 +273,7 @@ class FMU:
 
         # Write updated modelDescription.xml into new FMU
         new_fmu = FMU(new_file)
-        new_fmu._write_model_description(new_model_description)  # noqa: SLF001
+        new_fmu._write_model_description(new_model_description)
 
         return new_fmu
 
