@@ -1,25 +1,26 @@
 ospx package
 ============
 
-.. automodule:: ospx
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 Subpackages
 -----------
 
-.. toctree::
-   :maxdepth: 4
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-module.rst
+   :recursive:
 
    ospx.fmi
    ospx.watch
+   ospx.utils
 
-Submodules
-----------
 
-.. toctree::
-   :maxdepth: 4
+Modules
+-------
+
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-module.rst
+   :recursive:
 
    ospx.component
    ospx.connection

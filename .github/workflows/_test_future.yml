@@ -1,31 +1,35 @@
-name: Unit Tests (py312)
-# Test also with Python 3.12 (experimental; workflow will not fail on error.)
+name: Unit Tests (py314)
+# Test also with Python 3.14 (experimental; workflow will not fail on error.)
 
 on: workflow_call
 
 jobs:
-  test312:
-    name: Test on ${{matrix.python.toxenv}}-${{matrix.platform.toxenv}} (experimental)
+  test314:
+    name: Test on ${{matrix.python.version}}-${{matrix.platform.runner}} (experimental)
     continue-on-error: true
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
         platform:
           - runner: ubuntu-latest
-            toxenv: linux
           - runner: windows-latest
-            toxenv: windows
         python:
-          - version: '3.12.0rc3'
-            toxenv: 'py312'
+          - version: '3.14.0-alpha - 3.14.0'
+            uvpy: '3.14'
     steps:
       - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
       - name: Install Python ${{ matrix.python.version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python.version }}
-          cache: 'pip' # cache pip dependencies
-      - name: Install tox
-        run: python -m pip install tox
+      - name: Install the project
+        run: uv sync -p ${{ matrix.python.uvpy }} -U --no-dev
       - name: Run pytest
-        run: tox -e ${{matrix.python.toxenv}}-${{matrix.platform.toxenv}}
+        run: >
+          uv run --with pytest --with pytest-cov
+          pytest --cov

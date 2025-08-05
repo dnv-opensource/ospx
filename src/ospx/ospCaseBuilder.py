@@ -1,9 +1,9 @@
 import logging
 import os
 from pathlib import Path
-from typing import Union
+from typing import Any
 
-from dictIO import CppDict, DictReader
+from dictIO import DictReader, SDict
 
 from ospx import Graph, OspSimulationCase
 
@@ -15,16 +15,17 @@ logger = logging.getLogger(__name__)
 class OspCaseBuilder:
     """Builder for OSP-specific configuration files needed to run an OSP (co-)simulation case."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         return
 
     @staticmethod
     def build(
-        case_dict_file: Union[str, os.PathLike[str]],
+        case_dict_file: str | os.PathLike[str],
+        *,
         inspect: bool = False,
         graph: bool = False,
         clean: bool = False,
-    ):
+    ) -> None:
         """Build the OSP-specific configuration files needed to run an OSP (co-)simulation case.
 
         Builds following files:
@@ -37,20 +38,21 @@ class OspCaseBuilder:
         Parameters
         ----------
         case_dict_file : Union[str, os.PathLike[str]]
-            caseDict file. Contains all case-specific information OspCaseBuilder needs to generate the OSP files.
+            case dict file. Contains all case-specific information OspCaseBuilder needs to generate the OSP files.
         inspect : bool, optional
-            inspect mode. If True, build() reads all properties from the FMUs but does not actually create the OSP case files, by default False
+            inspect mode. If True, build() reads all properties from the FMUs
+            but does not actually create the OSP case files, by default False
         graph : bool, optional
             if True, creates a dependency graph image using graphviz, by default False
         clean : bool, optional
-            if True, cleans up case folder and deletes any formerly created ospx files, e.g. OspSystemStructure.xml .fmu .csv etc.
+            if True, cleans up case folder and deletes any formerly created ospx files,
+            e.g. OspSystemStructure.xml .fmu .csv etc.
 
         Raises
         ------
         FileNotFoundError
             if case_dict_file does not exist
         """
-
         # Make sure source_file argument is of type Path. If not, cast it to Path type.
         case_dict_file = case_dict_file if isinstance(case_dict_file, Path) else Path(case_dict_file)
         if not case_dict_file.exists():
@@ -63,26 +65,25 @@ class OspCaseBuilder:
 
         logger.info(f"reading {case_dict_file}")  # 0
 
-        case_dict: CppDict = DictReader.read(case_dict_file, comments=False)
+        case_dict: SDict[str, Any] = DictReader.read(case_dict_file, comments=False)
 
         case = OspSimulationCase(case_dict)
         try:
             case.setup()
-        except Exception as e:
-            logger.exception(e)
+        except Exception:
+            logger.exception("Error during setup of OspSimulationCase.")
             return
 
         if inspect:
             # inspect and return
-            case._inspect()  # pyright: ignore
+            case._inspect()  # noqa: SLF001  # pyright: ignore[reportPrivateUsage]
             return
 
-        # case.write_osp_model_description_xmls()
         case.write_osp_system_structure_xml()
         case.write_system_structure_ssd()
 
-        if "postProcessing" in case_dict.keys():
-            case._write_plot_config_json()  # pyright: ignore
+        if "postProcessing" in case_dict:
+            case._write_plot_config_json()  # noqa: SLF001  # pyright: ignore[reportPrivateUsage]
 
         case.write_statistics_dict()
 
@@ -94,7 +95,7 @@ class OspCaseBuilder:
         return
 
 
-def _clean_case_folder(case_folder: Path):
+def _clean_case_folder(case_folder: Path) -> None:
     """Clean up the case folder and deletes any existing ospx files, e.g. modelDescription.xml .fmu .csv etc."""
     import re
     from shutil import rmtree
@@ -123,11 +124,8 @@ def _clean_case_folder(case_folder: Path):
 
         for file in files:
             if not re.search(except_pattern, str(file)):
-                # logger.info("%s in list to clean" % file)
                 if file.is_file():
-                    # logger.info("file %s cleaned" % file)
                     file.unlink(missing_ok=True)
                 else:
-                    # logger.info("dir %s removed" % file)
                     rmtree(file)
     return

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <OspModelDescription xmlns="https://open-simulation-platform.com/OspModelDescription/1.0.0" version="1.0">
-        
+
     <UnitDefinitions>
         <Unit name="m">
             <BaseUnit kg="0" m="1" s="0" A="0" K="0" mol="0" cd="0" rad="0" factor="1.0" offset="0.0"/>
@@ -49,20 +49,20 @@
                 <Variable ref="Wave_Forces[6]" unit="N.m"/>
             </Torque>
         </Generic>
-        
+
         <Generic name="current_velocity">
             <LinearVelocity name="linear_current_velocity">
                 <Variable ref="Current_Velocity[1]" unit="m/s"/>
                 <Variable ref="Current_Velocity[2]" unit="m/s"/>
                 <Variable ref="Current_Velocity[3]" unit="m/s"/>
             </LinearVelocity>
-            <AngularVelocity name="anuglar_current_velocity">    
+            <AngularVelocity name="anuglar_current_velocity">
                 <Variable ref="Current_Velocity[4]" unit="rad/s"/>
                 <Variable ref="Current_Velocity[5]" unit="rad/s"/>
                 <Variable ref="Current_Velocity[6]" unit="rad/s"/>
             </AngularVelocity>
         </Generic>
-        
+
         <Generic name="position_6dof">
             <LinearDisplacement name="linear_position">
                 <Variable ref="Vessel_Position[1]" unit="m"/>
@@ -75,7 +75,7 @@
                 <Variable ref="Vessel_Position[6]" unit="rad"/>
             </AngularDisplacement>
         </Generic>
-        
+
         <Generic name="position_3dof">
             <LinearDisplacement name="linear_position_2dof">
                 <Variable ref="Vessel_Position[1]" unit="m"/>
@@ -98,7 +98,7 @@
                 <Variable ref="Vessel_Velocity[6]" unit="rad/s"/>
             </AngularVelocity>
         </Generic>
-        
+
         <Generic name="velocity_3dof">
             <LinearVelocity name="linear_vessel_velocity_2dof">
                 <Variable ref="Vessel_Velocity[1]" unit="m/s"/>
@@ -121,7 +121,7 @@
                 <Variable ref="Vessel_Acceleration[6]"/>
             </AngularAcceleration>
         </Generic>
-        
+
         <Generic name="acceleration_3dof">
             <LinearAcceleration name="linear_acceleration_2dof">
                 <Variable ref="Vessel_Acceleration[1]"/>
@@ -131,6 +131,6 @@
                 <Variable ref="Vessel_Acceleration[6]"/>
             </AngularAcceleration>
         </Generic>
-        
+
     </VariableGroups>
 </OspModelDescription>

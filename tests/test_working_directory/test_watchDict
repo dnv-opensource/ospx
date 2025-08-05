@@ -1,0 +1,46 @@
+/*---------------------------------*- C++ -*----------------------------------*\
+filetype dictionary; coding utf-8; version 0.1; local --; purpose --;
+\*----------------------------------------------------------------------------*/
+datasources
+{
+    difference
+    {
+        columns
+        (
+            0                 1                 2                 3                 4
+        );
+    }
+    quotient
+    {
+        columns
+        (
+            0                 1                 2                 3                 4
+        );
+    }
+    minuend
+    {
+        columns
+        (
+            0                 1                 2
+        );
+    }
+    subtrahend
+    {
+        columns
+        (
+            0                 1                 2
+        );
+    }
+    dividend
+    {
+        columns
+        (
+            0                 1                 2
+        );
+    }
+}
+delimiter                     ,;
+simulation
+{
+    name                      demoCase;
+}

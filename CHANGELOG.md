@@ -5,7 +5,153 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 
 ## [Unreleased]
 
-* -/-
+### Dependencies
+* Updated to ruff>=0.11.0  (from ruff>=0.9.2)
+* Updated to pyright>=1.1.396  (from pyright>=1.1.392)
+* Updated to sourcery>=1.35  (from sourcery>=1.31)
+* Updated to types-lxml>=2025.3  (from types-lxml>=2024.12)
+* Updated to pre-commit>=4.1  (from pre-commit>=4.0)
+* Updated to mypy>=1.15  (from mypy>=1.14)
+
+### Changed
+* Do not run code quality checks in nightly builds
+* Included uv.lock file in version control
+
+
+## [0.3.1] - 2025-01-18
+
+### Added
+* Added support for Python 3.13
+* Added CITATION.cff
+* pyproject.toml : Added keywords
+
+### Solved
+* Resolved issues raised by `ruff` 0.9.2
+
+### Dependencies
+* Updated to ruff>=0.9.2  (from ruff>=0.6.3)
+* Updated to pyright>=1.1.392  (from pyright>=1.1.378)
+* Updated to sourcery>=1.31  (from sourcery>=1.22)
+* Updated to lxml>=5.3  (from lxml>=5.2)
+* Updated to types-lxml>=2024.12  (from types-lxml>=2024.4)
+* Updated to matplotlib>=3.10  (from matplotlib>=3.9)
+* Updated to dictIO>=0.4.1  (from dictIO>=0.4.0)
+* Updated to Sphinx>=8.1  (from Sphinx>=8.0)
+* Updated to sphinx-argparse-cli>=1.19  (from sphinx-argparse-cli>=1.17)
+* Updated to sphinx-autodoc-typehints>=3.0  (from sphinx-autodoc-typehints>=2.2)
+* Updated to mypy>=1.14  (from mypy>=1.11.1)
+* Updated to setup-uv@v5  (from setup-uv@v2)
+* Updated to jupyter>=1.1  (from jupyter>=1.0)
+* Updated to pytest-cov>=6.0  (from pytest-cov>=5.0)
+* Updated to pre-commit>=4.0  (from pre-commit>=3.8)
+* numpy: As Python 3.13 requires numpy 2.x, made minimum required numpy version in pyproject.toml dependent on Python version:
+  * "numpy>=1.26; python_version < '3.13'",
+  * "numpy>=2.2; python_version >= '3.13'",
+
+
+## [0.3.0] - 2024-11-11
+
+### Breaking changes
+* The code has been adapted to [dictIO][dictIO_docs] 0.4.0 <br>
+  [dictIO][dictIO_docs] 0.4.0 introduced some breaking changes. With the current release 0.3.0 of ospx, the code base has been adapted to these in changes. <br>
+  The most prominent change being that class `dictIO.CppDict` has been replaced by class `dictIO.SDict`.
+
+### Changed
+* Changed from `pip`/`tox` to `uv` as package manager
+* README.md : Completely rewrote section "Development Setup", introducing `uv` as package manager.
+* Changed publishing workflow to use OpenID Connect (Trusted Publisher Management) when publishing to PyPI
+* Updated copyright statement
+* VS Code settings: Turned off automatic venv activation
+* Replaced black formatter with ruff formatter
+
+### Solved
+* Sphinx documentation: Resolved issue that documentation of class members was generated twice.
+
+### Added
+* Sphinx documentation: Added extension to support Markdown-based diagrams created with Mermaid.
+* Added `mypy` as static type checker (in addition to `pyright`)
+
+### GitHub workflows
+* (all workflows): Adapted to use `uv` as package manager
+* _test_future.yml : updated Python version to 3.13.0-alpha - 3.13.0
+* _test_future.yml : updated name of test job to 'test313'
+
+### Dependencies
+* Updated to dictIO>=0.4.0  (from dictIO>=0.3.4)
+* Updated to ruff>=0.6.3  (from ruff==0.4.2)
+* Updated to pyright>=1.1.378  (from pyright==1.1.360)
+* Updated to sourcery>=1.22  (from sourcery==1.16)
+* Updated to pytest>=8.3  (from pytest>=8.2)
+* Updated to Sphinx>=8.0  (from Sphinx>=7.3)
+* Updated to sphinx-argparse-cli>=1.17  (from sphinx-argparse-cli>=1.16)
+* Updated to myst-parser>=4.0  (from myst-parser>=3.0)
+* Updated to furo>=2024.8  (from furo>=2024.5)
+* updated to setup-python@v5  (from setup-python@v4)
+* updated to actions-gh-pages@v4  (from actions-gh-pages@v3)
+* updated to upload-artifact@v4  (from upload-artifact@v3)
+* Updated to download-artifact@v4  (from download-artifact@v3)
+* updated to checkout@v4  (from checkout@v3)
+
+
+## [0.2.14] - 2024-05-22
+
+### Dependencies
+* updated to ruff==0.4.2  (from ruff==0.2.1)
+* updated to pyright==1.1.360  (from pyright==1.1.350)
+* updated to sourcery==1.16  (from sourcery==1.15)
+* updated to lxml>=5.2  (from lxml>=5.1)
+* updated to types-lxml>=2024.4  (from types-lxml>=5.1)
+* updated to pytest>=8.2  (from pytest>=7.4)
+* updated to pytest-cov>=5.0  (from pytest-cov>=4.1)
+* updated to Sphinx>=7.3  (from Sphinx>=7.2)
+* updated to sphinx-argparse-cli>=1.15  (from sphinx-argparse-cli>=1.11)
+* updated to myst-parser>=3.0  (from myst-parser>=2.0)
+* updated to furo>=2024.4  (from furo>=2023.9.10)
+* updated to numpy>=1.26,<2.0  (from numpy>=1.26)
+* updated to matplotlib>=3.9  (from matplotlib>=3.8)
+* updated to dictIO>=0.3.4  (from dictIO>=0.3.1)
+* removed black
+
+### Changed
+* replaced black formatter with ruff formatter
+* Changed publishing workflow to use OpenID Connect (Trusted Publisher Management) when publishing to PyPI
+* Updated copyright statement
+* VS Code settings: Turned off automatic venv activation
+
+
+## [0.2.13] - 2024-02-21
+
+### Added
+* README.md : Under `Development Setup`, added a step to install current package in "editable" mode, using the pip install -e option.
+This removes the need to manually add /src to the PythonPath environment variable in order for debugging and tests to work.
+
+### Removed
+* VS Code settings: Removed the setting which added the /src folder to PythonPath. This is no longer necessary. Installing the project itself as a package in "editable" mode, using the pip install -e option, solves the issue and removes the need to manually add /src to the PythonPath environment variable.
+
+### Changed
+* Moved all project configuration from setup.cfg to pyproject.toml
+* Moved all tox configuration from setup.cfg to tox.ini.
+* Moved pytest configuration from pyproject.toml to pytest.ini
+* Deleted setup.cfg
+
+### Dependencies
+* updated to black[jupyter]==24.1  (from black[jupyter]==23.12)
+* updated to version: '==24.1'  (from version: '==23.12')
+* updated to ruff==0.2.1  (from ruff==0.1.8)
+* updated to pyright==1.1.350  (from pyright==1.1.338)
+* updated to sourcery==1.15  (from sourcery==1.14)
+* updated to lxml>=5.1  (from lxml>=4.9)
+* updated to pandas>=2.2  (from pandas>=2.1)
+
+
+## [0.2.12] - 2024-01-09
+
+Maintenance Release
+
+### Dependencies
+
+* Updated to dictIO>=0.3.1  (from dictIO>=0.2.9)
+* Updated other dependencies to latest versions
 
 
 ## [0.2.11] - 2023-09-25
@@ -333,7 +479,12 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 * Added support for Python 3.10
 
 <!-- Markdown link & img dfn's -->
-[unreleased]: https://github.com/dnv-opensource/ospx/compare/v0.2.11...HEAD
+[unreleased]: https://github.com/dnv-opensource/ospx/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/dnv-opensource/ospx/compare/v0.3.0...v0.3.1
+[0.3.0]: https://github.com/dnv-opensource/ospx/compare/v0.2.14...v0.3.0
+[0.2.14]: https://github.com/dnv-opensource/ospx/compare/v0.2.13...v0.2.14
+[0.2.13]: https://github.com/dnv-opensource/ospx/compare/v0.2.12...v0.2.13
+[0.2.12]: https://github.com/dnv-opensource/ospx/compare/v0.2.11...v0.2.12
 [0.2.11]: https://github.com/dnv-opensource/ospx/compare/v0.2.10...v0.2.11
 [0.2.10]: https://github.com/dnv-opensource/ospx/compare/v0.2.9...v0.2.10
 [0.2.9]: https://github.com/dnv-opensource/ospx/compare/v0.2.8...v0.2.9
@@ -352,3 +503,6 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 [0.0.22]: https://github.com/dnv-opensource/ospx/compare/v0.0.17...v0.0.22
 [0.0.17]: https://github.com/dnv-opensource/ospx/releases/tag/v0.0.17
 [ospx]: https://github.com/dnv-opensource/ospx
+
+<!-- Markdown link & img dfn's -->
+[dictIO_docs]: https://dnv-opensource.github.io/dictIO/README.html

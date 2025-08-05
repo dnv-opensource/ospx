@@ -1,83 +1,153 @@
 [build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = [
+    "hatchling",
+]
+build-backend = "hatchling.build"
 
-[tool.black]
-line-length = 120
-target-version = ["py39", "py310"]
+[tool.hatch.build.targets.sdist]
+only-include = [
+    "src/ospx",
+    "tests",
+    ".coveragerc",
+    ".editorconfig",
+    ".pre-commit-config.yaml",
+    "manage.py",
+    "pyproject.toml",
+    "pytest.ini",
+    "ruff.toml",
+    "uv.lock",
+]
 
-[tool.ruff]
+[tool.hatch.build.targets.wheel]
+packages = [
+    "src/ospx",
+]
+
+[project]
+name = "ospx"
+version = "0.3.1"
+description = "Extension package to farn, adding support to build OSP simulation cases using FMUs."
+readme = "README.md"
+requires-python = ">= 3.10, < 3.14"
+license = { file = "LICENSE" }
+authors = [
+    { name = "Frank Lumpitzsch", email = "frank.lumpitzsch@dnv.com" },
+    { name = "Claas Rostock", email = "claas.rostock@dnv.com" },
+    { name = "Seunghyeon Yoo", email = "seunghyeon.yoo@dnv.com" },
+]
+maintainers = [
+    { name = "Claas Rostock", email = "claas.rostock@dnv.com" },
+]
+keywords = [
+    "farn",
+    "OSP",
+    "fmi",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "lxml>=5.3",
+    "numpy>=1.26; python_version < '3.13'",
+    "numpy>=2.2; python_version >= '3.13'",
+    "pandas>=2.2",
+    "matplotlib>=3.10",
+    "graphviz>=0.20",
+    "dictIO>=0.4.1",
+]
+
+[project.urls]
+Homepage = "https://github.com/dnv-opensource/ospx"
+Documentation = "https://dnv-opensource.github.io/ospx/README.html"
+Repository = "https://github.com/dnv-opensource/ospx.git"
+Issues = "https://github.com/dnv-opensource/ospx/issues"
+Changelog = "https://github.com/dnv-opensource/ospx/blob/main/CHANGELOG.md"
+
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-cov>=6.0",
+    "ruff>=0.11.0",
+    "pyright>=1.1.396",
+    "mypy>=1.15",
+    "sourcery>=1.35",
+    "pre-commit>=4.1",
+    "Sphinx>=8.1",
+    "sphinx-argparse-cli>=1.19",
+    "sphinx-autodoc-typehints>=3.0",
+    "sphinxcontrib-mermaid>=1.0.0",
+    "myst-parser>=4.0",
+    "furo>=2024.8",
+    "nbconvert>=7.16",
+    "jupyter>=1.1",
+    "jupyter-client>=8.6",
+    "pandas-stubs>=2.2",
+    "types-lxml>=2025.3",
+]
+
+[tool.uv]
+default-groups = [
+    "dev",
+]
+native-tls = true
+
+
+[project.scripts]
+ospCaseBuilder = "ospx.cli.ospCaseBuilder:main"
+importSystemStructure = "ospx.cli.importSystemStructure:main"
+watchCosim = "ospx.watch.cli.watchCosim:main"
+
+
+[tool.mypy]
+plugins = [
+    "numpy.typing.mypy_plugin",
+]
+mypy_path = "stubs"
+files = [
+    "src",
+    "tests",
+    "demos",
+]
 exclude = [
-    ".git",
-    ".venv",
-    ".tox",
-    "build",
-    "dist",
-    "__pycache__",
-    "./docs/source/conf.py",
+    "^src/folder_to_be_excluded/",
 ]
-src = ["src"]
-ignore = [
-    "E501",  # Line length too long
-    "D100",  # Missing docstring in public module
-    "D104",  # Missing docstring in public package
-    "D105",  # Missing docstring in magic method
-    "D107",  # Missing docstring in __init__
-    "D202",  # No blank lines allowed after function docstring
-    "D203",  # 1 blank line required before class docstring
-    "D205",  # 1 blank line required between summary line and description
-    "D212",  # Multi-line docstring summary should start at the first line
-    "D213",  # Multi-line docstring summary should start at the second line
-    # "N802",  # Function name should be lowercase  (uncomment if you want to allow Uppercase function names)
-    # "N803",  # Argument name should be lowercase  (uncomment if you want to allow Uppercase argument names)
-    "N806",  # Variable in function should be lowercase  (uncomment if you want to allow Uppercase variable names in functions)
-    # "N815",  # Variable in class scope should not be mixedCase  (uncomment if you want to allow mixedCase variable names in class scope)
-    # "N816",  # Variable in global scope should not be mixedCase  (uncomment if you want to allow mixedCase variable names in global scope)
-    "N999",  # Invalid module name
-    ]
-line-length = 120
-select = [
-    "E",
-    "D",
-    "F",
-    "N",
-    "W",
-    "I",
-    "B",
-]
-target-version = "py39"
-
-[tool.ruff.pep8-naming]
-ignore-names = [
-    "test_*",
-    "setUp",
-    "tearDown",
+check_untyped_defs = true
+disable_error_code = [
+    "misc",
+    "import-untyped",
 ]
 
-[tool.ruff.pydocstyle]
-convention = "numpy"
-
-[tool.ruff.per-file-ignores]
-"__init__.py" = ["I001"]
-"./tests/*" = ["D"]
 
 [tool.pyright]
-exclude = [
-    ".git",
-    ".venv",
-    ".tox",
-    "build",
-    "dist",
-    "**/__pycache__",
-    "./docs/source/conf.py",
-    "./venv",
+stubPath = "stubs"
+include = [
+    "src",
+    "tests",
+    "demos",
 ]
-extraPaths = ["./src"]
+exclude = [
+    "src/folder_to_be_excluded",
+]
+
 typeCheckingMode = "basic"
 useLibraryCodeForTypes = true
 reportMissingParameterType = "error"
 reportUnknownParameterType = "warning"
-reportUnknownMemberType = "warning"
+reportUnknownMemberType = "warning"                # consider to set to `false` if you work a lot with matplotlib and pandas, which are both not properly typed and known to trigger this warning
 reportMissingTypeArgument = "error"
 reportPropertyTypeMismatch = "error"
 reportFunctionMemberAccess = "warning"
@@ -98,17 +168,13 @@ reportUnusedExpression = "warning"
 reportMatchNotExhaustive = "warning"
 reportShadowedImports = "warning"
 reportUntypedFunctionDecorator = "warning"
+reportUntypedClassDecorator = "warning"
 reportUntypedBaseClass = "error"
 reportUntypedNamedTuple = "warning"
+reportUnnecessaryTypeIgnoreComment = "information"
 # Activate the following rules only locally and temporary, i.e. for a QA session.
 # (For server side CI they are considered too strict.)
+# reportMissingTypeStubs = true
 # reportConstantRedefinition = "warning"
-# reportUnnecessaryTypeIgnoreComment = "information"
 # reportImportCycles = "warning"
 # reportImplicitStringConcatenation = "warning"
-
-[tool.pytest.ini_options]
-testpaths = "tests"
-addopts = "--strict-markers"
-xfail_strict = true
-pythonpath = ["src"]

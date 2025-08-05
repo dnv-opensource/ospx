@@ -5,43 +5,51 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug Unit Test",
-            "type": "python",
+            "name": "Python: Debug Tests",
+            "type": "debugpy",
             "request": "launch",
-            "justMyCode": false,
-            "program": "${file}"
+            "program": "${file}",
+            "purpose": [
+                "debug-test"
+            ],
+            "console": "integratedTerminal",
+            "env": {
+                "PYTEST_ADDOPTS": "--no-cov"
+            },
+            "autoReload": {
+                "enable": true
+            },
+            "justMyCode": true,
         },
         {
-            "name": "Python: Current File, cwd = file dir, envFile",
-            "type": "python",
+            "name": "Python: Current File, cwd = file dir",
+            "type": "debugpy",
             "request": "launch",
             "cwd": "${fileDirname}", // working dir = dir where current file is
             "program": "${file}",
             "console": "integratedTerminal",
+            "justMyCode": true,
             "autoReload": {
                 "enable": true
             },
-            "justMyCode": false,
-            "envFile": "${workspaceFolder}/.env" // specify where .env file is
         },
         {
-            "name": "Python: Current File, cwd = workspace root folder, envFile",
-            "type": "python",
+            "name": "Python: Current File, cwd = workspace root folder",
+            "type": "debugpy",
             "request": "launch",
-            "cwd": "${workspaceFolder}", // working dir = workspace (mvx) dir
+            "cwd": "${workspaceFolder}", // working dir = workspace root folder
             "program": "${file}",
             "console": "integratedTerminal",
             "autoReload": {
                 "enable": true
             },
-            "justMyCode": false,
-            "envFile": "${workspaceFolder}/.env" // specify where .env file is
+            "justMyCode": true,
         },
         {
             "name": "ospCaseBuilder test_caseDict --inspect",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
-            "cwd": "${workspaceFolder}\\tests\\test_dicts",
+            "cwd": "${workspaceFolder}\\tests\\test_working_directory",
             "program": "${workspaceFolder}\\src\\ospx\\cli\\ospCaseBuilder.py",
             "args": [
                 "test_caseDict",
@@ -51,14 +59,13 @@
             "autoReload": {
                 "enable": true
             },
-            "justMyCode": false,
-            "envFile": "${workspaceFolder}/.env" // specify where .env file is
+            "justMyCode": true,
         },
         {
             "name": "ospCaseBuilder test_caseDict_minimal_inspect --inspect",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
-            "cwd": "${workspaceFolder}\\tests\\test_dicts",
+            "cwd": "${workspaceFolder}\\tests\\test_working_directory",
             "program": "${workspaceFolder}\\src\\ospx\\cli\\ospCaseBuilder.py",
             "args": [
                 "test_caseDict_minimal_inspect",
@@ -68,14 +75,13 @@
             "autoReload": {
                 "enable": true
             },
-            "justMyCode": false,
-            "envFile": "${workspaceFolder}/.env" // specify where .env file is
+            "justMyCode": true,
         },
         {
             "name": "importSystemStructure test_import_OspSystemStructure.xml",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
-            "cwd": "${workspaceFolder}\\tests\\test_dicts",
+            "cwd": "${workspaceFolder}\\tests\\test_working_directory",
             "program": "${workspaceFolder}\\src\\ospx\\cli\\importSystemStructure.py",
             "args": [
                 "test_import_OspSystemStructure.xml",
@@ -84,14 +90,13 @@
             "autoReload": {
                 "enable": true
             },
-            "justMyCode": false,
-            "envFile": "${workspaceFolder}/.env" // specify where .env file is
+            "justMyCode": true,
         },
         {
             "name": "ospCaseBuilder test_caseDict_imported_test_graph",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
-            "cwd": "${workspaceFolder}\\tests\\test_dicts",
+            "cwd": "${workspaceFolder}\\tests\\test_working_directory",
             "program": "${workspaceFolder}\\src\\ospx\\cli\\ospCaseBuilder.py",
             "args": [
                 "test_caseDict_imported_test_graph",
@@ -101,14 +106,13 @@
             "autoReload": {
                 "enable": true
             },
-            "justMyCode": false,
-            "envFile": "${workspaceFolder}/.env" // specify where .env file is
+            "justMyCode": true,
         },
         {
             "name": "ospCaseBuilder test_caseDict --graph",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
-            "cwd": "${workspaceFolder}\\tests\\test_dicts",
+            "cwd": "${workspaceFolder}\\tests\\test_working_directory",
             "program": "${workspaceFolder}\\src\\ospx\\cli\\ospCaseBuilder.py",
             "args": [
                 "test_caseDict",
@@ -118,14 +122,13 @@
             "autoReload": {
                 "enable": true
             },
-            "justMyCode": false,
-            "envFile": "${workspaceFolder}/.env" // specify where .env file is
+            "justMyCode": true,
         },
         {
             "name": "watchCosim test_caseDict",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
-            "cwd": "${workspaceFolder}\\tests\\test_dicts",
+            "cwd": "${workspaceFolder}\\tests\\test_working_directory",
             "program": "${workspaceFolder}\\src\\ospx\\watch\\cli\\watchCosim.py",
             "args": [
                 "watchDict",
@@ -135,14 +138,13 @@
             "autoReload": {
                 "enable": true
             },
-            "justMyCode": false,
-            "envFile": "${workspaceFolder}/.env" // specify where .env file is
+            "justMyCode": true,
         },
         {
             "name": "ospCaseBuilder test_caseDict_minimal_set_int_for_real",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
-            "cwd": "${workspaceFolder}\\tests\\test_dicts",
+            "cwd": "${workspaceFolder}\\tests\\test_working_directory",
             "program": "${workspaceFolder}\\src\\ospx\\cli\\ospCaseBuilder.py",
             "args": [
                 "test_caseDict_minimal_set_int_for_real",
@@ -151,12 +153,11 @@
             "autoReload": {
                 "enable": true
             },
-            "justMyCode": false,
-            "envFile": "${workspaceFolder}/.env" // specify where .env file is
+            "justMyCode": true,
         },
         {
             "name": "ospCaseBuilder house",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "cwd": "${workspaceFolder}\\tests\\house",
             "program": "${workspaceFolder}\\src\\ospx\\cli\\ospCaseBuilder.py",
@@ -167,12 +168,11 @@
             "autoReload": {
                 "enable": true
             },
-            "justMyCode": false,
-            "envFile": "${workspaceFolder}/.env" // specify where .env file is
+            "justMyCode": true,
         },
         {
             "name": "ospCaseBuilder variable_group --inspect",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "cwd": "${workspaceFolder}\\tests\\variable_groups",
             "program": "${workspaceFolder}\\src\\ospx\\cli\\ospCaseBuilder.py",
@@ -184,12 +184,11 @@
             "autoReload": {
                 "enable": true
             },
-            "justMyCode": false,
-            "envFile": "${workspaceFolder}/.env" // specify where .env file is
+            "justMyCode": true,
         },
         {
             "name": "importSystemStructure variable_group OspSystemStructure.xml",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "cwd": "${workspaceFolder}\\tests\\variable_groups",
             "program": "${workspaceFolder}\\src\\ospx\\cli\\importSystemStructure.py",
@@ -200,12 +199,11 @@
             "autoReload": {
                 "enable": true
             },
-            "justMyCode": false,
-            "envFile": "${workspaceFolder}/.env" // specify where .env file is
+            "justMyCode": true,
         },
         {
             "name": "ospCaseBuilder variable_group",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "cwd": "${workspaceFolder}\\tests\\variable_groups",
             "program": "${workspaceFolder}\\src\\ospx\\cli\\ospCaseBuilder.py",
@@ -216,12 +214,11 @@
             "autoReload": {
                 "enable": true
             },
-            "justMyCode": false,
-            "envFile": "${workspaceFolder}/.env" // specify where .env file is
+            "justMyCode": true,
         },
         {
             "name": "watchCosim variable_group",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "cwd": "${workspaceFolder}\\tests\\variable_groups",
             "program": "${workspaceFolder}\\src\\ospx\\watch\\cli\\watchCosim.py",
@@ -233,12 +230,11 @@
             "autoReload": {
                 "enable": true
             },
-            "justMyCode": false,
-            "envFile": "${workspaceFolder}/.env" // specify where .env file is
+            "justMyCode": true,
         },
         {
             "name": "importSystemStructure variable_group OspSystemStructure_original.xml",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "cwd": "${workspaceFolder}\\tests\\variable_groups",
             "program": "${workspaceFolder}\\src\\ospx\\cli\\importSystemStructure.py",
@@ -249,12 +245,11 @@
             "autoReload": {
                 "enable": true
             },
-            "justMyCode": false,
-            "envFile": "${workspaceFolder}/.env" // specify where .env file is
+            "justMyCode": true,
         },
         {
             "name": "ospCaseBuilder variable_group --inspect multiple_connection_types",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "cwd": "${workspaceFolder}\\tests\\variable_groups",
             "program": "${workspaceFolder}\\src\\ospx\\cli\\ospCaseBuilder.py",
@@ -266,12 +261,11 @@
             "autoReload": {
                 "enable": true
             },
-            "justMyCode": false,
-            "envFile": "${workspaceFolder}/.env" // specify where .env file is
+            "justMyCode": true,
         },
         {
             "name": "ospCaseBuilder variable_group multiple_connection_types",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "cwd": "${workspaceFolder}\\tests\\variable_groups",
             "program": "${workspaceFolder}\\src\\ospx\\cli\\ospCaseBuilder.py",
@@ -282,12 +276,11 @@
             "autoReload": {
                 "enable": true
             },
-            "justMyCode": false,
-            "envFile": "${workspaceFolder}/.env" // specify where .env file is
+            "justMyCode": true,
         },
         {
             "name": "importSystemStructure gunnerus-dp/control-system OspSystemStructure.xml (cwd=gunnerus-dp)",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "cwd": "${workspaceFolder}\\tests\\gunnerus-dp",
             "program": "${workspaceFolder}\\src\\ospx\\cli\\importSystemStructure.py",
@@ -298,12 +291,11 @@
             "autoReload": {
                 "enable": true
             },
-            "justMyCode": false,
-            "envFile": "${workspaceFolder}/.env" // specify where .env file is
+            "justMyCode": true,
         },
         {
             "name": "importSystemStructure gunnerus-dp/control-system OspSystemStructure.xml (cwd=control-system)",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "cwd": "${workspaceFolder}\\tests\\gunnerus-dp\\config\\control-system",
             "program": "${workspaceFolder}\\src\\ospx\\cli\\importSystemStructure.py",
@@ -314,12 +306,11 @@
             "autoReload": {
                 "enable": true
             },
-            "justMyCode": false,
-            "envFile": "${workspaceFolder}/.env" // specify where .env file is
+            "justMyCode": true,
         },
         {
             "name": "ospCaseBuilder gunnerus-dp",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "cwd": "${workspaceFolder}\\tests\\gunnerus-dp",
             "program": "${workspaceFolder}\\src\\ospx\\cli\\ospCaseBuilder.py",
@@ -330,12 +321,11 @@
             "autoReload": {
                 "enable": true
             },
-            "justMyCode": false,
-            "envFile": "${workspaceFolder}/.env" // specify where .env file is
+            "justMyCode": true,
         },
         {
             "name": "ospCaseBuilder gunnerus-dp --inspect",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "cwd": "${workspaceFolder}\\tests\\gunnerus-dp",
             "program": "${workspaceFolder}\\src\\ospx\\cli\\ospCaseBuilder.py",
@@ -347,12 +337,11 @@
             "autoReload": {
                 "enable": true
             },
-            "justMyCode": false,
-            "envFile": "${workspaceFolder}/.env" // specify where .env file is
+            "justMyCode": true,
         },
         {
             "name": "watchCosim gunnerus-dp",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "cwd": "${workspaceFolder}\\tests\\gunnerus-dp",
             "program": "${workspaceFolder}\\src\\ospx\\watch\\cli\\watchCosim.py",
@@ -364,12 +353,11 @@
             "autoReload": {
                 "enable": true
             },
-            "justMyCode": false,
-            "envFile": "${workspaceFolder}/.env" // specify where .env file is
+            "justMyCode": true,
         },
         {
             "name": "importSystemStructure spring_mass_damper",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "cwd": "${workspaceFolder}\\tests\\spring_mass_damper",
             "program": "${workspaceFolder}\\src\\ospx\\cli\\importSystemStructure.py",
@@ -380,12 +368,11 @@
             "autoReload": {
                 "enable": true
             },
-            "justMyCode": false,
-            "envFile": "${workspaceFolder}/.env" // specify where .env file is
+            "justMyCode": true,
         },
         {
             "name": "ospCaseBuilder spring_mass_damper --inspect",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "cwd": "${workspaceFolder}\\tests\\spring_mass_damper",
             "program": "${workspaceFolder}\\src\\ospx\\cli\\ospCaseBuilder.py",
@@ -397,12 +384,11 @@
             "autoReload": {
                 "enable": true
             },
-            "justMyCode": false,
-            "envFile": "${workspaceFolder}/.env" // specify where .env file is
+            "justMyCode": true,
         },
         {
             "name": "ospCaseBuilder spring_mass_damper --graph",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "cwd": "${workspaceFolder}\\tests\\spring_mass_damper",
             "program": "${workspaceFolder}\\src\\ospx\\cli\\ospCaseBuilder.py",
@@ -414,12 +400,11 @@
             "autoReload": {
                 "enable": true
             },
-            "justMyCode": false,
-            "envFile": "${workspaceFolder}/.env" // specify where .env file is
+            "justMyCode": true,
         },
         {
             "name": "watchCosim spring_mass_damper",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "cwd": "${workspaceFolder}\\tests\\spring_mass_damper",
             "program": "${workspaceFolder}\\src\\ospx\\watch\\cli\\watchCosim.py",
@@ -432,8 +417,7 @@
             "autoReload": {
                 "enable": true
             },
-            "justMyCode": false,
-            "envFile": "${workspaceFolder}/.env" // specify where .env file is
+            "justMyCode": true,
         },
     ]
 }

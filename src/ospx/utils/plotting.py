@@ -2,9 +2,9 @@
 import logging
 import os
 import re
-from datetime import datetime as datetime
+from collections.abc import MutableMapping
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, MutableMapping, Union
 
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
@@ -12,7 +12,7 @@ from matplotlib.figure import Figure
 logger = logging.getLogger(__name__)
 
 
-def create_meta_dict(title: str) -> Dict[str, str]:
+def create_meta_dict(title: str) -> dict[str, str]:
     """Create a default of meta dict which can be passed to save_figure().
 
     Parameters
@@ -30,7 +30,7 @@ def create_meta_dict(title: str) -> Dict[str, str]:
         "Author": "VFW",
         "Description": title,
         "Copyright": "VFW",
-        "Creation Time": str(datetime.now()),
+        "Creation Time": str(datetime.now(tz=timezone.utc)),
         "Software": "matplotlib",
         "Disclaimer": "",
         "Warning": "",
@@ -41,12 +41,12 @@ def create_meta_dict(title: str) -> Dict[str, str]:
 
 
 def save_figure(
-    fig: Figure,  # type: ignore
+    fig: Figure,
     extension: str,
-    path: Union[str, os.PathLike[str]],
+    path: str | os.PathLike[str],
     title: str,
     meta_dict: MutableMapping[str, str],
-):
+) -> None:
     """Save a figure object as image file.
 
     Parameters
@@ -62,11 +62,10 @@ def save_figure(
     meta_dict : MutableMapping[str, str]
         a dict with additional meta properties. Will be passed as-is to figure.savefig()
     """
-
     # Make sure path argument is of type Path. If not, cast it to Path type.
     path = path if isinstance(path, Path) else Path(path)
 
-    if not os.path.exists(path):
+    if not path.exists():
         logger.info(f"path {path} does not exist, creating")  # 0
         path.mkdir(parents=True, exist_ok=True)
 
@@ -88,23 +87,21 @@ def save_figure(
         title_in_file_name = title_in_file_name.replace(item[0], item[1])
 
     # limit overall length to 128 characters
-    if len(title_in_file_name) >= 80:
-        title_in_file_name = "".join(list(title_in_file_name[:59]) + [".", "."] + list(title_in_file_name[-19:]))
+    if len(title_in_file_name) >= 80:  # noqa: PLR2004
+        title_in_file_name = "".join([*list(title_in_file_name[:59]), ".", ".", *list(title_in_file_name[-19:])])
 
-    save_file: str
+    save_file: str = f"{title_in_file_name}.{extension}"
     if path:
-        save_file = str(path / f"{title_in_file_name}.{extension}")
-    else:
-        save_file = f"{title_in_file_name}.{extension}"
+        save_file = str(path / save_file)
 
-    fig.savefig(  # type: ignore
+    fig.savefig(  # pyright: ignore[reportUnknownMemberType]
         save_file,
         orientation="landscape",
-        # papertype = 'a4',
+        # papertype = 'a4',  # noqa: ERA001
         format=extension,
         transparent=False,
         metadata=meta_dict,
     )
-    plt.close(fig)  # type: ignore
+    plt.close(fig)
 
     return

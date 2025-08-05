@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-# coding: utf-8
+"""ospCaseBuilder command line interface."""
 
 import argparse
 import logging
 from pathlib import Path
-from typing import Union
 
 from ospx import OspCaseBuilder
 from ospx.utils.logging import configure_logging
@@ -15,7 +14,7 @@ logger = logging.getLogger(__name__)
 def _argparser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="ospCaseBuilder",
-        usage="%(prog)s caseDict [options [args]]",
+        usage="%(prog)s case_dict_file [options [args]]",
         epilog="_________________ospCaseBuilder___________________",
         prefix_chars="-",
         add_help=True,
@@ -23,8 +22,8 @@ def _argparser() -> argparse.ArgumentParser:
     )
 
     _ = parser.add_argument(
-        "caseDict",
-        metavar="caseDict",
+        "case_dict_file",
+        metavar="case_dict_file",
         type=str,
         nargs="?",
         help="name of the dict file containing the OSP simulation case configuration.",
@@ -98,8 +97,8 @@ def _argparser() -> argparse.ArgumentParser:
     return parser
 
 
-def main():
-    """Entry point for console script as configured in setup.cfg.
+def main() -> None:
+    """Entry point for console script as configured in pyproject.toml.
 
     Runs the command line interface and parses arguments and options entered on the console.
     """
@@ -108,13 +107,12 @@ def main():
 
     # Configure Logging
     # ..to console
-    log_level_console: str = "INFO"
+    log_level_console: str = "WARNING"
     if any([args.quiet, args.verbose]):
         log_level_console = "ERROR" if args.quiet else log_level_console
-        log_level_console = "DEBUG" if args.verbose else log_level_console
-
+        log_level_console = "INFO" if args.verbose else log_level_console
     # ..to file
-    log_file: Union[Path, None] = Path(args.log) if args.log else None
+    log_file: Path | None = Path(args.log) if args.log else None
     log_level_file: str = args.log_level
     configure_logging(log_level_console, log_file, log_level_file)
 
@@ -122,7 +120,7 @@ def main():
     graph: bool = args.graph
     clean: bool = args.clean
 
-    case_dict_file: Path = Path(args.caseDict)
+    case_dict_file: Path = Path(args.case_dict_file)
 
     # Check whether case dict file exists
     if not case_dict_file.exists():

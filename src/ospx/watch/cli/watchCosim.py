@@ -6,6 +6,7 @@ import logging
 import os
 import re
 import shutil
+import sys
 from argparse import ArgumentParser
 from pathlib import Path
 from time import sleep
@@ -38,7 +39,10 @@ def _argparser() -> argparse.ArgumentParser:
         "-c",
         "--converge",
         action="store_true",
-        help="watch convergence progress, finally --dump (reading watchDict and .csv, plotting convergence until no changes happen for 5s to any .csv)",
+        help=(
+            "watch convergence progress, finally --dump "
+            "(reading watchDict and .csv, plotting convergence until no changes happen for 5s to any .csv)"
+        ),
         default=False,
         required=False,
     )
@@ -134,12 +138,11 @@ def _argparser() -> argparse.ArgumentParser:
     return parser
 
 
-def main():
+def main() -> None:
     """Entry point for console script as configured in setup.cfg.
 
     Runs the command line interface and parses arguments and options entered on the console.
     """
-
     parser = _argparser()
     args = parser.parse_args()
 
@@ -150,7 +153,7 @@ def main():
         log_level_console = "ERROR" if args.quiet else log_level_console
         log_level_console = "DEBUG" if args.verbose else log_level_console
     # ..to file
-    log_file: Union[Path, None] = Path(args.log) if args.log else None
+    log_file: Path | None = Path(args.log) if args.log else None
     log_level_file: str = args.log_level
     configure_logging(log_level_console, log_file, log_level_file)
 
@@ -166,7 +169,7 @@ def main():
     if not converge and not plot and not dump:
         logger.error("give at least one option what to do: --converge, --plot or --dump")
         parser.print_help()
-        exit(0)
+        sys.exit(0)
 
     # Dispatch to _main(), which takes care of processing the arguments and invoking the API.
     _main(
@@ -181,8 +184,9 @@ def main():
     )
 
 
-def _main(
+def _main(  # noqa: PLR0913
     watch_dict_file_name: str,
+    *,
     converge: bool = False,
     plot: bool = False,
     dump: bool = False,
@@ -190,22 +194,21 @@ def _main(
     latest_values: int = 0,
     scale_factor: float = 1,
     timeline_data: bool = False,
-):
+) -> None:
     """Entry point for unit tests.
 
     Processes the arguments parsed by main() on the console and invokes the API.
     """
-
     watch_dict_file = Path(watch_dict_file_name)
 
     if not watch_dict_file.is_file():
         logger.error(f"file {watch_dict_file} not found.")
         return
 
-    csv_files: List[Path] = []
+    csv_files: list[Path] = []
     wait_counter: int = 0
-    while wait_counter < 5:
-        csv_files = list(Path(".").glob("*.csv"))
+    while wait_counter < 5:  # noqa: PLR2004
+        csv_files = list(Path().glob("*.csv"))
         if csv_files:
             break
         if wait_counter == 0:
@@ -219,6 +222,7 @@ def _main(
         logger.error("no csv files found.")
         return
     
+    csv_file_names: list[str] = sorted(file.name for file in csv_files)
     csv_file_names: List[str] = sorted(file.name for file in csv_files)
 
     yaml_file_names: List[str] = {re.sub(r"\.csv$", "_metadata.yaml", n) for n in csv_file_names}
@@ -241,7 +245,13 @@ def _main(
         for data_source_name in data_source_names
     ]
 
-    watcher = CosimWatcher(latest_csv_file_names, skip_values, latest_values, scale_factor, timeline_data)
+    watcher = CosimWatcher(
+        csv_file_names=latest_csv_file_names,
+        skip_values=skip_values,
+        latest_values=latest_values,
+        scale_factor=scale_factor,
+        timeline_data=timeline_data,
+    )
     watcher.read_watch_dict(watch_dict_file_name)
 
     Path(watcher.results_dir).mkdir(parents=True, exist_ok=True)

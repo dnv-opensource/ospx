@@ -12,7 +12,7 @@
 		<Simulator name="LOSGuidance" source="LOSGuidance.fmu" stepSize="0.1">
 			<InitialValues>
 				<InitialValue variable="UDesired">
-					<Real value="1"/>					
+					<Real value="1"/>
 				</InitialValue>
 			</InitialValues>
 		</Simulator>
@@ -25,7 +25,7 @@
 		<Simulator name="TargetShipModule" source="TargetShipModule.fmu" stepSize="0.1">
 			<InitialValues>
 				<InitialValue variable="Parameters.posYNEDInit[0]">
-					<Real value="1"/>					
+					<Real value="1"/>
 				</InitialValue>
 			</InitialValues>
 		</Simulator>
@@ -33,13 +33,13 @@
 		<Simulator name="EncounterEvaluation" source="EncounterEvaluation.fmu" stepSize="0.1">
 			<InitialValues>
 				<InitialValue variable="TargetShipType[0]">
-					<Real value="3"/>					
+					<Real value="3"/>
 				</InitialValue>
 				<InitialValue variable="TargetShipType[1]">
-					<Real value="3"/>					
+					<Real value="3"/>
 				</InitialValue>
 				<InitialValue variable="TargetShipType[2]">
-					<Real value="3"/>					
+					<Real value="3"/>
 				</InitialValue>
 			</InitialValues>
 		</Simulator>
@@ -47,13 +47,13 @@
 		<Simulator name="EvaluateEncounterR14" source="EvaluateEncounterR14.fmu" stepSize="0.1">
 			<InitialValues>
 				<InitialValue variable="COLREGState[1]">
-					<Real value="4"/>					
+					<Real value="4"/>
 				</InitialValue>
 				<InitialValue variable="COLREGState[2]">
-					<Real value="4"/>					
+					<Real value="4"/>
 				</InitialValue>
 				<InitialValue variable="COLREGState[3]">
-					<Real value="4"/>					
+					<Real value="4"/>
 				</InitialValue>
 			</InitialValues>
 		</Simulator>
@@ -61,13 +61,13 @@
 		<Simulator name="SafetyScore" source="SafetyScore.fmu" stepSize="0.1">
 			<InitialValues>
 				<InitialValue variable="TargetShipType[1]">
-					<Real value="3"/>					
+					<Real value="3"/>
 				</InitialValue>
 				<InitialValue variable="TargetShipType[2]">
-					<Real value="3"/>					
+					<Real value="3"/>
 				</InitialValue>
 				<InitialValue variable="TargetShipType[3]">
-					<Real value="3"/>					
+					<Real value="3"/>
 				</InitialValue>
 			</InitialValues>
 		</Simulator>
@@ -77,9 +77,9 @@
 
 
 
-	
-	
-	
+
+
+
 	<Connections>
 		<!-- BEGIN Vessel -> OutputConn -->
 		<VariableGroupConnection>
