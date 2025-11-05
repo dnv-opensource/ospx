@@ -97,8 +97,8 @@ class OspCaseBuilder:
 
 def _clean_case_folder(case_folder: Path) -> None:
     """Clean up the case folder and deletes any existing ospx files, e.g. modelDescription.xml .fmu .csv etc."""
-    import re
-    from shutil import rmtree
+    import re  # noqa: PLC0415
+    from shutil import rmtree  # noqa: PLC0415
 
     # specify all files to be deleted (or comment-in / comment-out as needed)
     case_builder_result_files = [
