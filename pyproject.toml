@@ -28,7 +28,7 @@ name = "ospx"
 version = "0.3.1"
 description = "Extension package to farn, adding support to build OSP simulation cases using FMUs."
 readme = "README.md"
-requires-python = ">= 3.10, < 3.14"
+requires-python = ">= 3.11, < 3.15"
 license = { file = "LICENSE" }
 authors = [
     { name = "Frank Lumpitzsch", email = "frank.lumpitzsch@dnv.com" },
