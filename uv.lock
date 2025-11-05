@@ -2,17 +2,23 @@ version = 1
 revision = 3
 requires-python = ">=3.11, <3.15"
 resolution-markers = [
-    "python_full_version >= '3.14' and sys_platform != 'win32'",
-    "python_full_version == '3.13.*' and sys_platform != 'win32'",
+    "python_full_version >= '3.14' and sys_platform != 'linux' and sys_platform != 'win32'",
+    "python_full_version == '3.13.*' and sys_platform != 'linux' and sys_platform != 'win32'",
+    "python_full_version >= '3.14' and sys_platform == 'linux'",
+    "python_full_version == '3.13.*' and sys_platform == 'linux'",
     "python_full_version >= '3.14' and sys_platform == 'win32'",
     "python_full_version == '3.13.*' and sys_platform == 'win32'",
-    "python_full_version == '3.12.*' and sys_platform != 'win32'",
+    "python_full_version == '3.12.*' and sys_platform != 'linux' and sys_platform != 'win32'",
+    "python_full_version == '3.12.*' and sys_platform == 'linux'",
     "python_full_version == '3.12.*' and sys_platform == 'win32'",
-    "python_full_version < '3.12' and sys_platform != 'win32'",
+    "python_full_version < '3.12' and sys_platform != 'linux' and sys_platform != 'win32'",
+    "python_full_version < '3.12' and sys_platform == 'linux'",
     "python_full_version < '3.12' and sys_platform == 'win32'",
 ]
 required-markers = [
     "sys_platform == 'win32'",
+    "sys_platform == 'linux'",
+    "sys_platform == 'darwin'",
 ]
 
 [[package]]
@@ -1091,7 +1097,7 @@ dependencies = [
     { name = "overrides", marker = "python_full_version < '3.12'" },
     { name = "packaging" },
     { name = "prometheus-client" },
-    { name = "pywinpty", marker = "os_name == 'nt'" },
+    { name = "pywinpty", marker = "os_name == 'nt' and sys_platform != 'linux'" },
     { name = "pyzmq" },
     { name = "send2trash" },
     { name = "terminado" },
@@ -1109,7 +1115,7 @@ name = "jupyter-server-terminals"
 version = "0.5.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "pywinpty", marker = "os_name == 'nt'" },
+    { name = "pywinpty", marker = "os_name == 'nt' and sys_platform != 'linux'" },
     { name = "terminado" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/fc/d5/562469734f476159e99a55426d697cbf8e7eb5efe89fb0e0b4f83a3d3459/jupyter_server_terminals-0.5.3.tar.gz", hash = "sha256:5ae0295167220e9ace0edcfdb212afd2b01ee8d179fe6f23c899590e9b8a5269", size = 31430, upload-time = "2024-03-12T14:37:03.049Z" }
@@ -1843,8 +1849,8 @@ dev = [
     { name = "pytest" },
     { name = "pytest-cov" },
     { name = "ruff" },
-    { name = "sourcery", version = "1.40.0", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform == 'win32'" },
-    { name = "sourcery", version = "1.41.1", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform != 'win32'" },
+    { name = "sourcery", version = "1.40.0", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "sourcery", version = "1.41.1", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform != 'linux' and sys_platform != 'win32'" },
     { name = "sphinx" },
     { name = "sphinx-argparse-cli" },
     { name = "sphinx-autodoc-typehints" },
@@ -2686,12 +2692,17 @@ name = "sourcery"
 version = "1.40.0"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
+    "python_full_version >= '3.14' and sys_platform == 'linux'",
+    "python_full_version == '3.13.*' and sys_platform == 'linux'",
     "python_full_version >= '3.14' and sys_platform == 'win32'",
     "python_full_version == '3.13.*' and sys_platform == 'win32'",
+    "python_full_version == '3.12.*' and sys_platform == 'linux'",
     "python_full_version == '3.12.*' and sys_platform == 'win32'",
+    "python_full_version < '3.12' and sys_platform == 'linux'",
     "python_full_version < '3.12' and sys_platform == 'win32'",
 ]
 wheels = [
+    { url = "https://files.pythonhosted.org/packages/73/ef/42fa2226110cba8f0b656a0f30cac9e66fe0285fa249698bc1d9c5d6b8b4/sourcery-1.40.0-py2.py3-none-manylinux1_x86_64.whl", hash = "sha256:19116cc91aed5db2badca22cd2d745b8e2151bf22bac037d4b00aa2edd52217c", size = 124203805, upload-time = "2025-10-28T11:37:28.078Z" },
     { url = "https://files.pythonhosted.org/packages/e3/3d/b5bd0bc987472a7adb11b6c2fa8612ba3e445d41fed8b473b156af09d519/sourcery-1.40.0-py2.py3-none-win_amd64.whl", hash = "sha256:7a45fd88840cd167747519984213091912fe3782bc167af0c2de1c78d3d9672d", size = 101322491, upload-time = "2025-10-28T11:37:33.595Z" },
 ]
 
@@ -2700,10 +2711,10 @@ name = "sourcery"
 version = "1.41.1"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.14' and sys_platform != 'win32'",
-    "python_full_version == '3.13.*' and sys_platform != 'win32'",
-    "python_full_version == '3.12.*' and sys_platform != 'win32'",
-    "python_full_version < '3.12' and sys_platform != 'win32'",
+    "python_full_version >= '3.14' and sys_platform != 'linux' and sys_platform != 'win32'",
+    "python_full_version == '3.13.*' and sys_platform != 'linux' and sys_platform != 'win32'",
+    "python_full_version == '3.12.*' and sys_platform != 'linux' and sys_platform != 'win32'",
+    "python_full_version < '3.12' and sys_platform != 'linux' and sys_platform != 'win32'",
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/85/92/8150f339ca39a3bbca83cb70a49b22e7c2234ec8d8129bc6bfbe1a6aaf47/sourcery-1.41.1-py2.py3-none-macosx_10_9_universal2.whl", hash = "sha256:9ecb7636301e9dea8934f897151e504127274ea60c7709a65bed7457850f994c", size = 101735565, upload-time = "2025-10-30T14:04:17.397Z" },
@@ -2860,7 +2871,7 @@ version = "0.18.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "ptyprocess", marker = "os_name != 'nt'" },
-    { name = "pywinpty", marker = "os_name == 'nt'" },
+    { name = "pywinpty", marker = "os_name == 'nt' and sys_platform != 'linux'" },
     { name = "tornado" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/8a/11/965c6fd8e5cc254f1fe142d547387da17a8ebfd75a3455f637c663fb38a0/terminado-0.18.1.tar.gz", hash = "sha256:de09f2c4b85de4765f7714688fff57d3e75bad1f909b589fde880460c753fd2e", size = 32701, upload-time = "2024-03-12T14:34:39.026Z" }
