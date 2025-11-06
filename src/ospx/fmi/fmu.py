@@ -273,7 +273,7 @@ class FMU:
 
         # Write updated modelDescription.xml into new FMU
         new_fmu = FMU(new_file)
-        new_fmu._write_model_description(new_model_description)  # noqa: SLF001
+        new_fmu._write_model_description(new_model_description)
 
         return new_fmu
 
@@ -294,7 +294,7 @@ class FMU:
         FMU
             The created proxy version of the FMU
         """
-        import subprocess
+        import subprocess  # noqa: PLC0415
 
         remote_string = f"--remote={host}:{port}"
         command = f"fmu-proxify {self.file.name} {remote_string}"

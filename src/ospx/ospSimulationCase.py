@@ -45,9 +45,9 @@ class OspSimulationCase:
         Raises
         ------
         ValueError
-            If an expected element in caseDict is missing
+            If an expected element in the case dict file is missing
         FileNotFoundError
-            If an FMU file referenced in caseDict does not exist
+            If an FMU file referenced in case dict file does not exist
         """
         logger.info(f"Set up OSP simulation case '{self.name}' in case folder: {self.case_folder}")
 
@@ -373,7 +373,7 @@ class OspSimulationCase:
         }
 
         # @TODO: Time, StepCount, conn0, conn1, etc from modelDescription.xml ModelVariables
-        #        should match connectors in caseDict for respective model. Improvement needed.
+        #        should match connectors in case dict file for respective model. Improvement needed.
         #        FRALUM, 2021-xx-xx
         time_column = 0
         # Components
@@ -485,13 +485,13 @@ class OspSimulationCase:
         fmu_file_in_case_folder: Path = (self.case_folder / fmu_file.name).resolve().absolute()
         if not fmu_file_in_case_folder.exists():
             logger.info(f"Copy FMU {fmu_file} --> {fmu_file_in_case_folder}")
-            copy2(fmu_file, self.case_folder)
+            _ = copy2(fmu_file, self.case_folder)
             # Check whether also an <fmu_name>_OspModelDescription.xml file exists.
             # If so, copy also that one.
             osp_model_description_file = fmu_file.with_name(f"{fmu_file.stem}_OspModelDescription.xml")
             if osp_model_description_file.exists():
                 logger.info(f"Copy OspModelDescription {osp_model_description_file} --> {fmu_file_in_case_folder}")
-                copy2(osp_model_description_file, self.case_folder)
+                _ = copy2(osp_model_description_file, self.case_folder)
         return fmu_file_in_case_folder
 
     def _check_components_step_size(self) -> None:

@@ -1,4 +1,3 @@
-# ruff: noqa: PYI041
 import logging
 from collections.abc import Iterable, Sequence
 from typing import TYPE_CHECKING, Any
@@ -25,7 +24,7 @@ class ScalarVariable:
         data_type: str | None = None,
         causality: str | None = None,
         variability: str | None = None,
-        start: int | float | bool | str | None = None,
+        start: int | float | bool | str | None = None,  # noqa: FBT001
         value_reference: int = 0,
         description: str | None = None,
         quantity: str | None = None,
@@ -218,7 +217,7 @@ def get_fmi_data_type(arg: object) -> str:
 
 
 def _cast_to_fmi_data_type(
-    arg: int | float | bool | str | Sequence[Any],
+    arg: int | float | bool | str | Sequence[Any],  # noqa: FBT001
     fmi_data_type: str,
 ) -> int | float | bool | str | list[Any] | None:
     r"""Casts the passed in argument to a Python data type that matches the requested fmi data type.

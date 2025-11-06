@@ -38,7 +38,7 @@ class OspCaseBuilder:
         Parameters
         ----------
         case_dict_file : Union[str, os.PathLike[str]]
-            caseDict file. Contains all case-specific information OspCaseBuilder needs to generate the OSP files.
+            case dict file. Contains all case-specific information OspCaseBuilder needs to generate the OSP files.
         inspect : bool, optional
             inspect mode. If True, build() reads all properties from the FMUs
             but does not actually create the OSP case files, by default False
@@ -97,8 +97,8 @@ class OspCaseBuilder:
 
 def _clean_case_folder(case_folder: Path) -> None:
     """Clean up the case folder and deletes any existing ospx files, e.g. modelDescription.xml .fmu .csv etc."""
-    import re
-    from shutil import rmtree
+    import re  # noqa: PLC0415
+    from shutil import rmtree  # noqa: PLC0415
 
     # specify all files to be deleted (or comment-in / comment-out as needed)
     case_builder_result_files = [

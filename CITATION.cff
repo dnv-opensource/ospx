@@ -1,5 +1,5 @@
 title: ospx
-version: 0.3.1
+version: 0.3.2
 abstract: >-
   Extension package to farn, adding support to build OSP simulation cases using FMUs.
 type: software

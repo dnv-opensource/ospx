@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class OspSystemStructureImporter:
-    """Class providing methods to convert an existing OspSystemStructure.xml file to an ospx caseDict file."""
+    """Class providing methods to convert an existing OspSystemStructure.xml file to an ospx case dict file."""
 
     @staticmethod
     def import_system_structure(
@@ -24,14 +24,14 @@ class OspSystemStructureImporter:
         *,
         enter_lib_source_as_relative_path: bool = False,
     ) -> None:
-        """Import an OspSystemStructure.xml file and save it as an ospx caseDict file.
+        """Import an OspSystemStructure.xml file and save it as an ospx case dict file.
 
         Parameters
         ----------
         system_structure_file : Union[str, os.PathLike[str]]
             the OspSystemStructure.xml file to be imported
         enter_lib_source_as_relative_path : bool, optional
-            whether lib_source shall be entered as relative path in the caseDict, by default False
+            whether lib_source shall be entered as relative path in the case dict file, by default False
 
         Raises
         ------
