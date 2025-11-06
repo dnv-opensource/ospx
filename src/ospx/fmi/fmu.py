@@ -294,7 +294,7 @@ class FMU:
         FMU
             The created proxy version of the FMU
         """
-        import subprocess
+        import subprocess  # noqa: PLC0415
 
         remote_string = f"--remote={host}:{port}"
         command = f"fmu-proxify {self.file.name} {remote_string}"
