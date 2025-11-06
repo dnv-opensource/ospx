@@ -3,14 +3,11 @@ revision = 3
 requires-python = ">=3.11, <3.15"
 resolution-markers = [
     "python_full_version >= '3.14' and sys_platform != 'linux' and sys_platform != 'win32'",
-    "python_full_version == '3.13.*' and sys_platform != 'linux' and sys_platform != 'win32'",
+    "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform != 'linux' and sys_platform != 'win32'",
     "python_full_version >= '3.14' and sys_platform == 'linux'",
-    "python_full_version == '3.13.*' and sys_platform == 'linux'",
+    "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'linux'",
     "python_full_version >= '3.14' and sys_platform == 'win32'",
-    "python_full_version == '3.13.*' and sys_platform == 'win32'",
-    "python_full_version == '3.12.*' and sys_platform != 'linux' and sys_platform != 'win32'",
-    "python_full_version == '3.12.*' and sys_platform == 'linux'",
-    "python_full_version == '3.12.*' and sys_platform == 'win32'",
+    "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'win32'",
     "python_full_version < '3.12' and sys_platform != 'linux' and sys_platform != 'win32'",
     "python_full_version < '3.12' and sys_platform == 'linux'",
     "python_full_version < '3.12' and sys_platform == 'win32'",
@@ -603,16 +600,16 @@ wheels = [
 
 [[package]]
 name = "dictio"
-version = "0.4.1"
+version = "0.4.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "jsonschema" },
     { name = "lxml" },
     { name = "numpy" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/38/83/53b59a4c9f6536450e9eb1b78996cb455a7d2de717f340ec3bdf40760487/dictio-0.4.1.tar.gz", hash = "sha256:f1f50eae9fcd47fc2bd3d1510ed5ac6dd5b851062e1a06e70fa1bf72c04c85f0", size = 96767, upload-time = "2025-01-18T13:56:28.616Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/09/a2/e4e782674770fcd6bdac8367af8210c203ef3faad323aaaaaa18284e304c/dictio-0.4.2.tar.gz", hash = "sha256:873117cfeb9695c63c8de4fbb63373523da7062704cd2e7bf12dce6d6ec297c7", size = 210343, upload-time = "2025-11-06T11:28:41.804Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/3a/28/cbfbd62e313110cd01494d2e63eee2453e6ca53e7eaec5af76e44472848f/dictio-0.4.1-py3-none-any.whl", hash = "sha256:88dbc6e1474fb547c53e26e7eb56ac8342b35aafabb5083ed1653a1918fe6643", size = 59716, upload-time = "2025-01-18T13:56:26.89Z" },
+    { url = "https://files.pythonhosted.org/packages/c9/a0/4ae69e7803f4cbbef278fb89ef564ede0ada642520c2e25e00bfe9da715f/dictio-0.4.2-py3-none-any.whl", hash = "sha256:052fad65c3eb35bf66e50d4b7f0311528a86bcfc236893fb857cc5c84dd8d16b", size = 59872, upload-time = "2025-11-06T11:28:40.385Z" },
 ]
 
 [[package]]
@@ -1860,12 +1857,11 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "dictio", specifier = ">=0.4.1" },
+    { name = "dictio", specifier = ">=0.4.2" },
     { name = "graphviz", specifier = ">=0.20" },
     { name = "lxml", specifier = ">=6.0" },
     { name = "matplotlib", specifier = ">=3.10" },
-    { name = "numpy", marker = "python_full_version < '3.13'", specifier = ">=1.26" },
-    { name = "numpy", marker = "python_full_version >= '3.13'", specifier = ">=2.3" },
+    { name = "numpy", specifier = ">=2.3" },
     { name = "pandas", specifier = ">=2.3" },
 ]
 
@@ -2693,11 +2689,9 @@ version = "1.40.0"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
     "python_full_version >= '3.14' and sys_platform == 'linux'",
-    "python_full_version == '3.13.*' and sys_platform == 'linux'",
+    "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'linux'",
     "python_full_version >= '3.14' and sys_platform == 'win32'",
-    "python_full_version == '3.13.*' and sys_platform == 'win32'",
-    "python_full_version == '3.12.*' and sys_platform == 'linux'",
-    "python_full_version == '3.12.*' and sys_platform == 'win32'",
+    "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'win32'",
     "python_full_version < '3.12' and sys_platform == 'linux'",
     "python_full_version < '3.12' and sys_platform == 'win32'",
 ]
@@ -2712,8 +2706,7 @@ version = "1.41.1"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
     "python_full_version >= '3.14' and sys_platform != 'linux' and sys_platform != 'win32'",
-    "python_full_version == '3.13.*' and sys_platform != 'linux' and sys_platform != 'win32'",
-    "python_full_version == '3.12.*' and sys_platform != 'linux' and sys_platform != 'win32'",
+    "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform != 'linux' and sys_platform != 'win32'",
     "python_full_version < '3.12' and sys_platform != 'linux' and sys_platform != 'win32'",
 ]
 wheels = [
