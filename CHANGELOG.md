@@ -5,7 +5,14 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 
 ## [Unreleased]
 
+### Added
+* Added support for Python 3.14
+
+### Removed
+* Removed support for Python 3.10
+
 ### Dependencies
+* Updated to dictIO>=0.4.2  (from dictIO>=0.4.1)
 * Updated to ruff>=0.14.3  (from ruff>=0.9.2)
 * Updated to pyright>=1.1.407  (from pyright>=1.1.392)
 * Updated to sourcery>=1.40  (from sourcery>=1.31)
