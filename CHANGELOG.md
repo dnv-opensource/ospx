@@ -5,6 +5,11 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 
 ## [Unreleased]
 
+-/-
+
+
+## [0.3.2] - 2025-11-06
+
 ### Added
 * Added support for Python 3.14
 
@@ -524,7 +529,8 @@ Maintenance Release
 * Added support for Python 3.10
 
 <!-- Markdown link & img dfn's -->
-[unreleased]: https://github.com/dnv-opensource/ospx/compare/v0.3.1...HEAD
+[unreleased]: https://github.com/dnv-opensource/ospx/compare/v0.3.2...HEAD
+[0.3.2]: https://github.com/dnv-opensource/ospx/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/dnv-opensource/ospx/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/dnv-opensource/ospx/compare/v0.2.14...v0.3.0
 [0.2.14]: https://github.com/dnv-opensource/ospx/compare/v0.2.13...v0.2.14
