@@ -117,9 +117,7 @@ watchCosim = "ospx.watch.cli.watchCosim:main"
 
 
 [tool.mypy]
-plugins = [
-    "numpy.typing.mypy_plugin",
-]
+plugins = []
 mypy_path = "stubs"
 files = [
     "src",
