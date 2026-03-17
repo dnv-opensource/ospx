@@ -14,7 +14,7 @@ class Simulation:
     start_time: float | None = None
     stop_time: float | None = None
     base_step_size: float | None = None
-    _algorithm: str | None = None
+    _algorithm: str = "fixedStep"
 
     @property
     def algorithm(self) -> str | None:
@@ -26,6 +26,7 @@ class Simulation:
         """Set the simulation algorithm."""
         valid_values: list[str] = [
             "fixedStep",
+            "ecco",
         ]
         if value not in valid_values:
             logger.error(f"variable {self.name}: algorithm value '{value}' is invalid.")
