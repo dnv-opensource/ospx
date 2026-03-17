@@ -3,7 +3,7 @@ import logging
 import os
 import re
 from collections.abc import MutableMapping
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -30,7 +30,7 @@ def create_meta_dict(title: str) -> dict[str, str]:
         "Author": "VFW",
         "Description": title,
         "Copyright": "VFW",
-        "Creation Time": str(datetime.now(tz=timezone.utc)),
+        "Creation Time": str(datetime.now(tz=UTC)),
         "Software": "matplotlib",
         "Disclaimer": "",
         "Warning": "",

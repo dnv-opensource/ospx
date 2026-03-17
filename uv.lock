@@ -1,6 +1,6 @@
 version = 1
 revision = 3
-requires-python = ">=3.11, <3.15"
+requires-python = ">=3.11"
 resolution-markers = [
     "python_full_version >= '3.14' and sys_platform == 'win32'",
     "python_full_version >= '3.14' and sys_platform == 'emscripten'",
@@ -1975,7 +1975,7 @@ wheels = [
 
 [[package]]
 name = "ospx"
-version = "0.3.2"
+version = "0.3.3"
 source = { editable = "." }
 dependencies = [
     { name = "dictio" },
@@ -2012,34 +2012,34 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "dictio", specifier = ">=0.4.2" },
-    { name = "graphviz", specifier = ">=0.20" },
+    { name = "dictio", specifier = ">=0.4.3" },
+    { name = "graphviz", specifier = ">=0.21" },
     { name = "lxml", specifier = ">=6.0" },
     { name = "matplotlib", specifier = ">=3.10" },
     { name = "numpy", specifier = ">=2.3" },
-    { name = "pandas", specifier = ">=2.3" },
+    { name = "pandas", specifier = ">=3.0" },
 ]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "furo", specifier = ">=2025.9" },
-    { name = "jupyter", specifier = ">=1.1" },
-    { name = "jupyter-client", specifier = ">=8.6" },
-    { name = "mypy", specifier = ">=1.18" },
-    { name = "myst-parser", specifier = ">=4.0" },
-    { name = "nbconvert", specifier = ">=7.16" },
-    { name = "pandas-stubs", specifier = ">=2.3" },
-    { name = "pre-commit", specifier = ">=4.3" },
-    { name = "pyright", specifier = ">=1.1.407" },
-    { name = "pytest", specifier = ">=8.4" },
+    { name = "furo", specifier = ">=2025.12" },
+    { name = "jupyter", specifier = ">=1.1.1" },
+    { name = "jupyter-client", specifier = ">=8.8" },
+    { name = "mypy", specifier = ">=1.19.1" },
+    { name = "myst-parser", specifier = ">=5.0" },
+    { name = "nbconvert", specifier = ">=7.17" },
+    { name = "pandas-stubs", specifier = ">=3.0" },
+    { name = "pre-commit", specifier = ">=4.5" },
+    { name = "pyright", specifier = ">=1.1.408" },
+    { name = "pytest", specifier = ">=9.0" },
     { name = "pytest-cov", specifier = ">=7.0" },
-    { name = "ruff", specifier = ">=0.14.3" },
-    { name = "sourcery", specifier = ">=1.40" },
-    { name = "sphinx", specifier = ">=8.2" },
-    { name = "sphinx-argparse-cli", specifier = ">=1.20" },
-    { name = "sphinx-autodoc-typehints", specifier = ">=3.5" },
-    { name = "sphinxcontrib-mermaid", specifier = ">=1.0.0" },
-    { name = "types-lxml", specifier = ">=2025.8" },
+    { name = "ruff", specifier = ">=0.15.1" },
+    { name = "sourcery", specifier = ">=1.43.0" },
+    { name = "sphinx", specifier = ">=9.0" },
+    { name = "sphinx-argparse-cli", specifier = ">=1.20.1" },
+    { name = "sphinx-autodoc-typehints", specifier = ">=3.6" },
+    { name = "sphinxcontrib-mermaid", specifier = ">=2.0" },
+    { name = "types-lxml", specifier = ">=2026.1" },
 ]
 
 [[package]]
