@@ -29,7 +29,7 @@ def test_fmu_variables_number(test_fmu: FMU) -> None:
 
 
 def test_fmu_units_number(test_fmu: FMU) -> None:
-    assert len(test_fmu.units) == 0
+    assert len(test_fmu.units) == 12
 
 
 def test_fmu_variables_fmi_data_type(test_fmu: FMU) -> None:
