@@ -32,8 +32,15 @@ class OspSimulationCase:
         self.simulation: Simulation  # general properties of the simulation case
         self._read_simulation()
         self.name: str = self.case_dict.name  # initialize conservatively (with fallback path)
-        if self.simulation and self.simulation.name:
-            self.name = self.simulation.name
+        if self.simulation:
+            if self.simulation.name:
+                self.name = self.simulation.name
+            else:
+                logger.warning(
+                    f"no 'name' element found in {self.case_dict.name}['run']['simulation']. "
+                    "Simulation case name will be set to the name of the case dict file."
+                )
+                self.simulation.name = self.name
 
         # Library source path
         self.lib_source: Path
@@ -105,9 +112,9 @@ class OspSimulationCase:
 
         # Global Settings
         if self.simulation:
-            if self.simulation.start_time:
+            if self.simulation.start_time is not None:
                 osp_system_structure["StartTime"] = self.simulation.start_time
-            if self.simulation.base_step_size:
+            if self.simulation.base_step_size is not None:
                 osp_system_structure["BaseStepSize"] = self.simulation.base_step_size
             if self.simulation.algorithm:
                 osp_system_structure["Algorithm"] = self.simulation.algorithm
