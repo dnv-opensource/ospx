@@ -8,6 +8,20 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 * -/-
 
 
+## [0.3.4] - 2026-03-17
+
+## Solved
+* src/ospx/watch/watchCosim.py: Corrected the type of a dtype argument passed to pandas' `to_numpy()` method.
+
+## Changed
+* src/ospx/simulation.py: Made the `algorithm` attribute mandatory, as it became a mandatory field in OspSystemStructure.xml. As default value, `algorithm`is set to "fixedStep", which corresponds to what is used as default in OSP cosim.
+* src/ospx/ospSimulationCase.py: Improved the sync logic between the `name` attribute of `OspSimulationCase` and the `name` attribute of `Simulation`.
+
+## Added
+* Added tests for `ospSimulationCase.py` module
+* Added tests for `simulation.py` module
+
+
 ## [0.3.3] - 2026-03-17
 
 ### Added
@@ -601,7 +615,8 @@ Maintenance Release
 * Added support for Python 3.10
 
 <!-- Markdown link & img dfn's -->
-[unreleased]: https://github.com/dnv-opensource/ospx/compare/v0.3.3...HEAD
+[unreleased]: https://github.com/dnv-opensource/ospx/compare/v0.3.4...HEAD
+[0.3.4]: https://github.com/dnv-opensource/ospx/compare/v0.3.3...v0.3.4
 [0.3.3]: https://github.com/dnv-opensource/ospx/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/dnv-opensource/ospx/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/dnv-opensource/ospx/compare/v0.3.0...v0.3.1
