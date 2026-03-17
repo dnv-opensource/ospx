@@ -5,11 +5,15 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 
 ## [Unreleased]
 
+* -/-
+
+
+## [0.3.3] - 2026-03-17
+
 ### Added
 * Tests:
   * Added tests/test_utils_dict.py, adding tests for function `shrink_dict()` in ospx/utils/dict.py
   * Updated tests/test_working_directory/test_fmu_modelDescription.xml: Added 12 units
-
 
 ### Changed
 * GitHub Workflows:
@@ -38,15 +42,15 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
     That way, we ensure it remains _possible_ for users to find a solution, instead of rendering it impossible forever.
 * Sphinx Documentation:
   * Sphinx conf.py: Updated year in copyright statement to 2026
-* VS Code Settings:
-  * VS Code Settings: (Recommended extensions): Removed 'njqdev.vscode-python-typehint' (Python Type Hint). Not maintained since 1 year, and the functionality is now covered by GitHub Copilot.
-VS Code Settings: (Recommended extensions): Added 'ms-python.debugpy' (Python Debugger).
-VS Code Settings: (Recommended extensions): Added 'ms-python.vscode-python-envs' (Python Environments).
-  * VS Code settings: (Recommended extensions): Removed deprecated IntelliCode extension and replaced it by GitHub Copilot Chat as recommended replacement.
-  * VS Code settings: Updated 'mypy-type-checker.reportingScope' to 'custom'.
+* VS Code Settings (Recommended extensions):
+  * Removed 'njqdev.vscode-python-typehint' (Python Type Hint). Not maintained since 1 year, and the functionality is now covered by GitHub Copilot.
+  * Added 'ms-python.debugpy' (Python Debugger).
+  * Added 'ms-python.vscode-python-envs' (Python Environments).
+  * Removed deprecated IntelliCode extension and replaced it by GitHub Copilot Chat as recommended replacement.
+* VS Code settings:
+  * Updated 'mypy-type-checker.reportingScope' to 'custom'.
 * README.md: Updated year in copyright statement to 2026
 * ruff.toml: Updated target Python version to "py311"
-
 
 ### Dependencies
 * .pre-commit-config.yaml: Updated rev of ruff-pre-commit to v0.15.1
@@ -593,7 +597,8 @@ Maintenance Release
 * Added support for Python 3.10
 
 <!-- Markdown link & img dfn's -->
-[unreleased]: https://github.com/dnv-opensource/ospx/compare/v0.3.2...HEAD
+[unreleased]: https://github.com/dnv-opensource/ospx/compare/v0.3.3...HEAD
+[0.3.3]: https://github.com/dnv-opensource/ospx/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/dnv-opensource/ospx/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/dnv-opensource/ospx/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/dnv-opensource/ospx/compare/v0.2.14...v0.3.0
