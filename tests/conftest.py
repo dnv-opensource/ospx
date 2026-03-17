@@ -8,7 +8,7 @@ import pytest
 from ospx.utils.zip import add_file_content_to_zip
 
 
-@pytest.fixture(scope="package", autouse=True)
+@pytest.fixture(scope="session", autouse=True)
 def chdir() -> None:
     """
     Fixture that changes the current working directory to the 'test_working_directory' folder.
@@ -17,7 +17,7 @@ def chdir() -> None:
     os.chdir(Path(__file__).parent.absolute() / "test_working_directory")
 
 
-@pytest.fixture(scope="package", autouse=True)
+@pytest.fixture(scope="session", autouse=True)
 def test_dir() -> Path:
     """
     Fixture that returns the absolute path of the directory containing the current file.
