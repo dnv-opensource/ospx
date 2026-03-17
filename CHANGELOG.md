@@ -10,14 +10,14 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 
 ## [0.3.4] - 2026-03-17
 
-## Solved
+### Solved
 * src/ospx/watch/watchCosim.py: Corrected the type of a dtype argument passed to pandas' `to_numpy()` method.
 
-## Changed
+### Changed
 * src/ospx/simulation.py: Made the `algorithm` attribute mandatory, as it became a mandatory field in OspSystemStructure.xml. As default value, `algorithm`is set to "fixedStep", which corresponds to what is used as default in OSP cosim.
 * src/ospx/ospSimulationCase.py: Improved the sync logic between the `name` attribute of `OspSimulationCase` and the `name` attribute of `Simulation`.
 
-## Added
+### Added
 * Added tests for `ospSimulationCase.py` module
 * Added tests for `simulation.py` module
 
