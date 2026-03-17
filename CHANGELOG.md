@@ -5,7 +5,10 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 
 ## [Unreleased]
 
--/-
+### Added
+* Tests:
+  * Added tests/test_utils_dict.py, adding tests for function `shrink_dict()` in ospx/utils/dict.py
+  * Updated tests/test_working_directory/test_fmu_modelDescription.xml: Added 12 units
 
 
 ## [0.3.2] - 2025-11-06

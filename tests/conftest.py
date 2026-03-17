@@ -48,7 +48,7 @@ def default_setup_and_teardown():
     _remove_output_dirs_and_files()
     _create_test_fmu()
     yield
-    # _remove_test_fmu()
+    _remove_test_fmu()
     _remove_output_dirs_and_files()
 
 
