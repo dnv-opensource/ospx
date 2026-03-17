@@ -64,7 +64,7 @@ dependencies = [
     "numpy>=2.3",
     "pandas>=3.0",
     "matplotlib>=3.10",
-    "graphviz>=0.20",
+    "graphviz>=0.21",
     "dictIO>=0.4.3",
 ]
 
