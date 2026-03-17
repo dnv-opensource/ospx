@@ -55,4 +55,4 @@ class Unit:
     # "name" must be unique with respect to all other unit elements inside the UnitDefinitions section.
     name: str = field(default_factory=lambda: "-")
     base_unit: BaseUnit | None = None
-    display_unit: DisplayUnit = field(default_factory=lambda: DisplayUnit())
+    display_unit: DisplayUnit = field(default_factory=DisplayUnit)
