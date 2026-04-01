@@ -148,10 +148,10 @@ class CosimWatcher:
             axs: MutableSequence[Axes] = []
             plot: Axes
             time_key: Sequence[float] = list(data)[0]  # type: ignore[assignment, reportAssignmentType]  # noqa: RUF015
+                        
             for index in range(df_col_size):
                 # 0 is time column and thus removed
                 current_key: Sequence[float] = list(data)[index + 1]  # type: ignore[assignment, reportAssignmentType]
-
                 plot = self.figure.add_subplot(self.max_row, self.number_of_columns, index + 1)
 
                 try:
@@ -179,7 +179,7 @@ class CosimWatcher:
                 #     raise TypeError(
                 #         f"CosimWatcher.plot(): plot is of type {type(plot)}. Expected type was matplotlib.axes.Axes ."
                 #     )
-
+            
             _ = self.figure.suptitle(self.title)
 
             if converge:
@@ -393,22 +393,22 @@ class CosimWatcher:
                     # df_all_data_sources = pd.concat([df_all_data_sources, df_single_data_source], axis=1)
 
                     # df_all_data_sources = pd.concat([df_all_data_sources, df_single_data_source], ignore_index=True)
-                    df_all_data_sources = pd.concat(
-                        [df_all_data_sources, df_single_data_source]
-                    )  # frl check for duplicated timeName columns for multiple datasources
+                    # df_all_data_sources = pd.concat(
+                    #    [df_all_data_sources, df_single_data_source]
+                    # )  # frl check for duplicated timeName columns for multiple datasources
 
                     # potential solution
                     # interpolating non-matching time data
                     # otherwise should component-wise dataframes do a better job
-                    # bypass StepCound yielding in big holes, not plotted by mpl.
-                    # df_all_data_sources = pd.merge_asof(
-                    #    df_all_data_sources,
-                    #    df_single_data_source,
-                    #    on = 'Time',
-                    #    by = 'StepCount',
-                    #    direction = 'nearest',
-                    #    #tolerance = pd.Timedelta('1ms')
-                    # )
+                    # bypass StepCount yielding in big holes, not plotted by mpl.
+                    df_all_data_sources = pd.merge_asof(
+                       df_all_data_sources,
+                       df_single_data_source,
+                       on = 'Time',
+                    #   by = 'StepCount', # no StepCount in data
+                       direction = 'nearest',
+                    #   tolerance = pd.Timedelta('1ms'),
+                    )
 
         # find latest common start point for skip and latest
         # consider skipping negative values due to wrong inputs
@@ -427,7 +427,7 @@ class CosimWatcher:
 
         # if skip latest n steps is to be implemented, no changes to start, but an additional command option is required
         length: int = df_all_data_sources.shape[0]
-
+        
         return df_all_data_sources.iloc[start:length, :]
 
     def _determine_optimum_screen_size(self) -> None:
