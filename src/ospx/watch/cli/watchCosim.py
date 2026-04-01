@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding: utf-8
 
 import argparse
 import logging
@@ -10,7 +9,6 @@ import sys
 from argparse import ArgumentParser
 from pathlib import Path
 from time import sleep
-from typing import List, Union
 
 from ospx.utils.logging import configure_logging
 from ospx.watch.watchCosim import CosimWatcher
@@ -221,15 +219,14 @@ def _main(  # noqa: PLR0913
     if not csv_files:
         logger.error("no csv files found.")
         return
-    
-    csv_file_names: list[str] = sorted(file.name for file in csv_files)
-    csv_file_names: List[str] = sorted(file.name for file in csv_files)
 
-    yaml_file_names: List[str] = {re.sub(r"\.csv$", "_metadata.yaml", n) for n in csv_file_names}
-    yaml_files: List[Path] = [Path(n) for n in yaml_file_names]
-    
-    result_dict_files = list(Path(".").glob("*[rR]esult*Dict"))
-    
+    csv_file_names: list[str] = sorted(file.name for file in csv_files)
+
+    yaml_file_names: set[str] = {re.sub(r"\.csv$", "_metadata.yaml", n) for n in csv_file_names}
+    yaml_files: list[Path] = [Path(n) for n in yaml_file_names]
+
+    result_dict_files = list(Path().glob("*[rR]esult*Dict"))
+
     # From the csv file names, identify all data sources for which csv files have been written,
     # and save them as set.
     data_source_names = {re.sub(r"_\d{8}_\d{6}_\d{6}.*$", "", n) for n in csv_file_names}
@@ -269,14 +266,15 @@ def _main(  # noqa: PLR0913
         # after simplifying watchCosim or splitting off, it can be considered to move csv files in advance
         # (not suitable for -c option!)
         for file in csv_files:
-            shutil.move(file, "results")
-            
+            _ = shutil.move(file, "results")
+
         for file in yaml_files:
             if file.is_file():
-                shutil.move(file, "results")
-                
+                _ = shutil.move(file, "results")
+
         for file in result_dict_files:
-            shutil.move(file, "results")
-            
+            _ = shutil.move(file, "results")
+
+
 if __name__ == "__main__":
     main()

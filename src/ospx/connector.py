@@ -98,7 +98,7 @@ class Connector:
         """Returns the type of the connector."""
         return self._type
 
-    @type.setter
+    @type.setter  # noqa: A003
     def type(self, value: str) -> None:
         """Set the type of the connector.
 

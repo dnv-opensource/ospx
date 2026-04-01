@@ -25,9 +25,51 @@
         stepSize="0.2"
     />
 
+    <UnitDefinitions>
+        <Unit name="dimensionless">
+            <BaseUnit factor="1"/>
+        </Unit>
+        <Unit name="radian">
+            <BaseUnit rad="0" factor="1"/>
+            <DisplayUnit name="degree" factor="0.017453292519943295" offset="0.0"/>
+        </Unit>
+        <Unit name="radian / second">
+            <BaseUnit s="-1" rad="0" factor="1.0"/>
+            <DisplayUnit name="degree / second" factor="0.017453292519943295" offset="0.0"/>
+        </Unit>
+        <Unit name="radian / second ** 2">
+            <BaseUnit s="-2" rad="0" factor="1.0"/>
+            <DisplayUnit name="degree / second ** 2" factor="0.017453292519943295" offset="0.0"/>
+        </Unit>
+        <Unit name="kilogram * meter / second ** 2">
+            <BaseUnit kg="1" m="1" s="-2" factor="1.0"/>
+            <DisplayUnit name="newton" factor="1.0" offset="0.0"/>
+        </Unit>
+        <Unit name="kilogram * meter ** 2 / second ** 2">
+            <BaseUnit kg="1" m="2" s="-2" factor="1.0"/>
+            <DisplayUnit name="meter * newton" factor="1.0" offset="0.0"/>
+        </Unit>
+        <Unit name="kilogram">
+            <BaseUnit kg="1" factor="1"/>
+        </Unit>
+        <Unit name="meter">
+            <BaseUnit m="1" factor="1"/>
+        </Unit>
+        <Unit name="">
+            <BaseUnit factor="1"/>
+        </Unit>
+        <Unit name="meter / second">
+            <BaseUnit m="1" s="-1" factor="1.0"/>
+        </Unit>
+        <Unit name="meter / second ** 2">
+            <BaseUnit m="1" s="-2" factor="1.0"/>
+        </Unit>
+        <Unit name="kilogram / second">
+            <BaseUnit kg="1" s="-1" factor="1.0"/>
+        </Unit>
+    </UnitDefinitions>
 
     <ModelVariables>
-
 
         <ScalarVariable name="Variable_1_IN_Real" valueReference="0"  causality="input">
             <Real  start="0.0" />
