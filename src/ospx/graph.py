@@ -12,7 +12,7 @@ from graphviz.graphs import BaseGraph
 
 from ospx import Component, Connection, OspSimulationCase
 
-__ALL__ = ["Graph"]
+__all__ = ["Graph"]
 
 logger = logging.getLogger(__name__)
 

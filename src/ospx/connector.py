@@ -1,6 +1,6 @@
 import logging
 
-__ALL__ = ["Connector"]
+__all__ = ["Connector"]
 
 logger = logging.getLogger(__name__)
 

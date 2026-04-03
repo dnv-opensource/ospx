@@ -5,7 +5,7 @@ from typing import Any
 from ospx import Component, Connection, Connector, Endpoint
 from ospx.fmi import FMU, ScalarVariable, Unit
 
-__ALL__ = ["System"]
+__all__ = ["System"]
 
 logger = logging.getLogger(__name__)
 
