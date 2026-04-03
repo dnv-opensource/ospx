@@ -30,6 +30,7 @@ ignore = [
     "PLR0911", # Too many return statements   <- @TODO: reactivate and resolve  @CLAROS, 2024-10-21
     "PLR0912", # Too many branches   <- @TODO: reactivate and resolve  @CLAROS, 2024-10-21
     "PLR0915", # Too many statements   <- @TODO: reactivate and resolve  @CLAROS, 2024-10-21
+
     # Ruff lint rules considered as too strict and hence ignored
     "FIX002",  # Line contains TODO, consider resolving the issue
     "TD003",   # Missing issue link on the line following a TODO
@@ -163,7 +164,10 @@ raises-require-match-for = [
     "A001",   # Variable {name} is shadowing a Python builtin
     "D100",   # Missing docstring in public module
 ]
-
+# types.py specific ignores
+"**/types.py" = [
+    "A005", # Module `types` shadows a Python standard-library module
+]
 
 [lint.pydocstyle]
 convention = "numpy"
