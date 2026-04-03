@@ -65,7 +65,7 @@ dependencies = [
     "pandas>=3.0",
     "matplotlib>=3.10",
     "graphviz>=0.21",
-    "dictIO>=0.4.3",
+    "dictIO>=0.4.4",
 ]
 
 [project.urls]
