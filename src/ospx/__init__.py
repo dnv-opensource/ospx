@@ -1,14 +1,27 @@
-"""ospx package."""
+"""ospx package: Extension package to farn, adding support to build OSP simulation cases using FMUs."""
 
-from ospx.simulation import Simulation as Simulation
-from ospx.connector import Connector as Connector
+from ospx.simulation import Simulation
+from ospx.connector import Connector
 from ospx.connection import (
-    Endpoint as Endpoint,
-    Connection as Connection,
+    Endpoint,
+    Connection,
 )
-from ospx.component import Component as Component
-from ospx.system import System as System
-from ospx.ospSimulationCase import OspSimulationCase as OspSimulationCase
-from ospx.graph import Graph as Graph
-from ospx.ospCaseBuilder import OspCaseBuilder as OspCaseBuilder
-from ospx.importer import OspSystemStructureImporter as OspSystemStructureImporter
+from ospx.component import Component
+from ospx.system import System
+from ospx.ospSimulationCase import OspSimulationCase
+from ospx.graph import Graph
+from ospx.ospCaseBuilder import OspCaseBuilder
+from ospx.importer import OspSystemStructureImporter
+
+__all__ = [
+    "Component",
+    "Connection",
+    "Connector",
+    "Endpoint",
+    "Graph",
+    "OspCaseBuilder",
+    "OspSimulationCase",
+    "OspSystemStructureImporter",
+    "Simulation",
+    "System",
+]
