@@ -66,6 +66,7 @@
             "args": [
                 "test_caseDict",
                 "--inspect",
+                "-v",
             ],
             "console": "integratedTerminal",
             "autoReload": {
@@ -86,6 +87,7 @@
             "args": [
                 "test_caseDict_minimal_inspect",
                 "--inspect",
+                "-v",
             ],
             "console": "integratedTerminal",
             "autoReload": {
@@ -223,6 +225,7 @@
             "args": [
                 "caseDict",
                 "--inspect",
+                "-v",
             ],
             "console": "integratedTerminal",
             "autoReload": {
@@ -320,6 +323,7 @@
             "args": [
                 "caseDict_multiple_connection_types",
                 "--inspect",
+                "-v",
             ],
             "console": "integratedTerminal",
             "autoReload": {
@@ -416,6 +420,7 @@
             "args": [
                 "caseDict",
                 "--inspect",
+                "-v",
             ],
             "console": "integratedTerminal",
             "autoReload": {
@@ -475,6 +480,7 @@
             "args": [
                 "test_caseDict",
                 "--inspect",
+                "-v",
             ],
             "console": "integratedTerminal",
             "autoReload": {
