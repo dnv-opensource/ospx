@@ -1,3 +1,3 @@
 .. sphinx_argparse_cli::
-   :module: ospx.watch.cli.watchCosim
+   :module: ospx.cli.watchCosim
    :func: _argparser

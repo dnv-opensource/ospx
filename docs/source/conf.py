@@ -68,7 +68,7 @@ exclude_patterns = []
 html_title = f"ospx {release}"
 html_theme = "furo"
 html_static_path = ["_static"]
-html_logo = "_static/OSPx.svg"
+html_logo = "_static/ospx.svg"
 autodoc_default_options = {
     "member-order": "groupwise",
     "undoc-members": True,
