@@ -12,9 +12,11 @@
 /results
 *callGraph*
 
-
 *.xml
 !test_import_OspSystemStructure.xml
 !test_fmu*.xml
 *.ssd
 /caseDict_imported_from_test_import_OspSystemStructure_xml
+
+parsed.*
+reread.*

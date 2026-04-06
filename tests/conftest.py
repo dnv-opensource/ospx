@@ -1,3 +1,5 @@
+"""Test configuration and fixtures."""
+
 import logging
 import os
 from pathlib import Path
@@ -9,19 +11,24 @@ from ospx.utils.zip import add_file_content_to_zip
 
 
 @pytest.fixture(scope="session", autouse=True)
-def chdir() -> None:
+def chdir():
     """
     Fixture that changes the current working directory to the 'test_working_directory' folder.
-    This fixture is automatically used for the entire package.
+    This fixture is automatically used for the entire session.
     """
+    original_cwd = Path.cwd()
     os.chdir(Path(__file__).parent.absolute() / "test_working_directory")
+    try:
+        yield
+    finally:
+        os.chdir(original_cwd)  # reset to original working directory after tests
 
 
 @pytest.fixture(scope="session", autouse=True)
 def test_dir() -> Path:
     """
     Fixture that returns the absolute path of the directory containing the current file.
-    This fixture is automatically used for the entire package.
+    This fixture is automatically used for the entire session.
     """
     return Path(__file__).parent.absolute()
 
@@ -61,7 +68,7 @@ def _remove_output_dirs_and_files() -> None:
     for pattern in output_files:
         for file in Path.cwd().glob(pattern):
             _file = Path(file)
-            if not _file.name.startswith("test_"):
+            if _file.is_file() and not _file.name.startswith("test_"):
                 _file.unlink(missing_ok=True)
 
 
