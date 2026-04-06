@@ -115,7 +115,7 @@ required-environments = [
 [project.scripts]
 ospCaseBuilder = "ospx.cli.ospCaseBuilder:main"
 importSystemStructure = "ospx.cli.importSystemStructure:main"
-watchCosim = "ospx.watch.cli.watchCosim:main"
+watchCosim = "ospx.cli.watchCosim:main"
 
 
 [tool.mypy]
