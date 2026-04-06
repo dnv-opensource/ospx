@@ -27,7 +27,7 @@ allow-direct-references = true
 
 [project]
 name = "ospx"
-version = "0.3.4"
+version = "0.3.5"
 description = "Extension package to farn, adding support to build OSP simulation cases using FMUs."
 readme = "README.md"
 requires-python = ">= 3.11"
