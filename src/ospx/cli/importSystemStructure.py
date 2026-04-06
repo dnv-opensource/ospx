@@ -3,12 +3,23 @@
 
 import argparse
 import logging
+import pprint
+from importlib import metadata
 from pathlib import Path
 
-from ospx import OspSystemStructureImporter
+from ospx.importer import OspSystemStructureImporter
 from ospx.utils.logging import configure_logging
 
 logger = logging.getLogger(__name__)
+
+
+def _get_version() -> str:
+    """Return the installed package version, or a safe fallback if unavailable."""
+    try:
+        return metadata.version("ospx")
+    except metadata.PackageNotFoundError:
+        # Fallback when package metadata is not available (e.g. running from source)
+        return "ospx (version unknown)"
 
 
 def _argparser() -> argparse.ArgumentParser:
@@ -66,6 +77,13 @@ def _argparser() -> argparse.ArgumentParser:
         required=False,
     )
 
+    _ = parser.add_argument(
+        "-V",
+        "--version",
+        action="version",
+        version=_get_version(),
+    )
+
     return parser
 
 
@@ -92,11 +110,22 @@ def main() -> None:
 
     # Check whether system structure file exists
     if not system_structure_file.is_file():
-        logger.error(f"importSystemStructure: File {system_structure_file} not found.")
+        logger.error(f"importSystemStructure.py: File {system_structure_file} not found.")
         return
 
+    # Print the parsed commandline arguments for documentation and debugging purposes.
+    # The arguments will be split into one argument per line, if possible.
+    # If extracting a mapping from `args` fails, fall back to its string representation.
+    _indent: str = " " * 13
+    try:
+        _arg_mapping = vars(args)
+    except TypeError:
+        _arg_mapping = {"args": str(args)}
+    _formatted_args = pprint.pformat(_arg_mapping, sort_dicts=True)
+    _indented_args = "\n".join(f"{_indent}{line}" for line in _formatted_args.splitlines())
     logger.info(
-        f"Start importSystemStructure.py with following arguments:\n\t system_structure_file: \t{system_structure_file}"
+        "Start importSystemStructure.py with following arguments:\n%s\n",
+        _indented_args,
     )
 
     # Invoke API

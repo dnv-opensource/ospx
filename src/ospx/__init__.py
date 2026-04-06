@@ -10,8 +10,8 @@ from ospx.component import Component
 from ospx.system import System
 from ospx.ospSimulationCase import OspSimulationCase
 from ospx.graph import Graph
-from ospx.ospCaseBuilder import OspCaseBuilder
-from ospx.importer import OspSystemStructureImporter
+# from ospx.ospCaseBuilder import OspCaseBuilder
+# from ospx.importer import OspSystemStructureImporter
 
 __all__ = [
     "Component",
@@ -19,9 +19,9 @@ __all__ = [
     "Connector",
     "Endpoint",
     "Graph",
-    "OspCaseBuilder",
+    # "OspCaseBuilder",
     "OspSimulationCase",
-    "OspSystemStructureImporter",
+    # "OspSystemStructureImporter",
     "Simulation",
     "System",
 ]
