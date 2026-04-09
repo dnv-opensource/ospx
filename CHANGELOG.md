@@ -8,7 +8,7 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 * -/-
 
 
-## [0.3.5] - 2026-04-07
+## [0.3.5] - 2026-04-09
 
 ### Solved
 * Solved an issue where watchCosim failed to dump time series when called with --skip or --latest flag
