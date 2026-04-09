@@ -11,7 +11,7 @@ from dictIO.utils.counter import BorgCounter
 from ospx import Connector
 from ospx.fmi import FMU, ScalarVariable, Unit
 
-__ALL__ = ["Component"]
+__all__ = ["Component"]
 
 logger = logging.getLogger(__name__)
 

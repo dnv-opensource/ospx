@@ -16,12 +16,8 @@ ospx supports
 ```sh
 pip install ospx
 ```
-ospx requires the following (sub-)package:
-* [dictIO][dictIO_docs]: foundation package, enabling ospx to handle configuration files in dictIO dict file format.
 
-However, dictIO gets installed automatically with ospx.
-
-## Usage Example
+## Usage
 
 ospx provides both an API for use inside Python as well as a CLI for shell execution of core functions.
 
@@ -37,7 +33,7 @@ The above task can also be invoked from the command line, using the 'ospCaseBuil
 ospCaseBuilder caseDict
 ```
 
-_For more examples and usage, please refer to [ospx's documentation][ospx_docs]._
+_For more examples and usage, please refer to ospx's [documentation][ospx_docs]._
 
 ## File Format
 A caseDict is a file in dictIO dict file format used with farn.
@@ -67,7 +63,7 @@ uv self update
 ```
 
 ### 2. Install Python
-This project requires Python 3.10 or later. <br>
+This project requires Python 3.11 or later. <br>
 If you don't already have a compatible version installed on your machine, the probably most comfortable way to install Python is through `uv`:
 ```sh
 uv python install
@@ -91,15 +87,18 @@ cd ospx
 ```
 
 ### 4. Install dependencies
-Run `uv sync` to create a virtual environment and install all project dependencies into it:
+Run `uv sync -U` to create a virtual environment and install all project dependencies into it:
 ```sh
-uv sync
+uv sync -U
 ```
 > **Note**: Using `--no-dev` will omit installing development dependencies.
 
+> **Explanation**: The `-U` option stands for `--update`. It forces `uv` to fetch and install the latest versions of all dependencies,
+> ensuring that your environment is up-to-date.
+
 > **Note**: `uv` will create a new virtual environment called `.venv` in the project root directory when running
-> `uv sync` the first time. Optionally, you can create your own virtual environment using e.g. `uv venv`, before running
-> `uv sync`.
+> `uv sync -U` the first time. Optionally, you can create your own virtual environment using e.g. `uv venv`, before running
+> `uv sync -U`.
 
 ### 5. (Optional) Activate the virtual environment
 When using `uv`, there is in almost all cases no longer a need to manually activate the virtual environment. <br>
@@ -160,6 +159,10 @@ Claas Rostock - [@LinkedIn](https://www.linkedin.com/in/claasrostock/?locale=en_
 
 Seunghyeon Yoo - [@LinkedIn](https://www.linkedin.com/in/seunghyeon-yoo-3625173b/) - seunghyeon.yoo@dnv.com
 
+@TODO: (1) Adapt to chosen license (or delete if no license is applied). <br>
+@TODO: (2) Adapt or delete the license file (LICENSE.md) <br>
+@TODO: (3) Adapt or delete the license entry in pyproject.toml <br>
+@TODO: (4) Adapt below line to chosen license <br>
 Distributed under the MIT license. See [LICENSE](LICENSE.md) for more information.
 
 [https://github.com/dnv-opensource/ospx](https://github.com/dnv-opensource/ospx)
@@ -177,7 +180,7 @@ Distributed under the MIT license. See [LICENSE](LICENSE.md) for more informatio
 For your contribution, please make sure you follow the [STYLEGUIDE](STYLEGUIDE.md) before creating the Pull Request.
 
 <!-- Markdown link & img dfn's -->
-[dictIO_docs]: https://dnv-opensource.github.io/dictIO/README.html
 [ospx_docs]: https://dnv-opensource.github.io/ospx/README.html
+[dictIO_docs]: https://dnv-opensource.github.io/dictIO/README.html
 [farn_docs]: https://dnv-opensource.github.io/farn/README.html
 [osp_docs]: https://open-simulation-platform.github.io/

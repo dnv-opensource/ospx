@@ -11,7 +11,6 @@ only-include = [
     ".coveragerc",
     ".editorconfig",
     ".pre-commit-config.yaml",
-    "manage.py",
     "pyproject.toml",
     "pytest.ini",
     "ruff.toml",
@@ -23,9 +22,12 @@ packages = [
     "src/ospx",
 ]
 
+[tool.hatch.metadata]
+allow-direct-references = true
+
 [project]
 name = "ospx"
-version = "0.3.4"
+version = "0.3.5"
 description = "Extension package to farn, adding support to build OSP simulation cases using FMUs."
 readme = "README.md"
 requires-python = ">= 3.11"
@@ -61,11 +63,11 @@ classifiers = [
 ]
 dependencies = [
     "lxml>=6.0",
-    "numpy>=2.3",
+    "numpy>=2.4",
     "pandas>=3.0",
     "matplotlib>=3.10",
     "graphviz>=0.21",
-    "dictIO>=0.4.3",
+    "dictIO>=0.4.4",
 ]
 
 [project.urls]
@@ -79,23 +81,23 @@ Changelog = "https://github.com/dnv-opensource/ospx/blob/main/CHANGELOG.md"
 [dependency-groups]
 dev = [
     "pytest>=9.0",
-    "pytest-cov>=7.0",
-    "ruff>=0.15.1",
+    "pytest-cov>=7.1",
+    "ruff>=0.15.9",
     "pyright>=1.1.408",
     "mypy>=1.19.1",
     "sourcery>=1.43.0",
     "pre-commit>=4.5",
     "Sphinx>=9.0",
-    "sphinx-argparse-cli>=1.20.1",
+    "sphinx-argparse-cli>=1.21.3",
     "sphinx-autodoc-typehints>=3.6",
     "sphinxcontrib-mermaid>=2.0",
     "myst-parser>=5.0",
     "furo>=2025.12",
-    "nbconvert>=7.17",
     "jupyter>=1.1.1",
-    "jupyter-client>=8.8",
+    "nbconvert>=7.17",
     "pandas-stubs>=3.0",
-    "types-lxml>=2026.1",
+    "types-lxml>=2026.2",
+    "scipy-stubs>=1.17.1",
 ]
 
 [tool.uv]
@@ -113,7 +115,7 @@ required-environments = [
 [project.scripts]
 ospCaseBuilder = "ospx.cli.ospCaseBuilder:main"
 importSystemStructure = "ospx.cli.importSystemStructure:main"
-watchCosim = "ospx.watch.cli.watchCosim:main"
+watchCosim = "ospx.cli.watchCosim:main"
 
 
 [tool.mypy]
@@ -142,11 +144,11 @@ include = [
     "demos",
 ]
 exclude = [
-    "src/folder_to_be_excluded",
     "**/node_modules",
     "**/__pycache__",
     "**/.*",
     ".venv",
+    "src/folder_to_be_excluded",
 ]
 
 typeCheckingMode = "basic"

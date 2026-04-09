@@ -1,7 +1,7 @@
 import logging
 from dataclasses import dataclass
 
-__ALL__ = ["Simulation"]
+__all__ = ["Simulation"]
 
 logger = logging.getLogger(__name__)
 

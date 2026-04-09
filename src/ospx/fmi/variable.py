@@ -7,7 +7,7 @@ from dictIO import Formatter, NativeFormatter, Parser
 if TYPE_CHECKING:
     from dictIO.types import TSingleValue
 
-__ALL__ = ["ScalarVariable", "get_fmi_data_type"]
+__all__ = ["ScalarVariable", "get_fmi_data_type"]
 
 logger = logging.getLogger(__name__)
 

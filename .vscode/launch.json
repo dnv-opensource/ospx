@@ -19,7 +19,11 @@
             "autoReload": {
                 "enable": true
             },
+            "subProcess": true,
             "justMyCode": true,
+            "redirectOutput": true, // pipe stdout/stderr to Debug Console
+            "showReturnValue": true,
+            "logToFile": false, // set true temporarily when diagnosing debugger issues
         },
         {
             "name": "Python: Current File, cwd = file dir",
@@ -28,10 +32,14 @@
             "cwd": "${fileDirname}", // working dir = dir where current file is
             "program": "${file}",
             "console": "integratedTerminal",
-            "justMyCode": true,
             "autoReload": {
                 "enable": true
             },
+            "subProcess": true,
+            "justMyCode": true,
+            "redirectOutput": true,
+            "showReturnValue": true,
+            "logToFile": false,
         },
         {
             "name": "Python: Current File, cwd = workspace root folder",
@@ -43,7 +51,11 @@
             "autoReload": {
                 "enable": true
             },
+            "subProcess": true,
             "justMyCode": true,
+            "redirectOutput": true,
+            "showReturnValue": true,
+            "logToFile": false,
         },
         {
             "name": "ospCaseBuilder test_caseDict --inspect",
@@ -54,12 +66,17 @@
             "args": [
                 "test_caseDict",
                 "--inspect",
+                "-v",
             ],
             "console": "integratedTerminal",
             "autoReload": {
                 "enable": true
             },
+            "subProcess": true,
             "justMyCode": true,
+            "redirectOutput": true,
+            "showReturnValue": true,
+            "logToFile": false,
         },
         {
             "name": "ospCaseBuilder test_caseDict_minimal_inspect --inspect",
@@ -70,12 +87,17 @@
             "args": [
                 "test_caseDict_minimal_inspect",
                 "--inspect",
+                "-v",
             ],
             "console": "integratedTerminal",
             "autoReload": {
                 "enable": true
             },
+            "subProcess": true,
             "justMyCode": true,
+            "redirectOutput": true,
+            "showReturnValue": true,
+            "logToFile": false,
         },
         {
             "name": "importSystemStructure test_import_OspSystemStructure.xml",
@@ -90,7 +112,11 @@
             "autoReload": {
                 "enable": true
             },
+            "subProcess": true,
             "justMyCode": true,
+            "redirectOutput": true,
+            "showReturnValue": true,
+            "logToFile": false,
         },
         {
             "name": "ospCaseBuilder test_caseDict_imported_test_graph",
@@ -106,7 +132,11 @@
             "autoReload": {
                 "enable": true
             },
+            "subProcess": true,
             "justMyCode": true,
+            "redirectOutput": true,
+            "showReturnValue": true,
+            "logToFile": false,
         },
         {
             "name": "ospCaseBuilder test_caseDict --graph",
@@ -122,14 +152,18 @@
             "autoReload": {
                 "enable": true
             },
+            "subProcess": true,
             "justMyCode": true,
+            "redirectOutput": true,
+            "showReturnValue": true,
+            "logToFile": false,
         },
         {
             "name": "watchCosim test_caseDict",
             "type": "debugpy",
             "request": "launch",
             "cwd": "${workspaceFolder}\\tests\\test_working_directory",
-            "program": "${workspaceFolder}\\src\\ospx\\watch\\cli\\watchCosim.py",
+            "program": "${workspaceFolder}\\src\\ospx\\cli\\watchCosim.py",
             "args": [
                 "watchDict",
                 "-pd",
@@ -138,7 +172,11 @@
             "autoReload": {
                 "enable": true
             },
+            "subProcess": true,
             "justMyCode": true,
+            "redirectOutput": true,
+            "showReturnValue": true,
+            "logToFile": false,
         },
         {
             "name": "ospCaseBuilder test_caseDict_minimal_set_int_for_real",
@@ -153,7 +191,11 @@
             "autoReload": {
                 "enable": true
             },
+            "subProcess": true,
             "justMyCode": true,
+            "redirectOutput": true,
+            "showReturnValue": true,
+            "logToFile": false,
         },
         {
             "name": "ospCaseBuilder house",
@@ -168,7 +210,11 @@
             "autoReload": {
                 "enable": true
             },
+            "subProcess": true,
             "justMyCode": true,
+            "redirectOutput": true,
+            "showReturnValue": true,
+            "logToFile": false,
         },
         {
             "name": "ospCaseBuilder variable_group --inspect",
@@ -179,12 +225,17 @@
             "args": [
                 "caseDict",
                 "--inspect",
+                "-v",
             ],
             "console": "integratedTerminal",
             "autoReload": {
                 "enable": true
             },
+            "subProcess": true,
             "justMyCode": true,
+            "redirectOutput": true,
+            "showReturnValue": true,
+            "logToFile": false,
         },
         {
             "name": "importSystemStructure variable_group OspSystemStructure.xml",
@@ -199,7 +250,11 @@
             "autoReload": {
                 "enable": true
             },
+            "subProcess": true,
             "justMyCode": true,
+            "redirectOutput": true,
+            "showReturnValue": true,
+            "logToFile": false,
         },
         {
             "name": "ospCaseBuilder variable_group",
@@ -214,14 +269,18 @@
             "autoReload": {
                 "enable": true
             },
+            "subProcess": true,
             "justMyCode": true,
+            "redirectOutput": true,
+            "showReturnValue": true,
+            "logToFile": false,
         },
         {
             "name": "watchCosim variable_group",
             "type": "debugpy",
             "request": "launch",
             "cwd": "${workspaceFolder}\\tests\\variable_groups",
-            "program": "${workspaceFolder}\\src\\ospx\\watch\\cli\\watchCosim.py",
+            "program": "${workspaceFolder}\\src\\ospx\\cli\\watchCosim.py",
             "args": [
                 "watchDict",
                 "-pd",
@@ -230,7 +289,11 @@
             "autoReload": {
                 "enable": true
             },
+            "subProcess": true,
             "justMyCode": true,
+            "redirectOutput": true,
+            "showReturnValue": true,
+            "logToFile": false,
         },
         {
             "name": "importSystemStructure variable_group OspSystemStructure_original.xml",
@@ -245,7 +308,11 @@
             "autoReload": {
                 "enable": true
             },
+            "subProcess": true,
             "justMyCode": true,
+            "redirectOutput": true,
+            "showReturnValue": true,
+            "logToFile": false,
         },
         {
             "name": "ospCaseBuilder variable_group --inspect multiple_connection_types",
@@ -256,12 +323,17 @@
             "args": [
                 "caseDict_multiple_connection_types",
                 "--inspect",
+                "-v",
             ],
             "console": "integratedTerminal",
             "autoReload": {
                 "enable": true
             },
+            "subProcess": true,
             "justMyCode": true,
+            "redirectOutput": true,
+            "showReturnValue": true,
+            "logToFile": false,
         },
         {
             "name": "ospCaseBuilder variable_group multiple_connection_types",
@@ -276,7 +348,11 @@
             "autoReload": {
                 "enable": true
             },
+            "subProcess": true,
             "justMyCode": true,
+            "redirectOutput": true,
+            "showReturnValue": true,
+            "logToFile": false,
         },
         {
             "name": "importSystemStructure gunnerus-dp/control-system OspSystemStructure.xml (cwd=gunnerus-dp)",
@@ -291,7 +367,11 @@
             "autoReload": {
                 "enable": true
             },
+            "subProcess": true,
             "justMyCode": true,
+            "redirectOutput": true,
+            "showReturnValue": true,
+            "logToFile": false,
         },
         {
             "name": "importSystemStructure gunnerus-dp/control-system OspSystemStructure.xml (cwd=control-system)",
@@ -306,7 +386,11 @@
             "autoReload": {
                 "enable": true
             },
+            "subProcess": true,
             "justMyCode": true,
+            "redirectOutput": true,
+            "showReturnValue": true,
+            "logToFile": false,
         },
         {
             "name": "ospCaseBuilder gunnerus-dp",
@@ -321,7 +405,11 @@
             "autoReload": {
                 "enable": true
             },
+            "subProcess": true,
             "justMyCode": true,
+            "redirectOutput": true,
+            "showReturnValue": true,
+            "logToFile": false,
         },
         {
             "name": "ospCaseBuilder gunnerus-dp --inspect",
@@ -332,19 +420,24 @@
             "args": [
                 "caseDict",
                 "--inspect",
+                "-v",
             ],
             "console": "integratedTerminal",
             "autoReload": {
                 "enable": true
             },
+            "subProcess": true,
             "justMyCode": true,
+            "redirectOutput": true,
+            "showReturnValue": true,
+            "logToFile": false,
         },
         {
             "name": "watchCosim gunnerus-dp",
             "type": "debugpy",
             "request": "launch",
             "cwd": "${workspaceFolder}\\tests\\gunnerus-dp",
-            "program": "${workspaceFolder}\\src\\ospx\\watch\\cli\\watchCosim.py",
+            "program": "${workspaceFolder}\\src\\ospx\\cli\\watchCosim.py",
             "args": [
                 "watchDict",
                 "-pd",
@@ -353,7 +446,11 @@
             "autoReload": {
                 "enable": true
             },
+            "subProcess": true,
             "justMyCode": true,
+            "redirectOutput": true,
+            "showReturnValue": true,
+            "logToFile": false,
         },
         {
             "name": "importSystemStructure spring_mass_damper",
@@ -368,7 +465,11 @@
             "autoReload": {
                 "enable": true
             },
+            "subProcess": true,
             "justMyCode": true,
+            "redirectOutput": true,
+            "showReturnValue": true,
+            "logToFile": false,
         },
         {
             "name": "ospCaseBuilder spring_mass_damper --inspect",
@@ -379,12 +480,17 @@
             "args": [
                 "test_caseDict",
                 "--inspect",
+                "-v",
             ],
             "console": "integratedTerminal",
             "autoReload": {
                 "enable": true
             },
+            "subProcess": true,
             "justMyCode": true,
+            "redirectOutput": true,
+            "showReturnValue": true,
+            "logToFile": false,
         },
         {
             "name": "ospCaseBuilder spring_mass_damper --graph",
@@ -400,24 +506,31 @@
             "autoReload": {
                 "enable": true
             },
+            "subProcess": true,
             "justMyCode": true,
+            "redirectOutput": true,
+            "showReturnValue": true,
+            "logToFile": false,
         },
         {
             "name": "watchCosim spring_mass_damper",
             "type": "debugpy",
             "request": "launch",
             "cwd": "${workspaceFolder}\\tests\\spring_mass_damper",
-            "program": "${workspaceFolder}\\src\\ospx\\watch\\cli\\watchCosim.py",
+            "program": "${workspaceFolder}\\src\\ospx\\cli\\watchCosim.py",
             "args": [
                 "watchDict",
                 "-pd",
             ],
             "console": "integratedTerminal",
-            "justMyCode": false,
             "autoReload": {
                 "enable": true
             },
+            "subProcess": true,
             "justMyCode": true,
+            "redirectOutput": true,
+            "showReturnValue": true,
+            "logToFile": false,
         },
     ]
 }

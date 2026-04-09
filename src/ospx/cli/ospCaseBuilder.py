@@ -3,12 +3,23 @@
 
 import argparse
 import logging
+import pprint
+from importlib import metadata
 from pathlib import Path
 
-from ospx import OspCaseBuilder
+from ospx.ospCaseBuilder import OspCaseBuilder
 from ospx.utils.logging import configure_logging
 
 logger = logging.getLogger(__name__)
+
+
+def _get_version() -> str:
+    """Return the installed package version, or a safe fallback if unavailable."""
+    try:
+        return metadata.version("ospx")
+    except metadata.PackageNotFoundError:
+        # Fallback when package metadata is not available (e.g. running from source)
+        return "ospx (version unknown)"
 
 
 def _argparser() -> argparse.ArgumentParser:
@@ -25,7 +36,6 @@ def _argparser() -> argparse.ArgumentParser:
         "case_dict_file",
         metavar="case_dict_file",
         type=str,
-        nargs="?",
         help="name of the dict file containing the OSP simulation case configuration.",
     )
 
@@ -94,6 +104,13 @@ def _argparser() -> argparse.ArgumentParser:
         required=False,
     )
 
+    _ = parser.add_argument(
+        "-V",
+        "--version",
+        action="version",
+        version=_get_version(),
+    )
+
     return parser
 
 
@@ -123,16 +140,23 @@ def main() -> None:
     case_dict_file: Path = Path(args.case_dict_file)
 
     # Check whether case dict file exists
-    if not case_dict_file.exists():
+    if not case_dict_file.is_file():
         logger.error(f"ospCaseBuilder.py: File {case_dict_file} not found.")
         return
 
+    # Print the parsed commandline arguments for documentation and debugging purposes.
+    # The arguments will be split into one argument per line, if possible.
+    # If extracting a mapping from `args` fails, fall back to its string representation.
+    _indent: str = " " * 13
+    try:
+        _arg_mapping = vars(args)
+    except TypeError:
+        _arg_mapping = {"args": str(args)}
+    _formatted_args = pprint.pformat(_arg_mapping, sort_dicts=True)
+    _indented_args = "\n".join(f"{_indent}{line}" for line in _formatted_args.splitlines())
     logger.info(
-        f"Start ospCaseBuilder.py with following arguments:\n"
-        f"\t case_dict_file: \t\t{case_dict_file}\n"
-        f"\t inspect: \t\t\t\t{inspect}\n"
-        f"\t graph: \t\t\t{graph}\n"
-        f"\t clean: \t\t\t{clean}\n"
+        "Start ospCaseBuilder.py with following arguments:\n%s\n",
+        _indented_args,
     )
 
     # Invoke API

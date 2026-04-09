@@ -4,7 +4,7 @@ from ospx.component import Component
 from ospx.connector import Connector
 from ospx.fmi.variable import ScalarVariable
 
-__ALL__ = ["Endpoint", "Connection"]
+__all__ = ["Connection", "Endpoint"]
 
 logger = logging.getLogger(__name__)
 
