@@ -25,7 +25,7 @@ copyright = "2026, DNV SE. All rights reserved."
 author = "Frank Lumpitzsch, Claas Rostock, Seunghyeon Yoo"
 
 # The full version, including alpha/beta/rc tags
-release = "0.3.4"
+release = "0.3.5"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -68,7 +68,7 @@ exclude_patterns = []
 html_title = f"ospx {release}"
 html_theme = "furo"
 html_static_path = ["_static"]
-html_logo = "_static/OSPx.svg"
+html_logo = "_static/ospx.svg"
 autodoc_default_options = {
     "member-order": "groupwise",
     "undoc-members": True,

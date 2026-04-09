@@ -26,7 +26,7 @@ from ospx.utils.zip import (
 if TYPE_CHECKING:
     from collections.abc import Mapping, MutableMapping
 
-__ALL__ = ["FMU"]
+__all__ = ["FMU"]
 
 logger = logging.getLogger(__name__)
 

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+"""watchCosim command line interface."""
 
 import argparse
 import logging
@@ -6,7 +7,7 @@ import os
 import re
 import shutil
 import sys
-from argparse import ArgumentParser
+from importlib import metadata
 from pathlib import Path
 from time import sleep
 
@@ -16,10 +17,19 @@ from ospx.watch.watchCosim import CosimWatcher
 logger = logging.getLogger(__name__)
 
 
+def _get_version() -> str:
+    """Return the installed package version, or a safe fallback if unavailable."""
+    try:
+        return metadata.version("ospx")
+    except metadata.PackageNotFoundError:
+        # Fallback when package metadata is not available (e.g. running from source)
+        return "ospx (version unknown)"
+
+
 def _argparser() -> argparse.ArgumentParser:
-    parser = ArgumentParser(
+    parser = argparse.ArgumentParser(
         prog="watchCosim",
-        usage="%(prog)s watchDict [options [args]]",
+        usage="%(prog)s watch_dict_file [options [args]]",
         epilog="_________________watchCosim___________________",
         prefix_chars="-",
         add_help=True,
@@ -27,8 +37,8 @@ def _argparser() -> argparse.ArgumentParser:
     )
 
     _ = parser.add_argument(
-        "watchDict",
-        metavar="watchDict",
+        "watch_dict_file",
+        metavar="watch_dict_file",
         type=str,
         help="name of the dict file containing the watch configuration (will also be part of the result file names).",
     )
@@ -39,7 +49,7 @@ def _argparser() -> argparse.ArgumentParser:
         action="store_true",
         help=(
             "watch convergence progress, finally --dump "
-            "(reading watchDict and .csv, plotting convergence until no changes happen for 5s to any .csv)"
+            "(reading watch_dict_file and .csv, plotting convergence until no changes happen for 5s to any .csv)"
         ),
         default=False,
         required=False,
@@ -49,7 +59,7 @@ def _argparser() -> argparse.ArgumentParser:
         "-d",
         "--dump",
         action="store_true",
-        help="dump data (reading watchDict and .csv, creating results/{dataFrameDump, resultsDict})",
+        help="dump data (reading watch_dict_file and .csv, creating results/{dataFrameDump, resultsDict})",
         default=False,
         required=False,
     )
@@ -58,7 +68,7 @@ def _argparser() -> argparse.ArgumentParser:
         "-p",
         "--plot",
         action="store_true",
-        help="plot data including --dump (reading watchDict and .csv, creating results/SIMULATIONNAME.png)",
+        help="plot data including --dump (reading watch_dict_file and .csv, creating results/SIMULATIONNAME.png)",
         default=False,
         required=False,
     )
@@ -116,6 +126,7 @@ def _argparser() -> argparse.ArgumentParser:
         default="WARNING",
         required=False,
     )
+
     _ = parser.add_argument(
         "--scale",
         action="store",
@@ -124,6 +135,7 @@ def _argparser() -> argparse.ArgumentParser:
         default=1,
         required=False,
     )
+
     _ = parser.add_argument(
         "--skip",
         action="store",
@@ -133,11 +145,18 @@ def _argparser() -> argparse.ArgumentParser:
         required=False,
     )
 
+    _ = parser.add_argument(
+        "-V",
+        "--version",
+        action="version",
+        version=_get_version(),
+    )
+
     return parser
 
 
 def main() -> None:
-    """Entry point for console script as configured in setup.cfg.
+    """Entry point for console script as configured in pyproject.toml.
 
     Runs the command line interface and parses arguments and options entered on the console.
     """
@@ -149,59 +168,30 @@ def main() -> None:
     log_level_console: str = "WARNING"
     if any([args.quiet, args.verbose]):
         log_level_console = "ERROR" if args.quiet else log_level_console
-        log_level_console = "DEBUG" if args.verbose else log_level_console
+        log_level_console = "INFO" if args.verbose else log_level_console
     # ..to file
     log_file: Path | None = Path(args.log) if args.log else None
     log_level_file: str = args.log_level
     configure_logging(log_level_console, log_file, log_level_file)
 
-    watch_dict_file_name: str = args.watchDict
+    watch_dict_file: Path = Path(args.watch_dict_file)
     converge: bool = args.converge
     plot: bool = args.plot
     dump: bool = args.dump
-    skip: int = args.skip
-    latest: int = args.latest
+    skip_values: int = args.skip
+    latest_values: int = args.latest
     scale_factor = float(args.scale)
     timeline_data: bool = args.timeline
+
+    # Check whether watch dict file exists
+    if not watch_dict_file.is_file():
+        logger.error(f"watchCosim.py: File {watch_dict_file} not found.")
+        return
 
     if not converge and not plot and not dump:
         logger.error("give at least one option what to do: --converge, --plot or --dump")
         parser.print_help()
         sys.exit(0)
-
-    # Dispatch to _main(), which takes care of processing the arguments and invoking the API.
-    _main(
-        watch_dict_file_name=watch_dict_file_name,
-        converge=converge,
-        plot=plot,
-        dump=dump,
-        skip_values=skip,
-        latest_values=latest,
-        scale_factor=scale_factor,
-        timeline_data=timeline_data,
-    )
-
-
-def _main(  # noqa: PLR0913
-    watch_dict_file_name: str,
-    *,
-    converge: bool = False,
-    plot: bool = False,
-    dump: bool = False,
-    skip_values: int = 0,
-    latest_values: int = 0,
-    scale_factor: float = 1,
-    timeline_data: bool = False,
-) -> None:
-    """Entry point for unit tests.
-
-    Processes the arguments parsed by main() on the console and invokes the API.
-    """
-    watch_dict_file = Path(watch_dict_file_name)
-
-    if not watch_dict_file.is_file():
-        logger.error(f"file {watch_dict_file} not found.")
-        return
 
     csv_files: list[Path] = []
     wait_counter: int = 0
@@ -249,7 +239,7 @@ def _main(  # noqa: PLR0913
         scale_factor=scale_factor,
         timeline_data=timeline_data,
     )
-    watcher.read_watch_dict(watch_dict_file_name)
+    watcher.read_watch_dict(watch_dict_file)
 
     Path(watcher.results_dir).mkdir(parents=True, exist_ok=True)
 

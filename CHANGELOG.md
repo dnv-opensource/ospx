@@ -8,6 +8,26 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 * -/-
 
 
+## [0.3.5] - 2026-04-09
+
+### Solved
+* Solved an issue where watchCosim failed to dump time series when called with --skip or --latest flag
+  [39](https://github.com/dnv-opensource/ospx/issues/39)
+
+### Changed
+* Python modules: Changed `__ALL__` to `__all__` (lowercase, PEP8 and PEP257 compliant).
+* Updated code base with latest changes in python_project_template v0.2.10
+
+### Dependencies
+* .pre-commit-config.yaml: Updated rev of ruff-pre-commit to v0.15.9
+* Updated to dictIO>=0.4.4
+* Updated to numpy>=2.4
+* Updated to pytest-cov>=7.1
+* Updated to ruff>=0.15.9
+* Updated to sphinx-argparse-cli>=1.21.3
+* Updated to types-lxml>=2026.2
+
+
 ## [0.3.4] - 2026-03-17
 
 ### Solved
@@ -615,7 +635,8 @@ Maintenance Release
 * Added support for Python 3.10
 
 <!-- Markdown link & img dfn's -->
-[unreleased]: https://github.com/dnv-opensource/ospx/compare/v0.3.4...HEAD
+[unreleased]: https://github.com/dnv-opensource/ospx/compare/v0.3.5...HEAD
+[0.3.5]: https://github.com/dnv-opensource/ospx/compare/v0.3.4...v0.3.5
 [0.3.4]: https://github.com/dnv-opensource/ospx/compare/v0.3.3...v0.3.4
 [0.3.3]: https://github.com/dnv-opensource/ospx/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/dnv-opensource/ospx/compare/v0.3.1...v0.3.2
