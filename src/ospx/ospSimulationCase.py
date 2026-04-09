@@ -618,13 +618,11 @@ class OspSimulationCase:
                         if connector_name in plot["ySignals"]
                     )
 
-                temp_dict["plots"].append(
-                    {
-                        "label": plot["title"],
-                        "plotType": "trend",
-                        "variables": variables,
-                    }
-                )
+                temp_dict["plots"].append({
+                    "label": plot["title"],
+                    "plotType": "trend",
+                    "variables": variables,
+                })
 
             DictWriter.write(temp_dict, plot_config_file)
 
