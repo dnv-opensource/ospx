@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from dictIO import DictParser
+from dictIO.utils.xml import XmlParser
 
 from ospx import OspCaseBuilder
 
@@ -51,3 +52,20 @@ def test_inspect() -> None:
     # Execute
     OspCaseBuilder.build(case_dict_file=parsed_case_dict_file, inspect=True)
     # Assert
+
+
+def test_build_with_component_parameters_alias() -> None:
+    # Prepare
+    case_dict_file = Path("test_caseDict_parameters")
+    parsed_case_dict_file = Path(f"parsed.{case_dict_file.name}")
+    _ = DictParser.parse(case_dict_file)
+
+    # Execute
+    OspCaseBuilder.build(case_dict_file=parsed_case_dict_file)
+
+    # Assert
+    osp_system_structure = XmlParser.parse(Path("OspSystemStructure.xml"))
+    initial_values = osp_system_structure["Simulators"]["000000_Simulator"]["InitialValues"]
+
+    assert initial_values["000000_InitialValue"]["_attributes"]["variable"] == "functionString"
+    assert initial_values["000000_InitialValue"]["String"]["_attributes"]["value"] == "(x1-x2)^2"
