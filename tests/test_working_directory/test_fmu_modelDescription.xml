@@ -220,6 +220,10 @@
             <Integer  start="6"/>
         </ScalarVariable> <!-- index="34" -->
 
+        <ScalarVariable name="functionString" valueReference="34" variability="fixed" causality="parameter">
+            <String start="default"/>
+        </ScalarVariable> <!-- index="35" -->
+
 
 
 

@@ -9,7 +9,9 @@ from dictIO.utils.counter import BorgCounter
 from dictIO.utils.path import relative_path
 
 from ospx import Simulation, System
+from ospx.fmi import FMU
 from ospx.utils.dict import find_key
+from ospx.utils.fmu_patch import patch_fmu_parameter
 
 __ALL__ = ["OspSimulationCase"]
 
@@ -46,7 +48,7 @@ class OspSimulationCase:
         self.lib_source: Path
         self._resolve_lib_source_folder()
 
-    def setup(self) -> None:
+    def setup(self, *, inspect: bool = False) -> None:
         """Set up the OSP simulation case folder.
 
         Raises
@@ -66,6 +68,16 @@ class OspSimulationCase:
         # as 'source' attribute in a <Simulator> element.
         # If an FMU is not accessible via a relative path, it will be copied into the case folder.
         self._resolve_all_fmus()
+
+        # Resolve $references (e.g. $fString) in initialize/parameters start values
+        # before reading component starts and writing XML files.
+        self._resolve_component_start_references()
+
+        # Patch case-local FMU copies for string parameters that cannot be set reliably via FMI APIs.
+        if inspect:
+            self._log_required_string_patches()
+        else:
+            self._patch_case_specific_fmus()
 
         # Read system structure
         if "systemStructure" not in self.case_dict:
@@ -106,9 +118,14 @@ class OspSimulationCase:
 
         osp_system_structure: dict[str, Any] = {}
         osp_system_structure["_xmlOpts"] = {
-            "_nameSpaces": {"osp": "https://opensimulationplatform.com/xsd/OspModelDescription-1.0.0.xsd"},
+            "_nameSpaces": {
+                "osp": "http://opensimulationplatform.com/MSMI/OSPSystemStructure"
+            },
             "_rootTag": "OspSystemStructure",
+            "_rootAttributes": {"version": "0.1"},
         }
+        # "_nameSpaces": {"osp": "https://github.com/open-simulation-platform/libcosim/blob/master/data/xsd/OspSystemStructure"},
+        # "_rootAttributes": {"version": "0.1.1"},
 
         # Global Settings
         if self.simulation:
@@ -156,7 +173,8 @@ class OspSimulationCase:
                         initial_value_properties: dict[str, Any] = {}
                         initial_value_properties["_attributes"] = {"variable": variable.name}
                         if variable.data_type:
-                            initial_value_properties[variable.data_type] = {"_attributes": {"value": variable.start}}
+                            start_value = self._resolve_case_dict_reference(variable.start)
+                            initial_value_properties[variable.data_type] = {"_attributes": {"value": start_value}}
 
                         simulator_properties["InitialValues"][initial_value_key] = initial_value_properties
             simulators[simulator_key] = simulator_properties
@@ -209,9 +227,10 @@ class OspSimulationCase:
         DictWriter.write(osp_system_structure, osp_system_structure_file, formatter=formatter)
 
         self._correct_wrong_xml_namespace(
-            "OspSystemStructure.xml",
+            osp_system_structure_file,
             "<OspSystemStructure.*>?",
             """<OspSystemStructure xmlns="http://opensimulationplatform.com/MSMI/OSPSystemStructure" version="0.1">""",
+            #"""<OspSystemStructure xmlns="https://github.com/open-simulation-platform/libcosim/blob/master/data/xsd/OspSystemStructure" version="0.1.1">""",
         )
 
         return
@@ -501,6 +520,144 @@ class OspSimulationCase:
                 _ = copy2(osp_model_description_file, self.case_folder)
         return fmu_file_in_case_folder
 
+    def _patch_case_specific_fmus(self) -> None:
+        """Create case-local FMU copies for component string parameters and patch them in place."""
+        components = self.case_dict["systemStructure"]["components"]
+        for component_name, component_properties in components.items():
+            string_patches = self._collect_string_parameter_patches(component_properties)
+            if not string_patches:
+                continue
+
+            source_fmu = Path(component_properties["fmu"])
+            patched_fmu = self._copy_component_fmu_for_patch(component_name, source_fmu)
+
+            for param_name, value in string_patches.items():
+                logger.info(
+                    f"Patch component-specific FMU for {component_name}: {patched_fmu.name} :: {param_name}={value!r}"
+                )
+                patch_fmu_parameter(
+                    input_fmu=patched_fmu,
+                    param=param_name,
+                    value=str(value),
+                    inplace=True,
+                    no_backup=True,
+                    dll_grow=True,
+                )
+
+            component_properties["fmu"] = patched_fmu
+
+    def _resolve_component_start_references(self) -> None:
+        """Resolve $key references in component initialize/parameters start fields using case dict values."""
+        components = self.case_dict["systemStructure"]["components"]
+
+        for component_name, component_properties in components.items():
+            for section_name in ("initialize", "parameters"):
+                section = component_properties.get(section_name)
+                if not isinstance(section, dict):
+                    continue
+
+                for variable_name, variable_properties in section.items():
+                    if not isinstance(variable_properties, dict) or "start" not in variable_properties:
+                        continue
+
+                    start_value = variable_properties["start"]
+                    resolved = self._resolve_case_dict_reference(start_value)
+                    if resolved != start_value:
+                        logger.info(
+                            f"Resolve start reference for component {component_name}, variable {variable_name}: "
+                            f"{start_value!r} -> {resolved!r}"
+                        )
+                        variable_properties["start"] = resolved
+
+    def _resolve_case_dict_reference(self, value: Any) -> Any:
+        """Resolve a value like '$foo' from top-level case dict entries, otherwise return unchanged."""
+        if not isinstance(value, str):
+            return value
+        if not value.startswith("$"):
+            return value
+
+        reference_key = value[1:]
+        if not reference_key:
+            return value
+
+        if reference_key in self.case_dict:
+            return self.case_dict[reference_key]
+
+        logger.warning(f"Could not resolve reference {value!r}: key {reference_key!r} not found in case dict.")
+        return value
+
+    def _log_required_string_patches(self) -> None:
+        """In inspect mode, report required string-parameter FMU patches without changing files."""
+        components = self.case_dict["systemStructure"]["components"]
+        pending_patch_count = 0
+        for component_name, component_properties in components.items():
+            string_patches = self._collect_string_parameter_patches(component_properties)
+            if not string_patches:
+                continue
+
+            source_fmu = Path(component_properties["fmu"])
+            target_fmu = self._component_patch_target_fmu(component_name, source_fmu)
+            for param_name, value in string_patches.items():
+                pending_patch_count += 1
+                logger.info(
+                    f"Inspect mode: pending FMU patch for component {component_name}: "
+                    f"{source_fmu.name} -> {target_fmu.name}, parameter {param_name}={value!r}"
+                )
+
+        if pending_patch_count:
+            logger.info(
+                f"Inspect mode summary: {pending_patch_count} string parameter patch(es) are pending and "
+                "will be applied only in non-inspect build runs."
+            )
+        else:
+            logger.info("Inspect mode summary: no string parameter FMU patches are required.")
+
+    def _collect_string_parameter_patches(self, component_properties: dict[str, Any]) -> dict[str, str]:
+        """Collect string parameters from initialize/parameters that need FMU patching."""
+        fmu_file = Path(component_properties["fmu"])
+        variables = FMU(fmu_file).variables
+        initialize_section = component_properties.get("initialize", {})
+        patches: dict[str, str] = {}
+
+        for variable_name, variable_properties in initialize_section.items():
+            if variable_name not in variables:
+                continue
+
+            model_variable = variables[variable_name]
+            if model_variable.data_type != "String":
+                continue
+            if model_variable.causality not in {"parameter", "calculatedParameter", "structuralParameter"}:
+                continue
+            if not isinstance(variable_properties, dict) or "start" not in variable_properties:
+                continue
+
+            start_value = variable_properties["start"]
+            if start_value is None:
+                continue
+
+            patches[variable_name] = str(self._resolve_case_dict_reference(start_value))
+
+        return patches
+
+    def _copy_component_fmu_for_patch(self, component_name: str, source_fmu: Path) -> Path:
+        """Copy an FMU into a component-specific case-local file before patching it."""
+        target_fmu = self._component_patch_target_fmu(component_name, source_fmu)
+
+        logger.info(f"Copy FMU for case-specific patch {source_fmu} --> {target_fmu}")
+        copy2(source_fmu, target_fmu)
+
+        source_osp_model_description = source_fmu.with_name(f"{source_fmu.stem}_OspModelDescription.xml")
+        if source_osp_model_description.exists():
+            target_osp_model_description = target_fmu.with_name(f"{target_fmu.stem}_OspModelDescription.xml")
+            copy2(source_osp_model_description, target_osp_model_description)
+
+        return target_fmu
+
+    def _component_patch_target_fmu(self, component_name: str, source_fmu: Path) -> Path:
+        """Return the deterministic case-local FMU name used for component-specific patching."""
+        safe_component_name = re.sub(r"[^A-Za-z0-9_.-]", "_", component_name)
+        return (self.case_folder / f"{source_fmu.stem}__{safe_component_name}{source_fmu.suffix}").resolve()
+
     def _check_components_step_size(self) -> None:
         """Ensure that all components have a step size defined.
 
@@ -636,6 +793,7 @@ class OspSimulationCase:
         (may be obsolete in future)
         """
         buffer = ""
+
         with Path(file_name).open() as f:
             buffer = re.sub(pattern, replace, f.read())
 

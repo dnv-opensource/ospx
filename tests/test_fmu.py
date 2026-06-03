@@ -25,7 +25,7 @@ def test_fmu() -> FMU:
 
 
 def test_fmu_variables_number(test_fmu: FMU) -> None:
-    assert len(test_fmu.variables) == 34
+    assert len(test_fmu.variables) == 35
 
 
 def test_fmu_units_number(test_fmu: FMU) -> None:
@@ -40,12 +40,14 @@ def test_fmu_variables_fmi_data_type(test_fmu: FMU) -> None:
     assert test_fmu.variables["Variable_4_OUT_Real"].data_type == "Real"
     assert test_fmu.variables["Variable_5_OUT_Integer"].data_type == "Integer"
     assert test_fmu.variables["Variable_6_OUT_Bool"].data_type == "Boolean"
+    assert test_fmu.variables["functionString"].data_type == "String"
 
 
 def test_fmu_variables_start_value(test_fmu: FMU) -> None:
     assert test_fmu.variables["Vector_1_IN[0]"].start == 10.0
     assert test_fmu.variables["Vector_1_IN[1]"].start == 11.0
     assert test_fmu.variables["Vector_1_IN[2]"].start == 12.0
+    assert test_fmu.variables["functionString"].start == "default"
 
 
 # def test_fmu() -> None:

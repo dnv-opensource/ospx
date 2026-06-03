@@ -83,16 +83,45 @@ class Component:
         self.step_size = float(properties["stepSize"])
 
     def _read_initialize(self, properties: MutableMapping[Any, Any]) -> None:
-        if "initialize" not in properties:
+        initialize_section = properties["initialize"] if "initialize" in properties else {}
+        parameters_section = properties["parameters"] if "parameters" in properties else {}
+
+        if not initialize_section and not parameters_section:
             return
-        for variable_name, variable_properties in properties["initialize"].items():
+
+        # Read all explicit initialize entries first.
+        for variable_name, variable_properties in initialize_section.items():
             variable = ScalarVariable(name=variable_name)
-            if "causality" in variable_properties:
-                variable.causality = variable_properties["causality"]
-            if "variability" in variable_properties:
-                variable.variability = variable_properties["variability"]
-            if "start" in variable_properties:
-                variable.start = variable_properties["start"]
+            if variable_name in parameters_section:
+                variable.causality = "parameter"
+
+            if isinstance(variable_properties, MutableMapping):
+                if "causality" in variable_properties:
+                    variable.causality = variable_properties["causality"]
+                if "variability" in variable_properties:
+                    variable.variability = variable_properties["variability"]
+                if "start" in variable_properties:
+                    variable.start = variable_properties["start"]
+
+            self._initial_values[variable.name] = variable
+
+        # Also allow parameters entries that are not explicitly initialized.
+        # Supports both compact syntax `parameters { foo; }` and detailed dict syntax.
+        for variable_name, variable_properties in parameters_section.items():
+            if variable_name in self._initial_values:
+                continue
+
+            variable = ScalarVariable(name=variable_name)
+            variable.causality = "parameter"
+
+            if isinstance(variable_properties, MutableMapping):
+                if "causality" in variable_properties:
+                    variable.causality = variable_properties["causality"]
+                if "variability" in variable_properties:
+                    variable.variability = variable_properties["variability"]
+                if "start" in variable_properties:
+                    variable.start = variable_properties["start"]
+
             self._initial_values[variable.name] = variable
 
     def _read_connectors(self, properties: MutableMapping[Any, Any]) -> None:
@@ -148,7 +177,7 @@ class Component:
                 self._variables[variable_name].causality = variable.causality
             if variable.variability:
                 self._variables[variable_name].variability = variable.variability
-            if variable.start:
+            if variable.start is not None:
                 self._variables[variable_name].start = variable.start
 
     @property
