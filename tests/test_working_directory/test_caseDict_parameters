@@ -1,0 +1,51 @@
+/*---------------------------------*- C++ -*----------------------------------*\
+filetype dictionary; coding utf-8; version 0.1; local --; purpose --;
+\*----------------------------------------------------------------------------*/
+systemStructure
+{
+    connections
+    {
+    }
+    components
+    {
+        component_1
+        {
+            connectors
+            {
+                Connector_1
+                {
+                    variable x1;
+                    type input;
+                }
+                Connector_2
+                {
+                    variable x2;
+                    type output;
+                }
+            }
+            parameters
+            {
+                functionString;
+            }
+            initialize
+            {
+                functionString
+                {
+                    start "(x1-x2)^2";
+                }
+            }
+            fmu test_fmu.fmu;
+        }
+    }
+}
+run
+{
+    simulation
+    {
+        name testCaseParameters;
+        startTime 0;
+        stopTime 10;
+        baseStepSize 0.01;
+        algorithm fixedStep;
+    }
+}

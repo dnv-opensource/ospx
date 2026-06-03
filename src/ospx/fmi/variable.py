@@ -50,7 +50,7 @@ class ScalarVariable:
             self.causality = causality
         if variability:
             self.variability = variability
-        if start:
+        if start is not None:
             self.start = start
         self.value_reference = value_reference
         self.description = description
@@ -203,12 +203,12 @@ def get_fmi_data_type(arg: object) -> str:
         valid fmi 2.0 data types are 'Integer', 'Real', 'Boolean', 'String' and 'Enumeration'
     """
     # sourcery skip: assign-if-exp, reintroduce-else
+    if isinstance(arg, bool):
+        return "Boolean"
     if isinstance(arg, int):
         return "Integer"
     if isinstance(arg, float):
         return "Real"
-    if isinstance(arg, bool):
-        return "Boolean"
     # not regarding the content, sequence is always returned if not int or float, e.g. string.
     # requires a solution, if xs:enumeration is required.
     # elif isinstance(arg, Sequence):  # noqa: ERA001

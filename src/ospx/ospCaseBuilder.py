@@ -55,6 +55,7 @@ class OspCaseBuilder:
         """
         # Make sure source_file argument is of type Path. If not, cast it to Path type.
         case_dict_file = case_dict_file if isinstance(case_dict_file, Path) else Path(case_dict_file)
+        
         if not case_dict_file.exists():
             logger.error(f"OspCaseBuilder: File {case_dict_file} not found.")
             raise FileNotFoundError(case_dict_file)
@@ -69,7 +70,7 @@ class OspCaseBuilder:
 
         case = OspSimulationCase(case_dict)
         try:
-            case.setup()
+            case.setup(inspect=inspect)
         except Exception:
             logger.exception("Error during setup of OspSimulationCase.")
             return
@@ -78,8 +79,9 @@ class OspCaseBuilder:
             # inspect and return
             case._inspect()  # noqa: SLF001  # pyright: ignore[reportPrivateUsage]
             return
-
+        
         case.write_osp_system_structure_xml()
+
         case.write_system_structure_ssd()
 
         if "postProcessing" in case_dict:
