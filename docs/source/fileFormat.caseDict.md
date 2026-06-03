@@ -25,15 +25,16 @@ A caseDict file contains
 | &numsp;components                                 | dict      | defines all component models used in the simulation |
 | &numsp;&numsp;\<COMPONENT>                        | dict      | unique name identifying a component in the simulation |
 | &numsp;&numsp;&numsp;connectors                   | dict      | itemization of connectors as defined in the FMU's modelDescription.xml |
-| &numsp;&numsp;&numsp;&numsp;\<CONNECTOR>          | dict      | speaking name of a connector, i.e. what it does and where it is mounted |
-| &numsp;&numsp;&numsp;&numsp;&numsp;variable       | string    | name of a referenced variable as defined in the FMU file (mutually exclusive with variableGroup)|
-| &numsp;&numsp;&numsp;&numsp;&numsp;variableGroup  | string    | name of a referenced VariableGroup as defined in <fmu_name>_OSPModelDescription.xml (mutually exclusive with variable)|
-| &numsp;&numsp;&numsp;&numsp;&numsp;type           | string    | type of the connector. Choices: {input, output} |
-| &numsp;&numsp;&numsp;initialize                   | dict      | optional initialization, updating the FMU's default settings |
+| &numsp;&numsp;&numsp;&numsp;\<CONNECTOR>          | dict      | simulation-level speaking name of a connector (e.g., "input_signal", "output_data"). The name references the FMU-internal variable through the `variable` or `variableGroup` key. |
+| &numsp;&numsp;&numsp;&numsp;&numsp;variable       | string    | FMU-internal name of a variable as defined in the FMU's modelDescription.xml (mutually exclusive with variableGroup)|
+| &numsp;&numsp;&numsp;&numsp;&numsp;variableGroup  | string    | FMU-internal name of a VariableGroup as defined in <fmu_name>_OSPModelDescription.xml (mutually exclusive with variable)|
+| &numsp;&numsp;&numsp;&numsp;&numsp;type           | string    | connector direction. Choices: {input, output} |
+| &numsp;&numsp;&numsp;initialize                   | dict      | optional initialization section for setting start values on any FMU variable (inputs, outputs, or parameters) |
+| &numsp;&numsp;&numsp;parameters                   | dict      | optional simple listing of FMU parameter variable names to flag them for override. Combines with `initialize` section for parameter value assignment. |
 | &numsp;&numsp;&numsp;&numsp;\<VARIABLE>           | dict      | the variable / parameter to be set. Needs to match the name as defined in the FMU file. |
 | &numsp;&numsp;&numsp;&numsp;&numsp;causality      | string    | causality of the variable. Choices: {input, output, parameter} |
 | &numsp;&numsp;&numsp;&numsp;&numsp;variability    | string    | variability of the variable. Choices: {fixed, calculated, tunable} |
-| &numsp;&numsp;&numsp;&numsp;&numsp;start          | float     | initial value the variable shall be set to. |
+| &numsp;&numsp;&numsp;&numsp;&numsp;start          | float/string/bool/int | initial value the variable shall be set to. |
 | &numsp;&numsp;&numsp;fmu                          | string    | relative path to the location of the source FMU (relative to libSource) |
 | &numsp;&numsp;&numsp;stepSize                     | string    | optional step size for this component. Only necessary in case the step size shall deviate from the default step size defined in the FMU's ModelDescription.xml  |
 | &numsp;connections                                | dict      | itemization of connections |
@@ -237,6 +238,53 @@ systemStructure
         }
     }
 }
+
+~~~
+
+### Alternative: Using the `parameters` section for cleaner parameter handling
+
+For FMUs with string or complex parameters (such as configuration strings), the `parameters` section provides a cleaner alternative:
+
+~~~cpp
+components
+{
+    myMathComponent
+    {
+        connectors
+        {
+            input_x1
+            {
+                variable                x1;
+                type                    input;
+            }
+            output_result
+            {
+                variable                y;
+                type                    output;
+            }
+        }
+        parameters
+        {
+            functionString;
+        }
+        initialize
+        {
+            functionString
+            {
+                start                   "(x1-x2)^2";
+            }
+        }
+        fmu                             myMath.fmu;
+    }
+}
+
+~~~
+
+Note:
+- The `parameters` section lists FMU parameter names (they must exist in the FMU's modelDescription.xml)
+- Parameter values are assigned in the `initialize` section with `start` values
+- This approach is especially useful for string parameters or when you want to make the parameter intent explicit
+
 run
 {
     simulation
