@@ -74,10 +74,14 @@ class OspSimulationCase:
         self._resolve_component_start_references()
 
         # Patch case-local FMU copies for string parameters that cannot be set reliably via FMI APIs.
-        if inspect:
-            self._log_required_string_patches()
-        else:
-            self._patch_case_specific_fmus()
+        # frl 2026-09-30: this is a vibe coding fix and does not work properly, disabled
+        # it introduces a RMS_ERROR__baseMath_string.fmu lookup
+        # with fmu name baseMath_string.fmu
+        # and RMS_ERROR component name in simulation
+        # if inspect:
+        #    self._log_required_string_patches()
+        # else:
+        #    self._patch_case_specific_fmus()
 
         # Read system structure
         if "systemStructure" not in self.case_dict:
@@ -118,9 +122,7 @@ class OspSimulationCase:
 
         osp_system_structure: dict[str, Any] = {}
         osp_system_structure["_xmlOpts"] = {
-            "_nameSpaces": {
-                "osp": "http://opensimulationplatform.com/MSMI/OSPSystemStructure"
-            },
+            "_nameSpaces": {"osp": "http://opensimulationplatform.com/MSMI/OSPSystemStructure"},
             "_rootTag": "OspSystemStructure",
             "_rootAttributes": {"version": "0.1"},
         }
@@ -230,7 +232,7 @@ class OspSimulationCase:
             osp_system_structure_file,
             "<OspSystemStructure.*>?",
             """<OspSystemStructure xmlns="http://opensimulationplatform.com/MSMI/OSPSystemStructure" version="0.1">""",
-            #"""<OspSystemStructure xmlns="https://github.com/open-simulation-platform/libcosim/blob/master/data/xsd/OspSystemStructure" version="0.1.1">""",
+            # """<OspSystemStructure xmlns="https://github.com/open-simulation-platform/libcosim/blob/master/data/xsd/OspSystemStructure" version="0.1.1">""",
         )
 
         return
@@ -404,9 +406,10 @@ class OspSimulationCase:
         time_column = 0
         # Components
         for component_name, component in self.system_structure.components.items():
-            no_of_connectors = len(component.connectors.keys())
 
-            data_columns = [1] + [x + 2 for x in range(no_of_connectors)]  # f*** StepCount
+            #_no_of_output_cols = len(component.connectors.keys()) # we need more data --> variables
+            _no_of_output_cols = len(component.variables)
+            data_columns = [1] + [x + 2 for x in range(_no_of_output_cols)]  
             watch_dict["datasources"].update({component_name: {"dataColumns": data_columns, "timeColumn": time_column}})
 
         DictWriter.write(watch_dict, watch_dict_file, mode="w")

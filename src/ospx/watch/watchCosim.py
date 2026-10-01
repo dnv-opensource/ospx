@@ -204,24 +204,36 @@ class CosimWatcher:
     def dump(self) -> None:
         """Write dataframe to dump."""
         data = self._read_csv_files_into_dataframe()
-
+        
         result_dict = {}
         for header in list(data):
-            values: ndarray[tuple[int], np.dtype[np.float64]] = data[header].dropna().to_numpy(dtype=np.float64)
-            _first_value: Any = values[0]
-            _last_value: Any = values[-1]
+
+            _first_value: Any | str = "None"
+            _last_value: Any | str = "None"
             _mean: float | str = "None"
             _stddev: float | str = "None"
             _min: float | str = "None"
             _max: float | str = "None"
-            with contextlib.suppress(TypeError):
-                _mean = float(np.mean(values))
-            with contextlib.suppress(TypeError):
-                _stddev = float(np.std(values))
-            with contextlib.suppress(TypeError):
-                _min = float(np.min(values))
-            with contextlib.suppress(TypeError):
-                _max = float(np.max(values))
+
+            try:
+                # this is normally to prove if column data type is not string.  
+                # but it might be heterogenious, and hence the prove fails also
+                values: ndarray[tuple[int], np.dtype[np.float64]] = data[header].dropna().to_numpy(dtype=np.float64)
+                
+                _first_value = values[0]
+                _last_value = values[-1]
+                with contextlib.suppress(TypeError):
+                    _mean = float(np.mean(values))
+                with contextlib.suppress(TypeError):
+                    _stddev = float(np.std(values))
+                with contextlib.suppress(TypeError):
+                    _min = float(np.min(values))
+                with contextlib.suppress(TypeError):
+                    _max = float(np.max(values))
+            except:
+                values = data[header].dropna()
+                skipStatistics = True
+
             result_dict[header] = {
                 "latestValue": _last_value,
                 "firstValue": _first_value,
